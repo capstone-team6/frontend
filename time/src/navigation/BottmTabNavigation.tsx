@@ -17,7 +17,15 @@ const BottmTabNavigation = () => {
         screenOptions={{
             tabBarStyle:{
                 height: 70,
-            }
+            },
+            tabBarLabelStyle:{
+                marginBottom:10,
+            },
+            headerStyle:{
+                height:80
+            },
+            tabBarActiveTintColor: '#C9BAE5',
+
         }}
         >
             <Tab.Screen 
@@ -29,6 +37,7 @@ const BottmTabNavigation = () => {
                     fontFamily:'Gugi-Regular',
                     fontSize:35,
                     paddingTop:20,
+                    marginHorizontal:10,
                 },
                 tabBarLabel:'홈',
                 tabBarIcon: ()=> <Octicons name='home' size={20}/>

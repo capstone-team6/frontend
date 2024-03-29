@@ -1,10 +1,10 @@
+
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { Text, View ,StyleSheet, Dimensions} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import StackNavigator from '../navigation/StackNavigator';
 import Octicons from 'react-native-vector-icons/Octicons'
 
 function Main() {
@@ -69,3 +69,4 @@ const styles=StyleSheet.create({
     }
 })
 export default Main;
+

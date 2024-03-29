@@ -1,12 +1,13 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native-reanimated/lib/typescript/Animated';
 
-const Mypage = () => {
+function Mypage() {
     return (
         <View>
-            <Text>hi</Text>
+            
         </View>
     );
-};
+}
+
 
 export default Mypage;

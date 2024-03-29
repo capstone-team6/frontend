@@ -1,12 +1,13 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View } from 'react-native-reanimated/lib/typescript/Animated';
 
-const Scrap = () => {
+function Scrap() {
     return (
         <View>
             
         </View>
     );
-};
+}
+
 
 export default Scrap;
