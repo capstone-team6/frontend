@@ -8,6 +8,8 @@ import Chatting from '../pages/Chatting';
 import Octicons from 'react-native-vector-icons/Octicons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import { View } from 'react-native';
+import Feather from 'react-native-vector-icons/Feather'
 
 
 const Tab=createBottomTabNavigator()
@@ -36,11 +38,17 @@ const BottmTabNavigation = () => {
                     color:'#352456',
                     fontFamily:'Gugi-Regular',
                     fontSize:35,
-                    paddingTop:20,
+                    paddingTop:30,
                     marginHorizontal:10,
                 },
+                headerRight:()=>(
+                    <View style={{ flexDirection: 'row' ,paddingTop:10 }}>
+                        <Feather name='search' size={25} style={{ marginRight: 25, color:'black', }} />
+                        <Ionicons name='notifications-outline' size={25} style={{ marginRight: 30, color:'black' }} />
+                    </View>
+                ),
                 tabBarLabel:'홈',
-                tabBarIcon: ()=> <Octicons name='home' size={20}/>
+                tabBarIcon: ({focused})=> <Octicons name='home' size={20} color={focused ? '#C9BAE5' : 'gray'}/>
             }}
             />
             <Tab.Screen 
@@ -48,7 +56,7 @@ const BottmTabNavigation = () => {
             component={Scrap}
             options={{
                 tabBarLabel:'관심',
-                tabBarIcon:()=><AntDesign name='hearto' size={20}/>
+                tabBarIcon:({focused})=><AntDesign name='hearto' size={20} color={focused ? '#C9BAE5' : 'gray'}/>
             }}
             />
             <Tab.Screen 
@@ -56,7 +64,7 @@ const BottmTabNavigation = () => {
             component={Posting}
             options={{
                 tabBarLabel:'',
-                tabBarIcon:()=><AntDesign name='pluscircle' size={35}/>
+                tabBarIcon:()=><AntDesign name='pluscircle' size={45} color='#C9BAE5'/>
             }}
             />
             <Tab.Screen 
@@ -64,7 +72,7 @@ const BottmTabNavigation = () => {
             component={Chatting}
             options={{
                 tabBarLabel:'채팅',
-                tabBarIcon:()=><Ionicons name='chatbubble-outline' size={20}/>
+                tabBarIcon:({focused})=><Ionicons name='chatbubble-outline' size={20} color={focused ? '#C9BAE5' : 'gray'}/>
             }}
             />
             <Tab.Screen 
@@ -72,7 +80,7 @@ const BottmTabNavigation = () => {
             component={Mypage}
             options={{
                 tabBarLabel:'마이',
-                tabBarIcon:()=><Ionicons name='person-outline' size={20}/>
+                tabBarIcon:({focused})=><Ionicons name='person-outline' size={20} color={focused ? '#C9BAE5' : 'gray'}/>
             }}
             />
         </Tab.Navigator>
