@@ -1,9 +1,22 @@
+<<<<<<< Updated upstream
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
  *
  * @format
  */
+=======
+import * as React from 'react';
+import SignIn from './src/pages/SignIn'
+import { View } from 'react-native';
+import Main from './src/pages/Main';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Mypage from './src/pages/Mypage';
+import Nav from './src/navigation/BottmTabNavigation';
+import StackNav from './src/navigation/StackNavigator'
+>>>>>>> Stashed changes
 
 import React from 'react';
 import type {PropsWithChildren} from 'react';
@@ -32,6 +45,7 @@ type SectionProps = PropsWithChildren<{
 function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
+<<<<<<< Updated upstream
     <View style={styles.sectionContainer}>
       <Text
         style={[
@@ -52,6 +66,12 @@ function Section({children, title}: SectionProps): React.JSX.Element {
         {children}
       </Text>
     </View>
+=======
+      <NavigationContainer>    
+        <Nav/>
+      </NavigationContainer>
+    
+>>>>>>> Stashed changes
   );
 }
 
