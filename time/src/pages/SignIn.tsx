@@ -33,7 +33,7 @@ const styles=StyleSheet.create({
     mainLogo:{
         padding:20,
         marginBottom:20,
-        marginEnd:10,
+        marginEnd:40,
     },
     
     imageContainer:{
