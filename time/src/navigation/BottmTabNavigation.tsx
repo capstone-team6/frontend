@@ -37,7 +37,7 @@ const BottmTabNavigation = () => {
                 headerTitleStyle:{
                     color:'#352456',
                     fontFamily:'Gugi-Regular',
-                    fontSize:35,
+                    fontSize:40,
                     paddingTop:30,
                     marginHorizontal:10,
                 },
