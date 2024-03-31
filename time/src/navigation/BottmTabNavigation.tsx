@@ -10,6 +10,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import { View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather'
+import Icon from 'react-native-vector-icons/AntDesign';
 
 
 const Tab=createBottomTabNavigator()
@@ -79,6 +80,14 @@ const BottmTabNavigation = () => {
             name='나의 틈새' 
             component={Mypage}
             options={{
+                headerTitleStyle:{
+                    fontFamily:'NanumGothic-Bold',
+                    fontSize:28
+                },
+                headerRight:()=>(
+                    <Ionicons name='settings-outline' size={25} color='black' style={{margin:20}}/>
+                ),
+
                 tabBarLabel:'마이',
                 tabBarIcon:({focused})=><Ionicons name='person-outline' size={20} color={focused ? '#C9BAE5' : 'gray'}/>
             }}
