@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import Main from '../pages/Main';
-import Mypage from '../pages/Mypage';
 import Scrap from '../pages/Scrap';
 import Posting from '../pages/Posting';
 import Chatting from '../pages/Chatting';
@@ -11,9 +10,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import { View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather'
 import Icon from 'react-native-vector-icons/AntDesign';
-
+import myPageStack from '../navigation/myPageStackNavigator'
 
 const Tab=createBottomTabNavigator()
+
 const BottmTabNavigation = () => {
     return (
         <Tab.Navigator initialRouteName='main'
@@ -78,8 +78,9 @@ const BottmTabNavigation = () => {
             />
             <Tab.Screen 
             name='나의 틈새' 
-            component={Mypage}
+            component={myPageStack}
             options={{
+                headerShown:false,
                 headerTitleStyle:{
                     fontFamily:'NanumGothic-Bold',
                     fontSize:28

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 
-function Notice() {
+function Notify() {
     return (
         <View>
             
@@ -9,4 +9,4 @@ function Notice() {
     );
 }
 
-export default Notice;
+export default Notify;
