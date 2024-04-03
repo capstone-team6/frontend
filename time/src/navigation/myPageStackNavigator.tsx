@@ -4,7 +4,6 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import Profile from '../pages/Profile';
 import Mypage from '../pages/Mypage';
-import myBuyTime from '../pages/MyBuyTime';
 import Notify from '../pages/Notify';
 import { SafeAreaView, View } from 'react-native';
 import { Text } from 'react-native';
@@ -37,7 +36,10 @@ const StackNavigator = () => {
                     headerTitle:'프로필',
                     headerTitleStyle:{
                         fontFamily:'NanumGothic-Bold',
-                        fontSize: 28, color:'black'
+                        fontSize: 28, color:'black',
+                    },
+                    headerStyle:{
+                        height:80
                     }
                 }}
                 />
