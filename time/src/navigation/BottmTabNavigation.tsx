@@ -4,15 +4,15 @@ import Main from '../pages/Main';
 import Scrap from '../pages/Scrap';
 import Posting from '../pages/Posting';
 import Chatting from '../pages/Chatting';
-import Octicons from 'react-native-vector-icons/Octicons'
-import Ionicons from 'react-native-vector-icons/Ionicons'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import { View } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather'
+import Octicons from 'react-native-vector-icons/Octicons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import {View} from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
-import myPageStack from '../navigation/myPageStackNavigator'
+import myPageStack from '../navigation/MyPageStackNavigator';
 
-const Tab=createBottomTabNavigator()
+const Tab = createBottomTabNavigator();
 
 const BottmTabNavigation = () => {
     return (
@@ -64,6 +64,10 @@ const BottmTabNavigation = () => {
             name='글 작성' 
             component={Posting}
             options={{
+                headerTitleStyle:{
+                    fontFamily:'NanumGothic-Bold',
+                    fontSize:28
+                },
                 tabBarLabel:'',
                 tabBarIcon:()=><AntDesign name='pluscircle' size={45} color='#C9BAE5'/>
             }}

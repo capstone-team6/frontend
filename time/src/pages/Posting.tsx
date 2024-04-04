@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
+import Photo from 'react-native-vector-icons/MaterialIcons'
 
 const Posting = () => {
   const [selectedValue, setSelectedValue] = useState('');
@@ -19,7 +20,7 @@ const Posting = () => {
       <View style={styles.Posting_container}>
         <View style={styles.container}>
           <Text style={styles.container_text}>사진</Text>
-          <Text>카메라</Text>
+          <Photo name='add-a-photo' size={35}/>
         </View>
         <View style={styles.container}>
           <Text style={styles.container_text}>제목</Text>
