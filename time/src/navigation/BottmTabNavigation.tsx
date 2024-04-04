@@ -10,7 +10,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {View} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
-import myPageStack from '../navigation/MyPageStackNavigator';
+import myPageStack from '../navigation/myPageStackNavigator'
 
 const Tab = createBottomTabNavigator();
 
