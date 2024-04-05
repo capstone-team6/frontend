@@ -7,7 +7,7 @@ import {NavigationContainer} from '@react-navigation/native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import BottmTabNavigation from './src/navigation/myPageStackNavigator'
+import BottmTabNavigation from './src/navigation/BottmTabNavigation'
 
 const App:React.FC=()=> {
   const [isLoggedIn, setIsLoggedIn]=useState<boolean>(false)
@@ -21,6 +21,7 @@ const App:React.FC=()=> {
           {isLoggedIn?(
             <BottmTabNavigation/>
           ):(<SignIn onLoginSuccess={handleLoginSuccess}/>)}
+          
         </SafeAreaView>
       </NavigationContainer>
   );
