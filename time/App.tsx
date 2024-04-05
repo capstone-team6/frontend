@@ -11,12 +11,15 @@ import Nav from './src/navigation/BottmTabNavigation';
 import myBuyTime from './src/pages/MyBuyTime';
 import Profile from './src/pages/Profile';
 import Notify from './src/pages/Notify';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 function App() {
   return (
-    <NavigationContainer>
-      <Nav />
-    </NavigationContainer>
+      <NavigationContainer>    
+        <SafeAreaView style={{flex:1}}>
+          <Nav/>
+        </SafeAreaView>
+      </NavigationContainer>
   );
 }
 

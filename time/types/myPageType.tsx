@@ -7,4 +7,5 @@ export type RootStackParamList = {
     MySellTime:undefined;
     Pay:undefined;
     Appeal:undefined
+    AppealWrite:undefined
 };

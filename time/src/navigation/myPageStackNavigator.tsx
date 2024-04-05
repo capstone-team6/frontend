@@ -1,10 +1,9 @@
 // StackNavigator.tsx
 
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { StackNavigationProp, createStackNavigator } from '@react-navigation/stack';
 import Profile from '../pages/Profile';
 import Mypage from '../pages/Mypage';
-import myBuyTime from '../pages/MyBuyTime';
 import Notify from '../pages/Notify';
 import { SafeAreaView, View } from 'react-native';
 import { Text } from 'react-native';
@@ -13,11 +12,20 @@ import MyBuyTime from '../pages/MyBuyTime';
 import MySellTime from '../pages/MySellTime';
 import Pay from '../pages/Pay';
 import Appeal from '../pages/Appeal';
+import AppealWriteIcon from 'react-native-vector-icons/FontAwesome'
+import AppealWrite from '../pages/AppealWrite';
+import { RootStackParamList } from '../../types/myPageType';
+import { useNavigation } from '@react-navigation/native';
 
 
 const Stack = createStackNavigator();
+type writeNavigation=StackNavigationProp<RootStackParamList,'Appeal'>
 
-const StackNavigator = () => {
+const StackNavigator:React.FC = () => {
+    const navigation=useNavigation<writeNavigation>()
+    const goToWrite=()=>{
+        navigation.navigate('AppealWrite')
+    }
     return (
             <Stack.Navigator>
                 <Stack.Screen name='나의틈새' component={Mypage} 
@@ -37,7 +45,10 @@ const StackNavigator = () => {
                     headerTitle:'프로필',
                     headerTitleStyle:{
                         fontFamily:'NanumGothic-Bold',
-                        fontSize: 28, color:'black'
+                        fontSize: 28, color:'black',
+                    },
+                    headerStyle:{
+                        height:80
                     }
                 }}
                 />
@@ -74,7 +85,7 @@ const StackNavigator = () => {
                     headerTitleStyle:{
                         fontFamily:'NanumGothic-Bold',
                         fontSize: 28, color:'black'
-                    }
+                    },
                 }}
                 />
                 <Stack.Screen name='Appeal' component={Appeal}
@@ -83,7 +94,20 @@ const StackNavigator = () => {
                     headerTitleStyle:{
                         fontFamily:'NanumGothic-Bold',
                         fontSize: 28, color:'black'
-                    }
+                    },
+                    headerRight:()=>(
+                    <AppealWriteIcon name='pencil-square-o' size={35} style={{marginRight:20,paddingTop:10}} onPress={goToWrite}/>
+                    )
+                }}
+                />
+                <Stack.Screen name='AppealWrite' component={AppealWrite}
+                options={{
+                    headerTitle:'이의신청 작성',
+                    headerTitleStyle:{
+                        fontFamily:'NanumGothic-Bold',
+                        fontSize: 28, color:'black'
+                    },
+                    headerTitleAlign:'center'
                 }}
                 />
             </Stack.Navigator>
