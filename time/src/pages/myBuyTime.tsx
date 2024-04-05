@@ -1,7 +1,6 @@
 import React from 'react';
-import { View } from 'react-native'
-
-function MyBuyTime() {
+import { View } from 'react-native';
+function myBuyTime() {
     return (
         <View>
             
@@ -9,4 +8,4 @@ function MyBuyTime() {
     );
 }
 
-export default MyBuyTime;
+export default myBuyTime;
