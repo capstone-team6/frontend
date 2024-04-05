@@ -8,7 +8,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp, createStackNavigator } from '@react-navigation/stack';
 import Profile from './Profile';
-import { RootStackParamList} from '../../types/myPageType';
+import { RootStackParamList} from '../../types/Type';
 
 
 type MypageNavigationProp=StackNavigationProp<RootStackParamList,'Mypage'>
