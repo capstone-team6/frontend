@@ -4,10 +4,11 @@ import { Circle, Path, Rect, Svg} from 'react-native-svg';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import M from 'react-native-vector-icons/MaterialCommunityIcons'
+import { ScrollView } from 'react-native-gesture-handler';
 
 function Profile() {
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <View style={styles.topContainer}>
                 <Svg height='200' width='200'>
                 <Circle cx='90' cy='70' r='57' fill='#303030'/>
@@ -25,13 +26,13 @@ function Profile() {
                 </View>
             </View>
             <View style={styles.mytimeContainer}>
-                <Text style={{fontSize:30, color:'black', fontFamily:'NanumGothic-Bold', marginBottom:20}}>나의 시간</Text>
+                <Text style={{fontSize:28, color:'black', fontFamily:'NanumGothic-Bold', marginBottom:20}}>나의 시간</Text>
                 <Svg width="330" height="180">
-                    <Rect width="330" height="180" fill="#C9BAE5" rx="10" ry="10"/>
+                    <Rect width="330" height="170" fill="#C9BAE5" rx="10" ry="10"/>
                     <M name='clock-time-three-outline' size={135} color='black' style={{alignSelf:'center'}}/>
                     <Text style={{fontSize:20, color:'black', fontFamily:'NanumGothic-Bold', marginBottom:20,alignSelf:'center'}}>나의 시간은 15분이에요</Text>
                 </Svg>
-                <View>
+                <View style={{paddingBottom:10}}>
                     <TouchableOpacity style={styles.options_detail} >
                         <MaterialCommunityIcons name='clock-plus' size={40} color='black'/>
                         <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16, marginRight:45}}>판매한 시간</Text>
@@ -44,7 +45,7 @@ function Profile() {
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </ScrollView>
         
     );
 }
@@ -86,13 +87,13 @@ const styles=StyleSheet.create({
         alignContent:'center',
     },
     options_detail:{
-        marginTop:20,
+        marginTop:15,
         flexDirection:'row',
         borderColor:'gray',
         borderWidth:0.5,
         width:300,
         height:80,
-        margin:5,
+        margin:1,
         justifyContent:'space-around',
         alignItems:'center',
         borderRadius:7,
