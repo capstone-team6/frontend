@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cdec33e1-4f20-4a30-9940-12c29e26edf0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/android/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/android/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/time/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/time/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/src/navigation/myPageStackNavigator.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/src/navigation/myPageStackNavigator.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/src/pages/SignIn.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/src/pages/SignIn.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/src/pages/SignUp.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/src/pages/SignUp.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/types/Type.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/types/Type.tsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2eg4fzF74ALPm4Fclg1ZrkhwQag" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/choijiwon/Desktop/frontend",
+    "settings.editor.selected.configurable": "AndroidSdkUpdater"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cdec33e1-4f20-4a30-9940-12c29e26edf0" name="Changes" comment="" />
+      <created>1712312994785</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1712312994785</updated>
+    </task>
+    <servers />
+  </component>
+</project>

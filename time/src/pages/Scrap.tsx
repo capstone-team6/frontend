@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
-function MySellTime() {
+
+function Scrap() {
     return (
         <View>
             
@@ -8,4 +9,5 @@ function MySellTime() {
     );
 }
 
-export default MySellTime;
+
+export default Scrap;
