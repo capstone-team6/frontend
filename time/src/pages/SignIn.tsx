@@ -4,48 +4,45 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as KakaoLogin from '@react-native-seoul/kakao-login';
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../types/Type';
 
 interface SignInProps{
     onLoginSuccess:()=>void
 }
-
+type SignUpNavigation=StackNavigationProp<RootStackParamList,'SignUp'>
 const SignIn:React.FC<SignInProps>=({onLoginSuccess})=> {
+    const navigation=useNavigation<SignUpNavigation>()
+    const goToSignUp=()=>{
+        navigation.navigate('SignUp')
+    }
 
     const signInKaKao=async()=>{
-        try{
+        try{    
             const result = await KakaoLogin.login();
             console.log("Login Success", JSON.stringify(result));
-            await getProfile();
-            onLoginSuccess()
-        }catch(err){
-            console.log(err)
+            await getProfile(result.accessToken);
+            
+        }catch(error:any){
+            console.log(error)
         }
     }
-    const getProfile=async()=>{
+    const getProfile=async(token:string)=>{
         try{
-            const result=await KakaoLogin.getProfile()
-            console.log("GetProfile Success",JSON.stringify(result))
+            const res=await axios.post('서버 api',{token})
+            if(res.status===200){
+                console.log("GetProfile Success",JSON.stringify(res.data))
+                onLoginSuccess()
+            }
         }catch(error:any){
-            console.log(`GetProfile Fail(code:${error.code})`, error.message)
+            if(error.response&&error.response.status===401){
+                console.log(`GetProfile Fail(code:${error.response.status})`)
+                goToSignUp()
+            }
         }
     }
 
-    // 서버 통신 토큰 함수
-    // const sendUserInfo=async(userInfo:any)=>{
-    //     try{
-    //         const res=await axios.post('서버api',userInfo)
-    //         console.log('Server Response: ',res.data)
-    //         const token=res.data.token
-    //         if(token){
-    //             await AsyncStorage.setItem('token',token)
-    //             console.log('Token saved successfully')
-    //         }else{
-    //             console.log('NO token received from server')
-    //         }
-    //     }catch(error){
-    //         console.log(error)
-    //     }
-    // }
     return (
         <View style={styles.container}>
             <View style={styles.mainDisplay}>

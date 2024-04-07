@@ -9,5 +9,7 @@ export type RootStackParamList = {
     Appeal:undefined
     AppealWrite:undefined
     StackNavigator:undefined
+    SignUp: undefined
+
 
 };

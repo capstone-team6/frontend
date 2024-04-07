@@ -14,8 +14,10 @@ import Pay from '../pages/Pay';
 import Appeal from '../pages/Appeal';
 import AppealWriteIcon from 'react-native-vector-icons/FontAwesome'
 import AppealWrite from '../pages/AppealWrite';
-import { RootStackParamList } from '../../types/myPageType';
+import { RootStackParamList } from '../../types/Type';
 import { useNavigation } from '@react-navigation/native';
+
+import SignUp from '../pages/SignUp';
 
 
 const Stack = createStackNavigator();
@@ -110,6 +112,8 @@ const StackNavigator:React.FC = () => {
                     headerTitleAlign:'center'
                 }}
                 />
+                <Stack.Screen name='SignUp' component={SignUp}/>
+
             </Stack.Navigator>
             )
         }
