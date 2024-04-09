@@ -18,13 +18,16 @@ import { RootStackParamList } from '../../types/Type';
 import { useNavigation } from '@react-navigation/native';
 
 import SignUp from '../pages/SignUp';
+import SignIn from '../pages/SignIn';
 
 
 const Stack = createStackNavigator();
 type writeNavigation=StackNavigationProp<RootStackParamList,'Appeal'>
 
+
 const StackNavigator:React.FC = () => {
     const navigation=useNavigation<writeNavigation>()
+    
     const goToWrite=()=>{
         navigation.navigate('AppealWrite')
     }
@@ -112,8 +115,16 @@ const StackNavigator:React.FC = () => {
                     headerTitleAlign:'center'
                 }}
                 />
-                <Stack.Screen name='SignUp' component={SignUp}/>
-
+                <Stack.Screen name='SignUp' component={SignUp}
+                    options={{
+                        headerTitle:"닉네임 변경",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        headerTitleAlign:'center'
+                    }}
+                />
             </Stack.Navigator>
             )
         }

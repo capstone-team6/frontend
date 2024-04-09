@@ -9,17 +9,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import BottmTabNavigation from './src/navigation/BottmTabNavigation'
 import MapSearch from './src/pages/MapSearch';
+import SignUp from './src/pages/SignUp';
 
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn]=useState<boolean>(false)
+  
+  const handleLoginSuccess=()=>{
+    setIsLoggedIn(true)
+  }
   return (
       <NavigationContainer>    
         <SafeAreaView style={{flex:1}}>
-          {/* {isLoggedI?(
+          {/* {isLoggedIn?(
             <BottmTabNavigation/>
           ):(<SignIn onLoginSuccess={handleLoginSuccess}/>)}
-          <BottmTabNavigation/> */}
-          <BottmTabNavigation/>
+           */}
+          <SignUp/>
+          
         </SafeAreaView>
       </NavigationContainer>
   );
