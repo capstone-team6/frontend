@@ -9,33 +9,17 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import ChatScreen from './ChatScreen';
+import {RootStackParamList} from '../../types/Type';
+import {NavigationProp} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 
-<<<<<<< Updated upstream
+type ChatNavigationProp = StackNavigationProp<RootStackParamList, 'Chatting'>;
+
 const Chatting = () => {
-    return (
-        <View>
-            
-        </View>
-    );
-};
-=======
-// const ChatScreen: React.FC<{route: {params: {chatId: string}}}> = ({route}) => {
-//   const {chatId} = route.params;
-//   return (
-//     <View>
-//       <Text>Chat ID: {chatId}</Text>
-//     </View>
-//   );
-// };
-
-const ChatListScreen: React.FC = () => {
-  //   const navigation = useNavigation();
-
-  //   const handleChatItemClick = (chatId: string) => {
-  //     navigation.navigate('ChatScreen', { chatId: chatId });
-  // };
->>>>>>> Stashed changes
-
+  const navigation = useNavigation<ChatNavigationProp>();
+  const goTochatScreen = (userName: string) => {
+    navigation.navigate('ChatScreen', {userName});
+  };
   const chatData = [
     {
       id: 'chat1',
@@ -76,7 +60,9 @@ const ChatListScreen: React.FC = () => {
   return (
     <View style={styles.chatListContainer}>
       {chatData.map(chat => (
-        <TouchableOpacity key={chat.id}>
+        <TouchableOpacity
+          key={chat.id}
+          onPress={() => goTochatScreen(chat.userName)}>
           <View style={styles.chatItemContainer}>
             <Image source={chat.imageSource} style={styles.userImage} />
             <View style={styles.chatTextContainer}>
@@ -156,4 +142,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatListScreen;
+export default Chatting;
