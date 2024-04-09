@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
 
+
 interface SignInProps{
     onLoginSuccess:()=>void
 }
@@ -18,6 +19,7 @@ const SignIn:React.FC<SignInProps>=({onLoginSuccess})=> {
         navigation.navigate('SignUp')
     }
 
+    //카카오 api로 로그인 시도
     const signInKaKao=async()=>{
         try{    
             const result = await KakaoLogin.login();
@@ -28,18 +30,32 @@ const SignIn:React.FC<SignInProps>=({onLoginSuccess})=> {
             console.log(error)
         }
     }
-    const getProfile=async(token:string)=>{
+
+    //서버한테 토큰 보내기
+    const getProfile=async(Token:string)=>{
         try{
-            const res=await axios.post('서버 api',{token})
+            const data={
+                token:Token
+            }
+            const res=await axios.post('http://192.168.0.4:8080/kakao/login',data)
             if(res.status===200){
                 console.log("GetProfile Success",JSON.stringify(res.data))
-                onLoginSuccess()
+                await AsyncStorage.setItem('userId',res.data.id)
+                if(res.data.isOurMember===true){
+                    onLoginSuccess()
+                }else{
+                    goToSignUp()
+                }
+                
             }
         }catch(error:any){
-            if(error.response&&error.response.status===401){
+            if(error.response&&error.response.status===403){
                 console.log(`GetProfile Fail(code:${error.response.status})`)
-                goToSignUp()
+                
             }
+            
+
+            
         }
     }
 
