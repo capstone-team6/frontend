@@ -8,14 +8,18 @@ import {
   Dimensions,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import ChatScreen from './ChatScreen';
+import {RootStackParamList} from '../../types/Type';
+import {NavigationProp} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 
-const Chatting= () => {
-  //   const navigation = useNavigation();
+type ChatNavigationProp = StackNavigationProp<RootStackParamList, 'Chatting'>;
 
-  //   const handleChatItemClick = (chatId: string) => {
-  //     navigation.navigate('ChatScreen', { chatId: chatId });
-  // };
-
+const Chatting = () => {
+  const navigation = useNavigation<ChatNavigationProp>();
+  const goTochatScreen = (userName: string) => {
+    navigation.navigate('ChatScreen', {userName});
+  };
   const chatData = [
     {
       id: 'chat1',
@@ -56,7 +60,9 @@ const Chatting= () => {
   return (
     <View style={styles.chatListContainer}>
       {chatData.map(chat => (
-        <TouchableOpacity key={chat.id}>
+        <TouchableOpacity
+          key={chat.id}
+          onPress={() => goTochatScreen(chat.userName)}>
           <View style={styles.chatItemContainer}>
             <Image source={chat.imageSource} style={styles.userImage} />
             <View style={styles.chatTextContainer}>
