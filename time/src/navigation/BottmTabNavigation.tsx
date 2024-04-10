@@ -11,6 +11,7 @@ import {View} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
 import myPageStack from '../navigation/myPageStackNavigator';
+import chatStackNavigator from './chatStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -91,9 +92,10 @@ const BottmTabNavigation = () => {
       />
       <Tab.Screen
         name="채팅"
-        component={Chatting}
+        component={chatStackNavigator}
         options={{
           tabBarLabel: '채팅',
+          headerShown: false,
           tabBarIcon: ({focused}) => (
             <Ionicons
               name="chatbubble-outline"
