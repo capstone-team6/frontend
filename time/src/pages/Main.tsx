@@ -1,17 +1,69 @@
-
+import Geolocation from '@react-native-community/geolocation';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
-import { Text, View ,StyleSheet, Dimensions} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View ,StyleSheet, Dimensions, Platform, PermissionsAndroid} from 'react-native';
+import Geocoder from 'react-native-geocoding';
+import { err } from 'react-native-svg';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Octicons from 'react-native-vector-icons/Octicons'
 
+Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ")
+
+async function requestPermission() {
+    try{
+        if(Platform.OS==="android"){
+        return await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            )
+        }
+    }catch(e){
+        console.log(e)
+    }
+}
+
 function Main() {
+    const [locatoin,setLocation]=useState<{
+        latitude:number
+        longitude:number
+        
+    }|null>(null)
+
+    const [address, setAddress]=useState<string>('')
+
+    useEffect(()=>{
+        requestPermission().then(result=>{
+            console.log({result})
+            if(result==="granted"){
+                Geolocation.getCurrentPosition(
+                    pos=>{
+                        setLocation(pos.coords);
+                        Geocoder.from(pos.coords.latitude, pos.coords.longitude)
+                            .then(json => {
+                                console.log(json)
+                                const addressComponent = json.results[6].formatted_address;
+                                const desireAddress=addressComponent.split(', ')[1]
+                                setAddress(desireAddress);
+                            })
+                            .catch(error => console.warn(error));
+                    },
+                    error=>{
+                        console.log(error)
+                    },
+                    {
+                        enableHighAccuracy:false,
+                        timeout:5000,
+                        maximumAge:10000,
+                    },
+                )
+            }
+        })
+    },[])
     return (
         <View style={styles.main_container}>
             <View style={styles.location}>
-                <Text style={styles.location_text}>경기도 용인시 처인구 명지대</Text>
+                <Text style={styles.location_text}>{address? address : 'Loading...'}</Text>
                 <AntDesign name='caretdown' size={13} style={styles.down_icon}/>
             </View>
             
