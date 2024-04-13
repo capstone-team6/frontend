@@ -8,8 +8,11 @@ import {NavigationContainer} from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import BottmTabNavigation from './src/navigation/BottmTabNavigation'
-import MapSearch from './src/pages/MapSearch';
+// import MapSearch from './src/pages/MapSearch';
 import SignUp from './src/pages/SignUp';
+import MapSearch from './src/pages/MapSearch';
+import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 
 function App() {
@@ -25,7 +28,9 @@ function App() {
             <BottmTabNavigation/>
           ):(<SignIn onLoginSuccess={handleLoginSuccess}/>)}
            */}
-          <SignUp/>
+          {/* <SignUp/> */}
+          <BottmTabNavigation/>
+          {/* <MapSearch/> */}
           
         </SafeAreaView>
       </NavigationContainer>

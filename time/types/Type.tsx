@@ -12,4 +12,6 @@ export type RootStackParamList = {
   SignUp: undefined;
   ChatScreen: {userName: string};
   Chatting: undefined;
+  SignIn:undefined
+  BottomTabNavigation:undefined
 };
