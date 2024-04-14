@@ -1,6 +1,6 @@
 import Geolocation from '@react-native-community/geolocation';
 import React, { useEffect, useState } from 'react';
-import { PermissionsAndroid, Platform, Text, View } from 'react-native';
+import { Dimensions, PermissionsAndroid, Platform, Text, View } from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps'
 import { err } from 'react-native-svg';
 import {WebView} from 'react-native-webview'
@@ -18,8 +18,8 @@ async function requestPermission() {
   
 }
 
-const MapSearch:React.FC = () => {
-  const [location,setLocation]=useState<{
+const MapSearch= ({location}:{location: { latitude: number, longitude: number } | null }) => {
+  const [curLocation,setLocation]=useState<{
     latitude:number
     longitude:number
   }|null>(null)
@@ -44,7 +44,7 @@ const MapSearch:React.FC = () => {
     })
   },[])
 
-  if(!location){
+  if(!curLocation){
     return(
       <View>
         <Text>Splash Screen</Text>
@@ -53,18 +53,18 @@ const MapSearch:React.FC = () => {
   }
   return (
     <MapView 
-    style={{ flex: 1 }}
+    style={{ flex: 1 , width:Dimensions.get('screen').width,height:250, marginBottom:20}}
       provider={PROVIDER_GOOGLE}
       initialRegion={{
-      latitude: location.latitude,
-      longitude:location.longitude,
+      latitude: curLocation.latitude,
+      longitude:curLocation.longitude,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
       }}   
     >
       <Marker coordinate={{
-        latitude: location.latitude,
-        longitude:location.longitude
+        latitude: curLocation.latitude,
+        longitude:curLocation.longitude
       }}/>
     </MapView>
   );

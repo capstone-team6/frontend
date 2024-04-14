@@ -8,6 +8,7 @@ import Geocoder from 'react-native-geocoding';
 import { err } from 'react-native-svg';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Octicons from 'react-native-vector-icons/Octicons'
+import Posting from './Posting';
 
 Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ")
 
@@ -42,7 +43,7 @@ function Main() {
                         Geocoder.from(pos.coords.latitude, pos.coords.longitude)
                             .then(json => {
                                 console.log(json)
-                                const addressComponent = json.results[6].formatted_address;
+                                const addressComponent = json.results[3].formatted_address;
                                 const desireAddress=addressComponent.split(', ')[1]
                                 setAddress(desireAddress);
                             })
@@ -66,6 +67,7 @@ function Main() {
                 <Text style={styles.location_text}>{address? address : 'Loading...'}</Text>
                 <AntDesign name='caretdown' size={13} style={styles.down_icon}/>
             </View>
+            
             
             <View style={styles.options}>
                 <Text style={styles.option1}>구매글</Text>
