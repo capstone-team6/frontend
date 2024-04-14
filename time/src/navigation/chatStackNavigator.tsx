@@ -4,7 +4,7 @@ import Chatting from '../pages/Chatting';
 import ChatScreen from '../pages/ChatScreen';
 import {RootStackParamList} from '../../types/Type';
 import {RotationGestureHandlerStateChangeEvent} from 'react-native-gesture-handler';
-
+import React from 'react';
 const Stack = createStackNavigator<RootStackParamList>();
 
 const ChatStackNavigator = () => {
