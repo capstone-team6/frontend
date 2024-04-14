@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,68 @@ import {
   Button,
   TouchableOpacity,
   ScrollView,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import Photo from 'react-native-vector-icons/MaterialIcons'
+import Geolocation from '@react-native-community/geolocation';
+import Geocoder from 'react-native-geocoding';
+import MapSearch from './MapSearch';
+import Right from 'react-native-vector-icons/AntDesign'
 
+
+Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ")
+
+async function requestPermission() {
+    try{
+        if(Platform.OS==="android"){
+        return await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            )
+        }
+    }catch(e){
+        console.log(e)
+    }
+}
 const Posting = () => {
   const [selectedValue, setSelectedValue] = useState('');
+  const [location,setLocation]=useState<{
+    latitude:number
+    longitude:number
+    
+}|null>(null)
 
+const [address, setAddress]=useState<string>('')
+
+useEffect(()=>{
+    requestPermission().then(result=>{
+        console.log({result})
+        if(result==="granted"){
+            Geolocation.getCurrentPosition(
+                pos=>{
+                    setLocation(pos.coords);
+                    Geocoder.from(pos.coords.latitude, pos.coords.longitude)
+                        .then(json => {
+                            console.log(json)
+                            const addressComponent = json.results[3].formatted_address;
+                            const desireAddress=addressComponent.split(', ')[1]
+                            setAddress(desireAddress);
+                        })
+                        .catch(error => console.warn(error));
+                },
+                error=>{
+                    console.log(error)
+                },
+                {
+                    enableHighAccuracy:false,
+                    timeout:5000,
+                    maximumAge:10000,
+                },
+            )
+        }
+    })
+},[])
   return (
     <ScrollView>
       <View style={styles.Posting_container}>
@@ -114,9 +169,17 @@ const Posting = () => {
           />
         </View>
         <View style={styles.container}>
-          <Text style={styles.container_text}>틈새위치</Text>
+          <View style={styles.location}>
+            <Text style={styles.container_text}>틈새위치</Text>
+            <TouchableOpacity>
+              <Text style={styles.locationButton}>위치 설정 안하기</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={{fontSize:20,borderWidth:1,borderColor:'gray',margin:10,height:40,borderRadius:5,textAlignVertical:'center'}}>{address}
+          <Right name='right'size={20}/></Text>
         </View>
       </View>
+      <MapSearch location={location}/>
     </ScrollView>
   );
 };
@@ -183,6 +246,22 @@ const styles = StyleSheet.create({
   categoryBtn_text: {
     color: 'black',
     textAlign: 'center',
+  },
+  location:{
+    flexDirection:'row'
+  },
+  locationButton:{
+    borderColor:'gray',
+    borderRadius:5,
+    borderWidth:1,
+    marginLeft:10,
+    fontSize:13,
+    width:110,
+    height:25,
+    textAlign:'center',
+    textAlignVertical:'center',
+    backgroundColor:'#E8EAEC',
+    
   },
 });
 
