@@ -10,6 +10,6 @@ export type RootStackParamList = {
   AppealWrite: undefined;
   StackNavigator: undefined;
   SignUp: undefined;
-  ChatScreen: {userName: string};
+  ChatScreen: {userId: string};
   Chatting: undefined;
 };
