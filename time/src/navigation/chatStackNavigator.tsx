@@ -7,7 +7,7 @@ import {RotationGestureHandlerStateChangeEvent} from 'react-native-gesture-handl
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-const chatStackNavigator = () => {
+const ChatStackNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -35,4 +35,4 @@ const chatStackNavigator = () => {
     </Stack.Navigator>
   );
 };
-export default chatStackNavigator;
+export default ChatStackNavigator;
