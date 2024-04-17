@@ -25,18 +25,6 @@ const SignUp:React.FC=()=> {
     const onChange=(text:string)=>{
         setNickname(text)
     }
-    // const handleNickNameChange=()=>{
-    //     if(isNicnameVaild===true){
-    //         console.log("사용 가능한 닉네임 입니다.")
-    //     }else{
-    //         nicknameCannotUse()
-    //     }
-    // }
-    
-
-    const nicknameCannotUse=()=>{
-    setErrorText('이미 존재하는 닉네임 입니다.')
-    }
 
     // 닉네임 중복 검사
     const checkName=async(name:string)=>{
@@ -100,7 +88,7 @@ const SignUp:React.FC=()=> {
                         <Text style={styles.checkButton} onPress={()=>checkName(nickName)}>중복확인</Text>
                     </TouchableOpacity>
                 </View>
-                {errorText?<Text style={{color:'red'}}>{errorText}</Text>:null}
+                {errorText?<Text style={{color:'black'}}>{errorText}</Text>:null}
             </View>
             <View style={styles.button} >
                 <TouchableOpacity onPress={returnNav}>
