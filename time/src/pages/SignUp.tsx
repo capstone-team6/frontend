@@ -12,33 +12,49 @@ type SignInNavigation=StackNavigationProp<RootStackParamList,'SignIn'>
 type MainNavigation=StackNavigationProp<RootStackParamList,'BottomTabNavigation'>
 const SignUp:React.FC=()=> {
 
+    //닉네임 설정
     const [nickName, setNickname]=useState('')
+    //중복 시 에러 메시지
     const [errorText, setErrorText]=useState('')
-    const [isNicnameVaild,setIsNicNameVaild]=useState(false)
+    //닉네임 유효 여부
+    const [isNicnameVaild,setIsNicNameVaild]=useState<boolean>(false)
+
     const returnNavigation=useNavigation<SignInNavigation>()
     const mainNavigation=useNavigation<MainNavigation>()
 
-    const handleNickNameChange=(text:string)=>{
-    setNickname(text)
-    setIsNicNameVaild(false)
+    const onChange=(text:string)=>{
+        setNickname(text)
     }
+    // const handleNickNameChange=()=>{
+    //     if(isNicnameVaild===true){
+    //         console.log("사용 가능한 닉네임 입니다.")
+    //     }else{
+    //         nicknameCannotUse()
+    //     }
+    // }
+    
 
     const nicknameCannotUse=()=>{
     setErrorText('이미 존재하는 닉네임 입니다.')
     }
 
+    // 닉네임 중복 검사
     const checkName=async(name:string)=>{
         try{
             const data={
                 nickname:name
             }
-            const nameRes=await axios.post("http://:8080/sign-up/nicknameCheck",data)
+            const nameRes=await axios.post("http://13.125.118.92:8080/sign-up/nicknameCheck",data)
             if(nameRes.status===200){
                 console.log(nameRes.data)
-                if(nameRes.data.isOk===true){
+                console.log(nameRes.data.data.success)
+                if(nameRes.data.data.success===true){ 
                     setIsNicNameVaild(true)
+                    setErrorText("사용 가능한 닉네임 입니다.")
+                    
                 }else{
-                    nicknameCannotUse()
+                    setIsNicNameVaild(false)
+                    setErrorText("이미 존재하는 닉네임 입니다. ")
                 }
             }
         }catch(error:any){
@@ -48,14 +64,22 @@ const SignUp:React.FC=()=> {
 
     const onSubmit=async()=>{
         try{
+            const id=await AsyncStorage.getItem('kakaoId')
+            console.log(id)
             const datas={
-                id:AsyncStorage.getItem('userId'),
+                kakaoId:id,
                 nickname:nickName
             }
-            const res=await axios.post("http://:8080/sign-up",datas)
-            if(res.status===200){
-                returnNavigation.navigate('BottomTabNavigation')
-            }
+            axios.put("http://13.125.118.92:8080/sign-up",datas)
+            .then(res=>{
+                const result=res.data.data
+                console.log(result)
+                mainNavigation.navigate('BottomTabNavigation')
+                
+            }).catch(err=>{
+                const result=err.response.data.data
+                console.log(result)
+            })
         }catch(error){
             console.log(error)
         }
@@ -66,11 +90,11 @@ const SignUp:React.FC=()=> {
     }
     return (
         <View style={styles.container}>
-            <Text style={styles.headerTitle}>닉네임 변경</Text>
+            
             <View style={styles.input}>
                 <Text style={{fontSize:18, marginTop:50, fontFamily:'NanumGothic-Regular', color:'black'}}>닉네임</Text>
                 <View style={styles.inputcheck}>
-                    <TextInput placeholder='10자 이내 입력' value={nickName} onChangeText={handleNickNameChange}
+                    <TextInput placeholder='10자 이내 입력' value={nickName} onChangeText={onChange}
                     style={{borderWidth:1,marginTop:10,fontFamily:'NanumGothic-Regular', width:Dimensions.get('screen').width/1.6, marginRight:10}}></TextInput>
                     <TouchableOpacity style={{paddingTop:13}}>
                         <Text style={styles.checkButton} onPress={()=>checkName(nickName)}>중복확인</Text>
@@ -94,13 +118,6 @@ const styles=StyleSheet.create({
     container:{
         flex:1,
         flexDirection:'column'
-    },
-    headerTitle:{
-        fontFamily:'NanumGothic-Bold',
-        fontSize: 28, color:'black',
-        textAlign:'center',
-        justifyContent:'center',
-        padding:20
     },
     input:{
         paddingHorizontal:50,
