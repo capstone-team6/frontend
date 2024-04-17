@@ -12,10 +12,17 @@ import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
 import myPageStack from '../navigation/myPageStackNavigator';
 import ChatStackNavigator from './ChatStackNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../types/Type';
+import { useNavigation } from '@react-navigation/native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
+
 
 const Tab = createBottomTabNavigator();
 
 const BottmTabNavigation = () => {
+ 
   return (
     <Tab.Navigator
       initialRouteName="main"
@@ -115,12 +122,14 @@ const BottmTabNavigation = () => {
             fontSize: 28,
           },
           headerRight: () => (
-            <Ionicons
+              <Ionicons
               name="settings-outline"
               size={25}
               color="black"
               style={{margin: 20}}
+              
             />
+            
           ),
 
           tabBarLabel: '마이',
