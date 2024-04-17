@@ -13,8 +13,11 @@ import SignUp from './src/pages/SignUp';
 import MapSearch from './src/pages/MapSearch';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { Header, createStackNavigator } from '@react-navigation/stack';
+import StackNavigator from './src/navigation/StackNavigator';
+// import StackNavigator from './src/navigation/StackNavigator';
 
-
+const Stack=createStackNavigator()
 function App() {
   const [isLoggedIn, setIsLoggedIn]=useState<boolean>(false)
   
@@ -22,16 +25,16 @@ function App() {
     setIsLoggedIn(true)
   }
   return (
-      <NavigationContainer>    
+      <NavigationContainer independent={true}>    
         <SafeAreaView style={{flex:1}}>
           {/* {isLoggedIn?(
             <BottmTabNavigation/>
-          ):(<SignIn onLoginSuccess={handleLoginSuccess}/>)}
-           */}
-          {/* <SignUp/> */}
-          <BottmTabNavigation/>
-          {/* <MapSearch/> */}
+          ):(<SignIn onLoginSuccess={handleLoginSuccess}/>)} */}
           
+          {isLoggedIn?(<BottmTabNavigation/>):(<StackNavigator onLoginSuccess={handleLoginSuccess}/>)}
+          {/* <SignUp/> */}
+          {/* <BottmTabNavigation/> */}
+          {/* <MapSearch/> */}
         </SafeAreaView>
       </NavigationContainer>
   );
