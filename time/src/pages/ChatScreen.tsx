@@ -16,14 +16,14 @@ import {
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import SockJS from 'sockjs-client';
-import StompJs, {Message as MessageType, Client} from '@stomp/stompjs';
+import Stomp from 'stompjs';
 
-const {createProxyMiddleware} = require('http-proxy-middleware');
-module.exports = app => {
-  app.use('/ws', createProxyMiddleware({targer: 'http://localhost:8080'}));
-};
+// const {createProxyMiddleware} = require('http-proxy-middleware');
+// module.exports = app => {
+//   app.use('/ws', createProxyMiddleware({targer: 'http://localhost:8080'}));
+// };
+
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -35,22 +35,12 @@ interface Props {
   navigation: ChatScreenNavigationProp;
 }
 
-interface User {
-  userId: string;
-}
 interface Chat {
   id: number;
   content: string;
   isMine: boolean;
   time: string;
   nickname: string;
-}
-
-interface WatingRoomBody {
-  type: string;
-  roomId: number;
-  sendUserId?: string;
-  content?: string;
 }
 
 interface MessageBody {
@@ -66,19 +56,52 @@ interface StyledMessageProps {
 }
 type ChatScreenProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 
-const ChatScreen: React.FC<Props> = ({navigation}) => {
-  //const {userId} = useParams<{userId: string}>();
-  const route = useRoute<ChatScreenProp>();
-  const {userId} = route.params;
+interface Message {
+  roomId: number;
+  writer: string;
+  message: string;
+  type: string;
+}
 
-  //const {selectedMbti} = useContext(MbtiContext);
-  const client = useRef<any>({});
-  const [chatList, setChatList] = useState<Chat[]>([]);
-  const [chat, setChat] = useState<string>('');
-  const [roomId, setRoomId] = useState<number>();
-  //const userNickname = localStorage.getItem('nickname');
-  const [isMatch, setIsMatch] = useState<boolean>(false);
-  // 고유한 ID를 발급하는 함수
+const ChatScreen: React.FC<Props> = ({navigation}) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messageInput, setMessageInput] = useState('');
+  const [stompClient, setStompClient] = useState<Stomp.Client | null>(null);
+
+  useEffect(() => {
+    //STOMP 클라이언트 설정
+    const socket = new SockJS('ws://13.125.118.92:8080/ws');
+    const stomp = Stomp.over(socket);
+    stomp.connect({}, () => {
+      setStompClient(stomp);
+      //구독할 채팅 토픽 지정
+      stomp.subscribe('/sub/chat/room/1', (message: any) => {
+        const newMessage = JSON.parse(message.body);
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+      });
+    });
+
+    return () => {
+      //컴포넌트 언마운트 시 STOMP 연결 해제
+      if (stompClient !== null) {
+        stompClient.disconnect(() => {
+          console.log('채팅이 종료되었습니다.');
+        });
+      }
+    };
+  }, []);
+
+  const sendMessage = () => {
+    if (stompClient !== null) {
+      stompClient.send(
+        '/pub/chat/send/1',
+        {},
+        JSON.stringify({content: messageInput}),
+      );
+      setMessageInput('');
+    }
+  };
+
   const generateId = (() => {
     let id = 0;
     return () => {
@@ -86,113 +109,6 @@ const ChatScreen: React.FC<Props> = ({navigation}) => {
       return id;
     };
   })();
-
-  const sendMessage = () => {};
-
-  const disconnect = () => {
-    client.current.deactivate();
-    console.log('채팅이 종료되었습니다.');
-    setIsMatch(false);
-  };
-
-  const onMessageReceived = (message: StompJs.Message) => {
-    const messageBody = JSON.parse(message.body) as MessageBody;
-    const {type, sendUserId, content, time, nickname} = messageBody;
-    const isMine = sendUserId === userId;
-    const newChat = {
-      id: generateId(),
-      content,
-      isMine,
-      time,
-      nickname,
-    };
-    console.log(newChat);
-    setChatList(prevChatList => [...prevChatList, newChat]);
-    console.log(chatList);
-
-    if (type === 'close') {
-      console.log('closed');
-    }
-  };
-
-  const subscribeAfterGetRoomId = (id: number) => {
-    client.current.subscribe(`/sub/chat/match/${id}`, onMessageReceived);
-  };
-
-  const publishAfterGetRoomId = (
-    event: React.FormEvent<HTMLFormElement>,
-    content: string,
-  ) => {
-    event.preventDefault();
-    if (!client.current.connected) return;
-
-    client.current.publish({
-      destination: `/pub/chat/match/${roomId}`,
-      body: JSON.stringify({
-        type: 'match',
-        roomId,
-        sendUserId: userId,
-        content,
-      }),
-    });
-
-    setChat('');
-  };
-
-  const handleChange = (event: any) => {
-    setChat(event.nativeEvent.text);
-  };
-
-  // 최초 렌더링시 실행
-  useEffect(() => {
-    const subscribe = () => {
-      client.current.subscribe(`/sub/chat/wait/${userId}`, (body: any) => {
-        const watingRoomBody = JSON.parse(body.body) as WatingRoomBody;
-        const {type, roomId: newRoomId} = watingRoomBody;
-
-        if (type === 'open') {
-          console.log('채팅 웨이팅 시작');
-        }
-
-        if (type === 'match') {
-          console.log('매칭이 되었습니다!');
-          subscribeAfterGetRoomId(newRoomId);
-          setRoomId(newRoomId);
-          setIsMatch(true);
-        }
-      });
-    };
-
-    const publishOnWait = () => {
-      if (!client.current.connected) return;
-
-      client.current.publish({
-        destination: '/pub/chat/wait',
-        body: JSON.stringify({
-          type: 'open',
-          userId,
-          //selectMbti: `${selectedMbti}`,
-        }),
-      });
-    };
-
-    const connect = () => {
-      client.current = new StompJs.Client({
-        brokerURL: 'ws://api.projectsassy.net:8080/ws',
-        onConnect: () => {
-          console.log('success');
-          subscribe();
-          publishOnWait();
-        },
-      });
-      client.current.activate();
-    };
-
-    connect();
-
-    return () => disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
 
   const [showTopInfo, setShowTopInfo] = useState(true);
 
@@ -244,24 +160,44 @@ const ChatScreen: React.FC<Props> = ({navigation}) => {
           </Text>
         </View>
       )}
-      <ScrollView
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        style={{flex: 1}}>
-        {chatList.map(msg => (
+      <ScrollView style={{flex: 1}}>
+        {messages.map((msg, index) => (
           <View
-            key={msg.id}
-            style={msg.isMine ? styles.myMessage : styles.theirMessage}>
-            <Text>{msg.content}</Text>
+            key={index}
+            style={{
+              alignSelf: msg.writer === 'Me' ? 'flex-end' : 'flex-start',
+              margin: 5,
+            }}>
+            <Text
+              style={{
+                backgroundColor: msg.writer === 'Me' ? '#DCF8C6' : '#F1F0F0',
+                padding: 10,
+                borderRadius: 8,
+              }}>
+              {msg.message}
+            </Text>
           </View>
         ))}
       </ScrollView>
-      <View style={styles.inputContainer}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: 10,
+        }}>
         <TextInput
-          style={styles.input}
-          value={chat}
-          onChangeText={handleChange}
-          placeholder="메시지 입력..."
+          value={messageInput}
+          onChangeText={setMessageInput}
+          placeholder="Type your message..."
+          style={{
+            flex: 1,
+            marginRight: 10,
+            padding: 10,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 8,
+          }}
         />
 
         <TouchableOpacity onPress={sendMessage} style={styles.iconContainer}>
