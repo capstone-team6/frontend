@@ -19,27 +19,46 @@ import { useNavigation } from '@react-navigation/native';
 
 import SignUp from '../pages/SignUp';
 import SignIn from '../pages/SignIn';
+import Setting from '../pages/Setting';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import Logout from '../pages/Logout';
+import DeleteMem from '../pages/DeleteMem';
+import NameChange from '../pages/NameChange';
+import StackNavigators from './StackNavigator';
+import App from '../../App';
 
 
 const Stack = createStackNavigator();
 type writeNavigation=StackNavigationProp<RootStackParamList,'Appeal'>
+type SettingNavigationProp=StackNavigationProp<RootStackParamList,'Setting'>
+type MypageNavigation=StackNavigationProp<RootStackParamList,'Mypage'>
+
 
 
 const StackNavigator:React.FC = () => {
     const navigation=useNavigation<writeNavigation>()
-    
+    const navigationSet=useNavigation<SettingNavigationProp>()
+    const mypageNavigation=useNavigation<MypageNavigation>()
+    const goToSetting=()=>{
+        navigationSet.navigate('Setting')
+    }
     const goToWrite=()=>{
         navigation.navigate('AppealWrite')
     }
+    const goToMypage=()=>{
+        navigation.navigate('Mypage')
+    }
     return (
             <Stack.Navigator>
-                <Stack.Screen name='나의틈새' component={Mypage} 
+                <Stack.Screen name='Mypage' component={Mypage} 
                 options={{ 
                         header:()=>(
                             <SafeAreaView>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, height: 80,backgroundColor:'white' }}>
                                     <Text style={{ fontFamily: 'NanumGothic-Bold', fontSize: 28, color:'black' }}>나의 틈새</Text>
-                                    <Ionicons name='settings-outline' size={25} color='black' style={{marginRight: 20}}/>
+                                    <TouchableOpacity onPress={goToSetting}>
+                                        <Ionicons name='settings-outline' size={25} color='black' style={{marginRight: 20}}/>
+                                    </TouchableOpacity>
                                 </View>
                             </SafeAreaView>
                         )
@@ -54,7 +73,12 @@ const StackNavigator:React.FC = () => {
                     },
                     headerStyle:{
                         height:80
-                    }
+                    },
+                    headerLeft: () => (
+                        <TouchableOpacity onPress={goToMypage}>
+                            <Ionicons name="arrow-back" size={24} color="black" style={{ marginLeft: 10 }} />
+                        </TouchableOpacity>
+                        ),
                 }}
                 />
                 <Stack.Screen name="MyBuyTime" component={MyBuyTime} 
@@ -123,6 +147,52 @@ const StackNavigator:React.FC = () => {
                             fontSize: 28, color:'black'
                         },
                         headerTitleAlign:'center'
+                    }}
+                />
+                <Stack.Screen name='Setting' component={Setting}
+                    options={{
+                        headerTitle:"설정",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        
+                    }}
+                />
+
+                <Stack.Screen name='Logout' component={Logout}
+                    options={{
+                        headerTitle:"로그아웃",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        
+                    }}
+                />
+                <Stack.Screen name='DeleteMem' component={DeleteMem}
+                    options={{
+                        headerTitle:"회원 탈퇴",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        
+                    }}
+                />
+                <Stack.Screen name='NameChange' component={NameChange}
+                    options={{
+                        headerTitle:"닉네임 변경",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        
+                    }}
+                />
+                <Stack.Screen name='App' component={App}
+                    options={{
+                        headerShown:false
                     }}
                 />
             </Stack.Navigator>
