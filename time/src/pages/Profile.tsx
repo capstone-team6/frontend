@@ -5,8 +5,16 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import M from 'react-native-vector-icons/MaterialCommunityIcons'
 import { ScrollView } from 'react-native-gesture-handler';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../types/Type';
+import { useNavigation } from '@react-navigation/native';
 
+type ChangeNavigation=StackNavigationProp<RootStackParamList,'NameChange'>
 function Profile() {
+    const navigation=useNavigation<ChangeNavigation>()
+    const goToChange=()=>{
+        navigation.navigate('NameChange')
+    }
     return (
         <ScrollView style={styles.container}>
             <View style={styles.topContainer}>
@@ -22,7 +30,9 @@ function Profile() {
                 <View style={styles.text_container}>
                     <Text style={{fontSize:25, color:'black', fontFamily:'NanumGothic-Bold'}}>홍길동</Text>
                     <Text style={{fontSize:15,marginTop:15 , color:'black',fontFamily:'NanumGothic-Bold'}}>총 거래한 시간: 60분</Text>
-                    <Text style={styles.profile_but}>프로필 수정</Text>
+                    <TouchableOpacity onPress={goToChange}>
+                        <Text style={styles.profile_but}>프로필 수정</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
             <View style={styles.mytimeContainer}>
