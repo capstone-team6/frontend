@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">틈새시장</string>
+    <string name="kakao_app_key">a6a5b93e3154aa41e5644b271916c14e</string>
 </resources>
