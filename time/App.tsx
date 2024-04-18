@@ -31,9 +31,9 @@ function App() {
             <BottmTabNavigation/>
           ):(<SignIn onLoginSuccess={handleLoginSuccess}/>)} */}
           
-          {isLoggedIn?(<BottmTabNavigation/>):(<StackNavigator onLoginSuccess={handleLoginSuccess}/>)}
+          {/* {isLoggedIn?(<BottmTabNavigation/>):(<StackNavigator onLoginSuccess={handleLoginSuccess}/>)} */}
           {/* <SignUp/> */}
-          {/* <BottmTabNavigation/> */}
+          <BottmTabNavigation/>
           {/* <MapSearch/> */}
         </SafeAreaView>
       </NavigationContainer>

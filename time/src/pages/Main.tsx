@@ -8,12 +8,10 @@ import Geocoder from 'react-native-geocoding';
 import { err } from 'react-native-svg';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Octicons from 'react-native-vector-icons/Octicons'
-<<<<<<< HEAD
-import Svg, { Circle,Rect } from 'react-native-svg';
-=======
 import Posting from './Posting';
 
 Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{language:"ko"})
+
 
 async function requestPermission() {
     try{
@@ -26,7 +24,6 @@ async function requestPermission() {
         console.log(e)
     }
 }
->>>>>>> main
 
 function Main() {
     const [locatoin,setLocation]=useState<{
@@ -44,15 +41,16 @@ function Main() {
                 Geolocation.getCurrentPosition(
                     pos=>{
                         setLocation(pos.coords);
-                        Geocoder.from(pos.coords.latitude, pos.coords.longitude)
+                        Geocoder.from(pos.coords.latitude, pos.coords.longitude,"ko")
                             .then(json => {
                                 console.log(json)
                                 const addressComponent = json.results[0].formatted_address;
-                                // const desireAddress=addressComponent.split(', ')[2]
-                                const addressArray = addressComponent.split(', ');
+                                const desireAddress=addressComponent.split(', ')[0]
+                                const words=desireAddress.split(" ")
+                                const lastAddress=`${words[1]} ${words[2]} ${words[3]}`
                                 // 주소에서 한글 부분을 선택
-                                const desireAddress=addressArray.filter(address => address !== "대한민국").join(', ');
-                                setAddress(desireAddress);
+                                // const desireAddress=addressArray.filter(address => address !== "대한민국").join(', ');
+                                setAddress(lastAddress);
                             })
                             .catch(error => console.warn(error));
                     },
@@ -83,22 +81,7 @@ function Main() {
             <View>
                 <View style={styles.options_line}></View>
             </View>
-
-            <Svg style={styles.sections}>
-                <Rect x="10" y="1" width='73' height='40' fill="#E8EAEC" rx='20' ry='20' />
-                <Rect x="90" y="1" width='73' height='40' fill="#E8EAEC" rx='20' ry='20' />
-                <Rect x="170" y="1" width='73' height='40' fill="#E8EAEC" rx='20' ry='20' />
-                <Rect x="250" y="1" width='73' height='40' fill="#E8EAEC" rx='20' ry='20' />
-                <Rect x="330" y="1" width='73' height='40' fill="#E8EAEC" rx='20' ry='20' />
-                <View style={styles.section_text}>
-                    <Text style={{ position: 'absolute', top: 12, left: 33 , fontFamily:'NanumGothic-Bold'}}>재능</Text>
-                    <Text style={{ position: 'absolute', top: 12, left: 114  , fontFamily:'NanumGothic-Bold' }}>운동</Text>
-                    <Text style={{ position: 'absolute', top: 12, left: 187  , fontFamily:'NanumGothic-Bold'}}>심부름</Text>
-                    <Text style={{ position: 'absolute', top: 12, left: 274  , fontFamily:'NanumGothic-Bold'}}>기타</Text>
-                </View>
-            </Svg>
-            
-
+        
         </View>
     );
 }
@@ -142,13 +125,6 @@ const styles=StyleSheet.create({
         margin:20,
         marginEnd: Dimensions.get('screen').width /1.8,
         
-    },
-    sections:{
-        flexDirection:'row',
-        marginHorizontal:10
-    },
-    section_text:{
-        flexDirection:'row',
     }
 })
 export default Main;
