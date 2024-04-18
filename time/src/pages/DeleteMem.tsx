@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
+import axios from 'axios';
 
 type Navigation=StackNavigationProp<RootStackParamList,'App'>
 const DeleteMem = () => {
@@ -13,12 +14,19 @@ const DeleteMem = () => {
 
     const disConnectKakao=async()=>{
         try{
-            const res=await KakaoLogin.unlink()
-            if(res){
-                console.log("카카오톡 연결이 끊어졌습니다")
-                await AsyncStorage.clear()
-                console.log('storage의 모든 데이터가 삭제되었습니다.')
-                navigation.navigate('App')
+            const authToken=AsyncStorage.getItem('accessToken')
+            const res=await axios.delete("http://13.125.118.92:8080/delete/member",{
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+            if(res.status===200){
+                console.log(res.data);
+                if(res.data.data.isDelete===true){
+                    await AsyncStorage.clear()
+                    console.log("회원 탈퇴가 완료되었습니다. ")
+                    navigation.navigate('App')
+                }
             }
         }catch(error){
             console.log(error)

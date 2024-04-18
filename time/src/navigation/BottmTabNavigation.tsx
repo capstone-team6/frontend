@@ -11,7 +11,7 @@ import {View} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
 import myPageStack from '../navigation/myPageStackNavigator';
-import ChatStackNavigator from './ChatStackNavigator';
+import ChatStackNavigator from './chatStackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
 import { useNavigation } from '@react-navigation/native';
