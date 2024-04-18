@@ -10,7 +10,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import Octicons from 'react-native-vector-icons/Octicons'
 import Posting from './Posting';
 
-Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ")
+Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{language:"ko"})
 
 async function requestPermission() {
     try{
@@ -43,8 +43,11 @@ function Main() {
                         Geocoder.from(pos.coords.latitude, pos.coords.longitude)
                             .then(json => {
                                 console.log(json)
-                                const addressComponent = json.results[3].formatted_address;
-                                const desireAddress=addressComponent.split(', ')[1]
+                                const addressComponent = json.results[0].formatted_address;
+                                // const desireAddress=addressComponent.split(', ')[2]
+                                const addressArray = addressComponent.split(', ');
+                                // 주소에서 한글 부분을 선택
+                                const desireAddress=addressArray.filter(address => address !== "대한민국").join(', ');
                                 setAddress(desireAddress);
                             })
                             .catch(error => console.warn(error));
