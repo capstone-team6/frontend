@@ -5,20 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cdec33e1-4f20-4a30-9940-12c29e26edf0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/android/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradlew" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/android/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/time/android/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/time/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/time/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/time/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/time/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/src/navigation/myPageStackNavigator.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/src/navigation/myPageStackNavigator.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/src/pages/SignIn.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/src/pages/SignIn.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/src/pages/SignUp.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/src/pages/SignUp.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time/types/Type.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/types/Type.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/src/pages/Main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/time/src/pages/Main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/time/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/time/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,18 +33,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/choijiwon/Desktop/frontend",
-    "settings.editor.selected.configurable": "AndroidSdkUpdater"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/choijiwon/Desktop/frontend&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

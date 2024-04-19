@@ -1,4 +1,5 @@
 import * as React from 'react';
+import PropTypes from 'prop-types';
 import SignIn from './src/pages/SignIn';
 import {Text, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
