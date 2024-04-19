@@ -12,17 +12,14 @@ import {
   NativeScrollEvent,
   Image,
   Dimensions,
+  Modal,
 } from 'react-native';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
-
-// const {createProxyMiddleware} = require('http-proxy-middleware');
-// module.exports = app => {
-//   app.use('/ws', createProxyMiddleware({targer: 'http://localhost:8080'}));
-// };
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp = StackNavigationProp<
@@ -35,80 +32,81 @@ interface Props {
   navigation: ChatScreenNavigationProp;
 }
 
-interface Chat {
-  id: number;
-  content: string;
-  isMine: boolean;
-  time: string;
-  nickname: string;
-}
+const ChatScreen: React.FC<Props> = ({route, navigation}) => {
+  //Chatting에서 roomId
+  const {roomId} = route.params;
 
-interface MessageBody {
-  type: string;
-  sendUserId: string;
-  content: string;
-  time: string;
-  nickname: string;
-}
-
-interface StyledMessageProps {
-  isMine: boolean;
-}
-type ChatScreenProp = RouteProp<RootStackParamList, 'ChatScreen'>;
-
-interface Message {
-  roomId: number;
-  writer: string;
-  message: string;
-  type: string;
-}
-
-const ChatScreen: React.FC<Props> = ({navigation}) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [messageInput, setMessageInput] = useState('');
+  const [chatList, setChatList] = useState<
+    {roomId: number; writer: string; message: string; type: string}[]
+  >([]);
   const [stompClient, setStompClient] = useState<Stomp.Client | null>(null);
-
-  useEffect(() => {
-    //STOMP 클라이언트 설정
-    const socket = new SockJS('ws://13.125.118.92:8080/ws');
-    const stomp = Stomp.over(socket);
-    stomp.connect({}, () => {
-      setStompClient(stomp);
-      //구독할 채팅 토픽 지정
-      stomp.subscribe('/sub/chat/room/1', (message: any) => {
-        const newMessage = JSON.parse(message.body);
-        setMessages(prevMessages => [...prevMessages, newMessage]);
-      });
-    });
-
-    return () => {
-      //컴포넌트 언마운트 시 STOMP 연결 해제
-      if (stompClient !== null) {
-        stompClient.disconnect(() => {
-          console.log('채팅이 종료되었습니다.');
-        });
-      }
-    };
-  }, []);
+  const [messageInput, setMessageInput] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
   const sendMessage = () => {
     if (stompClient !== null) {
+      const message = {
+        roomId: roomId,
+        writer: 'Me', // 작성자는 사용자로 지정합니다.
+        message: messageInput,
+        type: 'text', // 메시지 유형은 텍스트로 지정합니다. 다른 유형을 사용하는 경우 이 값을 수정하세요.
+      };
       stompClient.send(
-        '/pub/chat/send/1',
+        `/pub/chat/send/${roomId}`,
         {},
-        JSON.stringify({content: messageInput}),
+        JSON.stringify({message}),
       );
-      setMessageInput('');
+      setMessageInput(''); // 메시지를 보낸 후에는 입력 필드를 비웁니다.
     }
   };
 
-  const generateId = (() => {
-    let id = 0;
-    return () => {
-      id += 1;
-      return id;
+  const goBack = () => {
+    navigation.goBack();
+  };
+
+  const onCameraPress = () => {
+    // 카메라 접근 코드 작성
+    setModalVisible(false);
+  };
+
+  const onGalleryPress = () => {
+    // 갤러리 접근 코드 작성
+    setModalVisible(false);
+  };
+
+  const onTransactionPress = () => {
+    // 거래 진행 버튼 코드 작성
+    setModalVisible(false);
+  };
+
+  useEffect(() => {
+    const initializeWebSocket = () => {
+      const socket = new SockJS('http://13.125.118.92:8080/ws');
+      const client = Stomp.over(socket);
+
+      client.connect({}, () => {
+        console.log('Connected to WebSocket');
+        setStompClient(client);
+
+        client.subscribe(`/sub/chat/room/${roomId}`, (message: any) => {
+          const newMessage = JSON.parse(message.body);
+          setChatList(prevMessages => [...prevMessages, newMessage]);
+        });
+      });
     };
-  })();
+
+    const disconnectCallback = () => {
+      console.log('Disconnected from server');
+    };
+
+    initializeWebSocket();
+
+    return () => {
+      if (stompClient !== null) {
+        stompClient.disconnect(disconnectCallback);
+      }
+    };
+  }, [chatList]);
 
   const [showTopInfo, setShowTopInfo] = useState(true);
 
@@ -128,6 +126,11 @@ const ChatScreen: React.FC<Props> = ({navigation}) => {
         height: Dimensions.get('screen').height,
         backgroundColor: 'white',
       }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
+          <AntDesign name="arrowleft" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
       {showTopInfo && (
         <View
           style={{
@@ -160,8 +163,8 @@ const ChatScreen: React.FC<Props> = ({navigation}) => {
           </Text>
         </View>
       )}
-      <ScrollView style={{flex: 1}}>
-        {messages.map((msg, index) => (
+      <ScrollView style={{flex: 1}} onScroll={onScroll}>
+        {chatList.map((msg, index) => (
           <View
             key={index}
             style={{
@@ -170,7 +173,7 @@ const ChatScreen: React.FC<Props> = ({navigation}) => {
             }}>
             <Text
               style={{
-                backgroundColor: msg.writer === 'Me' ? '#DCF8C6' : '#F1F0F0',
+                backgroundColor: msg.writer === 'Me' ? '#C9BAE5' : '#F1F1F1',
                 padding: 10,
                 borderRadius: 8,
               }}>
@@ -186,13 +189,19 @@ const ChatScreen: React.FC<Props> = ({navigation}) => {
           justifyContent: 'space-between',
           padding: 10,
         }}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.plusButton}>
+          <AntDesign name="plus" size={13} />
+        </TouchableOpacity>
         <TextInput
           value={messageInput}
           onChangeText={setMessageInput}
+          onSubmitEditing={sendMessage} // TextInput에서 엔터를 누를 때 sendMessage 함수 호출
           placeholder="Type your message..."
           style={{
             flex: 1,
-            marginRight: 10,
+            marginRight: 35,
             padding: 10,
             borderWidth: 1,
             borderColor: '#ccc',
@@ -207,6 +216,21 @@ const ChatScreen: React.FC<Props> = ({navigation}) => {
           />
         </TouchableOpacity>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Button title="Camera" onPress={onCameraPress} />
+            <Button title="Gallery" onPress={onGalleryPress} />
+            <Button title="Transaction" onPress={onTransactionPress} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -224,7 +248,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginRight: 10,
-    width: 200,
   },
   myMessage: {
     alignSelf: 'flex-end',
@@ -243,6 +266,35 @@ const styles = StyleSheet.create({
   iconContainer: {
     position: 'absolute',
     right: 10,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+  },
+  plusButton: {
+    marginRight: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  backButton: {
+    marginRight: 10,
   },
 });
 
