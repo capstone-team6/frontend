@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -6,83 +6,116 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  FlatList,
+  ListRenderItemInfo,
+  ListRenderItem,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import ChatScreen from './ChatScreen';
 import {RootStackParamList} from '../../types/Type';
 import {NavigationProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
+
+interface RoomData {
+  roomId: number;
+  userName: string;
+  location: string;
+  time: string;
+  contents: string;
+  image: string;
+  // chatCount: any;
+}
 
 type ChatNavigationProp = StackNavigationProp<RootStackParamList, 'Chatting'>;
 
 const Chatting = () => {
   const navigation = useNavigation<ChatNavigationProp>();
-  const goTochatScreen = (userName: string) => {
-    navigation.navigate('ChatScreen', {userName});
+
+  const generateId = (() => {
+    let id = 0;
+    return () => {
+      id += 1;
+      return id;
+    };
+  })();
+
+  const handleChatRoomPress = (roomId: number) => {
+    navigation.navigate('ChatScreen', {
+      roomId,
+    });
   };
+
   const chatData = [
     {
-      id: 'chat1',
+      roomId: 1,
       userName: '홍길동',
       location: '역삼동',
       time: '30분전',
-      chatContent: '안녕하세요!',
-      chatCount: 1,
-      imageSource: require('../assets/images/profile.png'),
+      contents: '안녕하세요!',
+      chatCount: '1',
+      image: require('../assets/images/profile.png'),
     },
     {
-      id: 'chat2',
+      roomId: 2,
       userName: '틈새2',
-      chatContent: '감사합니다!! 조심히가세요!',
       location: '역삼동',
       time: '1일 전',
-      imageSource: require('../assets/images/profile.png'),
+      contents: '감사합니다!! 조심히가세요!',
+      image: require('../assets/images/profile.png'),
     },
     {
-      id: 'chat3',
+      roomId: 3,
       userName: '틈새3',
-      chatContent: '시간 구매하고 싶어요',
       location: '역삼동',
       time: '1일 전',
-      chatCount: 3,
-      imageSource: require('../assets/images/profile.png'),
+      contents: '시간 구매하고 싶어요',
+      chatCount: '3',
+      image: require('../assets/images/profile.png'),
     },
     {
-      id: 'chat4',
+      roomId: 4,
       userName: '틈새4',
-      chatContent: '감사합니다!! 조심히가세요!',
       location: '역삼동',
       time: '1주일 전',
-      imageSource: require('../assets/images/profile.png'),
+      contents: '감사합니다!! 조심히 가세요!',
+      chatCount: '1',
+      image: require('../assets/images/profile.png'),
     },
   ];
 
   return (
     <View style={styles.chatListContainer}>
-      {chatData.map(chat => (
-        <TouchableOpacity
-          key={chat.id}
-          onPress={() => goTochatScreen(chat.userName)}>
-          <View style={styles.chatItemContainer}>
-            <Image source={chat.imageSource} style={styles.userImage} />
-            <View style={styles.chatTextContainer}>
-              <View style={styles.info}>
-                <Text style={styles.userName}>{chat.userName}</Text>
-                <View style={{width: 7}} />
-                <Text style={styles.info_text}>
-                  {chat.location} · {chat.time}
-                </Text>
+      <FlatList
+        data={chatData}
+        keyExtractor={item => item.roomId.toString()}
+        renderItem={({item}: ListRenderItemInfo<RoomData>) => (
+          <TouchableOpacity onPress={() => handleChatRoomPress(item.roomId)}>
+            <View style={styles.chatItemContainer}>
+              <Image
+                source={require('../assets/images/profile.png')}
+                style={styles.userImage}
+              />
+              <View style={styles.chatTextContainer}>
+                <View style={styles.info}>
+                  <Text style={styles.userName}>{item.userName}</Text>
+                  <View style={{width: 7}} />
+                  <Text style={styles.info_text}>
+                    {item.location} · {item.time}
+                  </Text>
+                </View>
+                <Text style={styles.chatContent}>{item.contents}</Text>
               </View>
-              <Text style={styles.chatContent}>{chat.chatContent}</Text>
+              {/* {item.contents && (
+                <View style={styles.chatCountContainer}>
+                  <Text style={styles.chatCount}>{item.chatCount}</Text>
+                </View>
+              )} */}
             </View>
-            {chat.chatCount && (
-              <View style={styles.chatCountContainer}>
-                <Text style={styles.chatCount}>{chat.chatCount}</Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      ))}
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 };
@@ -138,7 +171,7 @@ const styles = StyleSheet.create({
   },
   chatCount: {
     fontSize: 10,
-    fontFamily: 'NanumGothic',
+    fontFamily: 'NanumGothic-Bold',
   },
 });
 
