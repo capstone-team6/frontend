@@ -14,4 +14,11 @@ export type RootStackParamList = {
   Chatting: undefined;
   SignIn:undefined
   BottomTabNavigation:undefined
+  Setting:undefined
+  Logout: undefined
+  DeleteMem:undefined
+  NameChange:undefined
+  StackNavigators:undefined
+  App:undefined
+
 };
