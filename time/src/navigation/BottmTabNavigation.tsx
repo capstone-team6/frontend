@@ -16,6 +16,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import postStackNavigator from './postNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -37,29 +38,31 @@ const BottmTabNavigation = () => {
       }}>
       <Tab.Screen
         name="틈새시장"
-        component={Main}
+        component={postStackNavigator}
         options={{
-          headerTitleStyle: {
-            color: '#352456',
-            fontFamily: 'Gugi-Regular',
-            fontSize: 40,
-            paddingTop: 30,
-            marginHorizontal: 10,
-          },
-          headerRight: () => (
-            <View style={{flexDirection: 'row', paddingTop: 10}}>
-              <Feather
-                name="search"
-                size={25}
-                style={{marginRight: 25, color: 'black'}}
-              />
-              <Ionicons
-                name="notifications-outline"
-                size={25}
-                style={{marginRight: 30, color: 'black'}}
-              />
-            </View>
-          ),
+          headerShown: false,
+          // headerTitleStyle: {
+          //   color: '#352456',
+          //   fontFamily: 'Gugi-Regular',
+          //   fontSize: 40,
+          //   paddingTop: 30,
+          //   marginHorizontal: 10,
+          // },
+
+          // headerRight: () => (
+          //   <View style={{flexDirection: 'row', paddingTop: 10}}>
+          //     <Feather
+          //       name="search"
+          //       size={25}
+          //       style={{marginRight: 25, color: 'black'}}
+          //     />
+          //     <Ionicons
+          //       name="notifications-outline"
+          //       size={25}
+          //       style={{marginRight: 30, color: 'black'}}
+          //     />
+          //   </View>
+          // ),
           tabBarLabel: '홈',
           tabBarIcon: ({focused}) => (
             <Octicons
