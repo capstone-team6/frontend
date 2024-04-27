@@ -15,6 +15,7 @@ import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 
+
 function App() {
   const [isLoggedIn, setIsLoggedIn]=useState<boolean>(false)
   
@@ -31,7 +32,6 @@ function App() {
           {/* <SignUp/> */}
           <BottmTabNavigation/>
           {/* <MapSearch/> */}
-          
         </SafeAreaView>
       </NavigationContainer>
   );
