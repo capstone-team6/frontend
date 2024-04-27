@@ -18,7 +18,8 @@ import { Header, createStackNavigator } from '@react-navigation/stack';
 import StackNavigator from './src/navigation/StackNavigator';
 // import StackNavigator from './src/navigation/StackNavigator';
 
-const Stack=createStackNavigator()
+
+
 function App() {
   const [isLoggedIn, setIsLoggedIn]=useState<boolean>(false)
   
