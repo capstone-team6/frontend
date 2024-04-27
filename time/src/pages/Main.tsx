@@ -43,10 +43,9 @@ function Main() {
                         setLocation(pos.coords);
                         Geocoder.from(pos.coords.latitude, pos.coords.longitude,"ko")
                             .then(json => {
-                                console.log(json)
+                                console.log(json.results[0])
                                 const addressComponent = json.results[0].formatted_address;
-                                const desireAddress=addressComponent.split(', ')[0]
-                                const words=desireAddress.split(" ")
+                                const words=addressComponent.split(" ")
                                 const lastAddress=`${words[1]} ${words[2]} ${words[3]}`
                                 // 주소에서 한글 부분을 선택
                                 // const desireAddress=addressArray.filter(address => address !== "대한민국").join(', ');

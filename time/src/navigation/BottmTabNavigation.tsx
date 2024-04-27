@@ -89,6 +89,10 @@ const BottmTabNavigation = () => {
         component={Posting}
         options={{
           tabBarLabel: '',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
           tabBarIcon: () => (
             <AntDesign name="pluscircle" size={45} color="#C9BAE5" />
           ),

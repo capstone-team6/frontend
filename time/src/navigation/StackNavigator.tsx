@@ -20,7 +20,13 @@ const StackNavigators:React.FC<StackNavProps>=({onLoginSuccess}) => {
         <Stack.Screen name='SignIn' options={{headerShown:false}}>
             {props => <SignIn {...props} onLoginSuccess={onLoginSuccess} />}
         </Stack.Screen>
-        <Stack.Screen name='SignUp' component={SignUp}/>
+        <Stack.Screen name='SignUp' component={SignUp} options={{
+            headerTitle:"회원가입",
+            headerTitleStyle:{
+                fontFamily:'NanumGothic-Bold',
+                fontSize: 28, color:'black'
+            },
+        }}/>
         <Stack.Screen name='BottomTabNavigation' component={BottomTabNavigation}
         options={{
             headerShown:false
