@@ -63,14 +63,29 @@ function Main() {
     longitude: number;
   } | null>(null);
   const [posts, setPosts] = useState([]);
-
+  const [isScrap, setIsScrap] = useState(false);
   const [address, setAddress] = useState<string>('');
 
   const navigation = useNavigation<MainNavigationProp>();
   const goToPostDetail = () => {
     navigation.navigate('PostDetail');
   };
-
+  const handleHeartPress = async (boardId: number) => {
+    try {
+      setIsScrap(!isScrap);
+      const res = await axios.post(
+        `http://13.125.118.92:8080/api/board/${boardId}/scrap`,
+        {
+          isScrap: !isScrap,
+        },
+      );
+      if (res.status === 200) {
+        console.log(res.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   useEffect(() => {
     axios
       .get('http://13.125.118.92:8080/api/board', {
@@ -136,6 +151,7 @@ function Main() {
       <View>
         <View style={styles.options_line}></View>
       </View>
+      {/* 임시 데이터 */}
       <TouchableOpacity style={styles.postContainer} onPress={goToPostDetail}>
         <Image
           source={require('../assets/images/post1.jpg')}
@@ -147,7 +163,13 @@ function Main() {
           <Text style={styles.info3}>10,000원/20분</Text>
         </View>
         <View style={styles.appeal_icon}>
-          <AntDesign name="hearto" size={15} />
+          <TouchableOpacity onPress={() => handleHeartPress(0)}>
+            <Ionicons
+              name={isScrap ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isScrap ? 'red' : 'gray'}
+            />
+          </TouchableOpacity>
         </View>
         <View style={styles.interactionContainer}>
           <View style={styles.interactionItem}>
@@ -181,7 +203,13 @@ function Main() {
               </Text>
             </View>
             <View style={styles.appeal_icon}>
-              <AntDesign name="hearto" size={15} />
+              <TouchableOpacity onPress={() => handleHeartPress(item.boardId)}>
+                <Ionicons
+                  name={isScrap ? 'heart' : 'heart-outline'}
+                  size={15}
+                  color={isScrap ? 'red' : 'gray'}
+                />
+              </TouchableOpacity>
             </View>
             <View style={styles.interactionContainer}>
               <View style={styles.interactionItem}>
