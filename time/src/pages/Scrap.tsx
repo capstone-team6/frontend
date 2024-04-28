@@ -16,6 +16,8 @@ import Feather from 'react-native-vector-icons/Feather';
 interface RoomData {
   boardId: number;
   title: string;
+  itemTime: string;
+  itemPrice: number;
   createdDate: string;
   chatCount: number;
   scrapCount: number;
@@ -31,7 +33,8 @@ const Scrap = () => {
     axios
       .get('http://13.125.118.92:8080/api/scrap-list')
       .then((response: any) => {
-        setPosts(response.data);
+        setPosts(response.data.data);
+        console.log(response.data.data);
       })
       .catch(error => {
         console.error(error);
@@ -41,7 +44,7 @@ const Scrap = () => {
   return (
     <View style={styles.main_container}>
       {/* 임시 */}
-      <TouchableOpacity style={styles.postContainer}>
+      {/* <TouchableOpacity style={styles.postContainer}>
         <Image
           source={require('../assets/images/post1.jpg')}
           style={styles.post_image}
@@ -64,14 +67,16 @@ const Scrap = () => {
             <Text style={styles.interactionText}>2</Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <FlatList
         data={posts}
-        keyExtractor={item => item.boardId.toString()}
+        keyExtractor={item => String(item.boardId)}
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
           <TouchableOpacity style={styles.postContainer}>
             <Image
-              source={require('../assets/images/post1.jpg')}
+              source={{
+                uri: `http:://13.125.118.92:8080/var/www/myapp/images/${item.firstImage}`,
+              }}
               style={styles.post_image}
             />
             <View style={styles.post_info}>
@@ -79,10 +84,12 @@ const Scrap = () => {
                 {item.distance} · {item.createdDate}
               </Text>
               <Text style={styles.info2}>{item.title}</Text>
-              <Text style={styles.info3}>10,000원/20분</Text>
+              <Text style={styles.info3}>
+                {item.itemPrice}/{item.itemTime}
+              </Text>
             </View>
             <View style={styles.appeal_icon}>
-              <AntDesign name="hearto" size={15} color={'red'} />
+              <AntDesign name="heart" size={15} color={'#E7736F'} />
             </View>
             <View style={styles.interactionContainer}>
               <View style={styles.interactionItem}>
