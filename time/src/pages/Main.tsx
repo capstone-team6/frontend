@@ -66,8 +66,8 @@ function Main() {
   const [address, setAddress] = useState<string>('');
 
   const navigation = useNavigation<MainNavigationProp>();
-  const goToPostDetail = () => {
-    navigation.navigate('PostDetail');
+  const goToPostDetail = (boardId: number) => {
+    navigation.navigate('PostDetail', {boardId});
   };
 
   useEffect(() => {
@@ -136,7 +136,11 @@ function Main() {
         <View style={styles.options_line}></View>
       </View>
       {/* 임시 데이터 */}
-      <TouchableOpacity style={styles.postContainer} onPress={goToPostDetail}>
+      <TouchableOpacity
+        style={styles.postContainer}
+        onPress={() => {
+          goToPostDetail(0);
+        }}>
         <Image
           source={require('../assets/images/post1.jpg')}
           style={styles.post_image}
@@ -161,7 +165,11 @@ function Main() {
         data={posts}
         keyExtractor={item => item.boardId.toString()}
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
-          <TouchableOpacity style={styles.postContainer}>
+          <TouchableOpacity
+            style={styles.postContainer}
+            onPress={() => {
+              goToPostDetail(item.boardId);
+            }}>
             <Image
               source={{
                 uri: `http:://13.125.118.92:8080/var/www/myapp/images/${item.firstImage}`,
