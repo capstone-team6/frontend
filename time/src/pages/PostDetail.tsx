@@ -11,7 +11,27 @@ import {
   Image,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+
 const PostDetail = () => {
+  const [isScrap, setIsScrap] = useState(false);
+  const handleHeartPress = async (boardId: number) => {
+    try {
+      setIsScrap(!isScrap);
+      const res = await axios.post(
+        `http://13.125.118.92:8080/api/board/${boardId}/scrap`,
+        {
+          isScrap: !isScrap,
+        },
+      );
+      if (res.status === 200) {
+        console.log(res.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <View style={styles.PostDetail_container}>
       <View style={styles.postingImg}>
@@ -36,8 +56,16 @@ const PostDetail = () => {
             <View style={styles.icon_container}>
               <AntDesign name="hearto" size={13} color="black" />
               <Text>2</Text>
-              <AntDesign name="heart" size={13} color="black" />
             </View>
+          </View>
+          <View style={styles.appeal_icon}>
+            <TouchableOpacity onPress={() => handleHeartPress(0)}>
+              <Ionicons
+                name={isScrap ? 'heart' : 'heart-outline'}
+                size={24}
+                color={isScrap ? 'red' : 'gray'}
+              />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -221,5 +249,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
+  appeal_icon: {position: 'absolute', right: 15, top: 10},
 });
 export default PostDetail;

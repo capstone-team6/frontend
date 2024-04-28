@@ -63,29 +63,13 @@ function Main() {
     longitude: number;
   } | null>(null);
   const [posts, setPosts] = useState([]);
-  const [isScrap, setIsScrap] = useState(false);
   const [address, setAddress] = useState<string>('');
 
   const navigation = useNavigation<MainNavigationProp>();
   const goToPostDetail = () => {
     navigation.navigate('PostDetail');
   };
-  const handleHeartPress = async (boardId: number) => {
-    try {
-      setIsScrap(!isScrap);
-      const res = await axios.post(
-        `http://13.125.118.92:8080/api/board/${boardId}/scrap`,
-        {
-          isScrap: !isScrap,
-        },
-      );
-      if (res.status === 200) {
-        console.log(res.data);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+
   useEffect(() => {
     axios
       .get('http://13.125.118.92:8080/api/board', {
@@ -97,7 +81,7 @@ function Main() {
         },
       })
       .then((response: any) => {
-        setPosts(response.data);
+        setPosts(response.data.boards);
       })
       .catch(error => {
         console.error(error);
@@ -162,15 +146,6 @@ function Main() {
           <Text style={styles.info2}>강아지 산책 부탁드려요</Text>
           <Text style={styles.info3}>10,000원/20분</Text>
         </View>
-        <View style={styles.appeal_icon}>
-          <TouchableOpacity onPress={() => handleHeartPress(0)}>
-            <Ionicons
-              name={isScrap ? 'heart' : 'heart-outline'}
-              size={24}
-              color={isScrap ? 'red' : 'gray'}
-            />
-          </TouchableOpacity>
-        </View>
         <View style={styles.interactionContainer}>
           <View style={styles.interactionItem}>
             <Feather name="message-circle" size={15} />
@@ -202,15 +177,7 @@ function Main() {
                 {item.itemPrice}/{item.itemTime}
               </Text>
             </View>
-            <View style={styles.appeal_icon}>
-              <TouchableOpacity onPress={() => handleHeartPress(item.boardId)}>
-                <Ionicons
-                  name={isScrap ? 'heart' : 'heart-outline'}
-                  size={15}
-                  color={isScrap ? 'red' : 'gray'}
-                />
-              </TouchableOpacity>
-            </View>
+            <View style={styles.appeal_icon}></View>
             <View style={styles.interactionContainer}>
               <View style={styles.interactionItem}>
                 <Feather name="message-circle" size={15} />
