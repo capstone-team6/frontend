@@ -14,6 +14,8 @@ import {
   TouchableOpacity,
   FlatList,
   ListRenderItemInfo,
+  ScrollView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import Geocoder from 'react-native-geocoding';
 import {err} from 'react-native-svg';
@@ -55,6 +57,11 @@ interface RoomData {
   itemTime: string;
   itemPrice: number;
 }
+interface SlideableCategoryButtonsProps {
+  selectedCategory: string;
+  onSelectCategory: (category: string) => void;
+}
+
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 function Main() {
@@ -64,17 +71,67 @@ function Main() {
   } | null>(null);
   const [posts, setPosts] = useState([]);
   const [address, setAddress] = useState<string>('');
+  const [selectedTab, setSelectedTab] = useState('buy');
+  const [selectedCategoryForBuy, setSelectedCategoryForBuy] = useState(
+    'defaultCategoryForBuy',
+  );
+  const [selectedCategoryForSell, setSelectedCategoryForSell] = useState(
+    'defaultCategoryForSell',
+  );
+
+  // 함수 선언
+  const handleSelectCategory = (category: string) => {
+    if (selectedTab === 'buy') {
+      setSelectedCategoryForBuy(category);
+    } else if (selectedTab === 'sell') {
+      setSelectedCategoryForSell(category);
+    }
+  };
 
   const navigation = useNavigation<MainNavigationProp>();
   const goToPostDetail = (boardId: number) => {
     navigation.navigate('PostDetail', {boardId});
   };
 
+  const categories = [
+    '재능기부',
+    '개산책',
+    '심부름',
+    '티켓팅',
+    '오픈런',
+    '나눔',
+    '기타',
+  ];
+
+  const SlideableCategoryButtons: React.FC<SlideableCategoryButtonsProps> = ({
+    selectedCategory,
+    onSelectCategory,
+  }) => {
+    return (
+      <ScrollView
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+        style={styles.scrollView}>
+        {categories.map((category, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.button,
+              category === selectedCategory ? styles.selectedButton : null,
+            ]}
+            onPress={() => onSelectCategory(category)}>
+            <Text style={styles.buttonText}>{category}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    );
+  };
+
   useEffect(() => {
     axios
       .get('http://13.125.118.92:8080/api/board', {
         params: {
-          keyword: '%E3%85%8E',
           pageNum: 0,
           category: 'ETC',
           boardType: 'BUY',
@@ -129,12 +186,78 @@ function Main() {
       </View>
 
       <View style={styles.options}>
-        <Text style={styles.option1}>구매글</Text>
-        <Text style={styles.option2}>판매글</Text>
+        <View>
+          <View style={{flexDirection: 'row', width: '100%'}}>
+            <TouchableWithoutFeedback onPress={() => setSelectedTab('buy')}>
+              <View style={[{alignItems: 'center', width: '50%'}]}>
+                <Text
+                  style={[
+                    styles.option1,
+                    selectedTab === 'buy' && styles.selectedOption,
+                    styles.tabTextMargin, // Apply margin to the text
+                  ]}>
+                  구매글
+                </Text>
+                {selectedTab === 'buy' && (
+                  <View style={[styles.lineUnderOption]}></View>
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => setSelectedTab('sell')}>
+              <View style={[{alignItems: 'center', width: '50%'}]}>
+                <Text
+                  style={[
+                    styles.option2,
+                    selectedTab === 'sell' && styles.selectedOption,
+                    styles.tabTextMargin, // Apply margin to the text
+                  ]}>
+                  판매글
+                </Text>
+                {selectedTab === 'sell' && (
+                  <View style={[styles.lineUnderOption]}></View>
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={{marginTop: 10}}>
+            {selectedTab === 'buy' ? (
+              <SlideableCategoryButtons
+                selectedCategory={selectedCategoryForBuy}
+                onSelectCategory={handleSelectCategory}
+              />
+            ) : (
+              <SlideableCategoryButtons
+                selectedCategory={selectedCategoryForSell}
+                onSelectCategory={handleSelectCategory}
+              />
+            )}
+          </View>
+        </View>
+        <View>
+          {selectedTab === 'buy' && (
+            <TouchableOpacity
+              style={styles.postContainer}
+              onPress={() => {
+                goToPostDetail(0);
+              }}></TouchableOpacity>
+          )}
+        </View>
       </View>
-      <View>
-        <View style={styles.options_line}></View>
-      </View>
+
+      {selectedTab === 'sell' && (
+        <FlatList
+          data={posts}
+          keyExtractor={item => item.boardId.toString()}
+          renderItem={({item}: ListRenderItemInfo<RoomData>) => (
+            <TouchableOpacity
+              style={styles.postContainer}
+              onPress={() => {
+                goToPostDetail(item.boardId);
+              }}></TouchableOpacity>
+          )}
+        />
+      )}
+
       {/* 임시 데이터 */}
       <TouchableOpacity
         style={styles.postContainer}
@@ -294,5 +417,41 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   appeal_icon: {position: 'absolute', right: 15, top: 10},
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  button: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginHorizontal: 5,
+    borderRadius: 20,
+    backgroundColor: '#E8EAEC',
+  },
+  selectedButton: {
+    backgroundColor: '#C9BAE5',
+  },
+  buttonText: {
+    fontSize: 16,
+    color: 'black',
+    fontFamily: 'NanumGothic',
+  },
+  scrollView: {
+    maxHeight: 50,
+  },
+  selectedOption: {
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  lineUnderOption: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'black',
+    width: '100%',
+    alignSelf: 'center',
+  },
+  tabTextMargin: {
+    marginBottom: 20,
+  },
 });
 export default Main;
