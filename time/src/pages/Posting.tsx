@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import {
   ScrollView,
   Platform,
   PermissionsAndroid,
-  Image
+  Image,
+  Alert
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import Photo from 'react-native-vector-icons/MaterialIcons'
@@ -21,10 +22,18 @@ import Right from 'react-native-vector-icons/AntDesign'
 import axios from 'axios';
 import ImagePicker from 'react-native-image-crop-picker'
 import ImageResizer from 'react-native-image-resizer'
+import { StackNavigationProp, createStackNavigator } from '@react-navigation/stack';
+import { RootStackParamList } from '../../types/Type';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-
-type ImageType=any
+type ImageType={
+  uri:string;
+  type:string;
+  name:string;
+}
 Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{lanuage:"ko",region:"KR"})
 
 async function requestPermission() {
@@ -38,8 +47,11 @@ async function requestPermission() {
         console.log(e)
     }
 }
+
+type Nav=StackNavigationProp<RootStackParamList,'틈새시장'>
 const Posting = () => {
-  const [selectedValue, setSelectedValue] = useState('');
+  
+  const navigation=useNavigation<Nav>();
   const [location,setLocation]=useState<{
     latitude:number
     longitude:number
@@ -48,13 +60,15 @@ const Posting = () => {
 
 const [address, setAddress]=useState<string>('')
 
-const [image, setImage]=useState<{uri: string; name:string; type:string}>()
 const [images, setImages]=useState<ImageType[]>([])
 const [category, setCategory]=useState<string>('')
-// const [preview, setPreview]=useState<{uri:string}>()
-// const [previews, setPreviews] = useState<string[]>([]);
 const [previews, setPreviews] = useState<{ uri: string } | string[]>([]);
-
+const mapRef=useRef<MapView>(null)
+const [markerLocation,setMarkerLocation]=useState<{
+  latitude:number,
+  longitude:number,
+}|any>(null)
+const [selectedValue, setSelectedValue] = useState('');
 
 const [time, setTime]=useState<string>('')
 const [price, setPrice]=useState<string>('')
@@ -62,6 +76,7 @@ const [content, setContent]=useState<string>('')
 const [title, setTitle]=useState<string>('')
 const [boardType, setBoardType]=useState<string>('')
 const [showMap, setShowMap]=useState<boolean>(true)
+const [isComplete,setIsComplete]=useState<boolean>(false)
 const [isActive,setIsActive]=useState<{[key:string]:boolean}>({
   'TALENT':false,
   'ECERCISE':false,
@@ -76,6 +91,7 @@ const [isType, setIsType]=useState<{[key:string]:boolean}>({
   'BUY':false,
   'SELL':false,
 })
+const [showMapSearch,setShowMapSearch]=useState(false)
 
 useEffect(()=>{
     requestPermission().then(result=>{
@@ -90,8 +106,9 @@ useEffect(()=>{
                             const addressComponent = json.results[0].formatted_address;
                             const words=addressComponent.split(" ")
                             const lastAddress=`${words[1]} ${words[2]} ${words[3]}`
-
                             setAddress(lastAddress);
+                            setMarkerLocation(pos.coords)
+                            
                         })
                         .catch(error => console.warn(error));
                 },
@@ -107,7 +124,18 @@ useEffect(()=>{
         }
     })
 },[])
-
+async function moveToLocation(latitude:any,longitude:any) {
+  mapRef.current?.animateToRegion(
+      {
+          latitude,
+          longitude,
+          latitudeDelta:0.015,
+          longitudeDelta:0.01121
+      },
+      2000,
+  )
+  setMarkerLocation({latitude,longitude})
+}
 
 const onTitleChange=(text:string)=>{
   setTitle(text)
@@ -122,17 +150,19 @@ const onContentChange=(text:string)=>{
   setContent(text)
 }
 
+
+
 const onResponse = useCallback(async (response:any) => {
   console.log(response.width, response.height, response.exif);
   const previewImage = `data:${response.mime};base64,${response.data}`;
   setPreviews(prevState => {
     if (Array.isArray(prevState)) {
       return [...prevState, previewImage];
+      
     } else {
       return [previewImage];
     }
   });
-  // setPreview({uri: `data:${response.mime};base64,${response.data}`});
   const orientation = (response.exif as any)?.Orientation;
   console.log('orientation', orientation);
   return ImageResizer.createResizedImage(
@@ -142,14 +172,13 @@ const onResponse = useCallback(async (response:any) => {
     response.mime.includes('jpeg') ? 'JPEG' : 'PNG',
     100,
     0,
-  ).then(r => {
-    console.log(r.uri, r.name);
-
-    setImage({
-      uri: r.uri,
-      name: r.name,
-      type: response.mime,
-    });
+  ).then((res) => {
+    console.log(res.uri);
+    setImages(prevState => [...prevState, {
+      uri: res.uri,
+      name: response.name,
+      type: response.mime.includes('png') ? 'image/png' : 'image/jpeg'
+    }]);
   });
 }, []);
 
@@ -173,6 +202,19 @@ const toggleMapVisibility=()=>{
   setShowMap(!showMap)
 }
 
+
+const deleteImage = (index: number) => {
+  const newPreviews = Array.isArray(previews) ? [...previews] : [];
+  newPreviews.splice(index, 1);
+  setPreviews(newPreviews);
+  if (Array.isArray(images)) {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages.length > 0 ? newImages : []);
+
+  } 
+};
+
 const handlePress=(category:string)=>{
   const updatedState = {...isActive};
   for (const key in updatedState) {
@@ -191,28 +233,93 @@ const handleType=(type:string)=>{
   setIsType(updateType)
 }
 
-const onSubmit= async ()=>{
-  const datas={
-    category:category,
-    title:title,
-    price:price,
-    content:content,
-    address:address,
-    latitude:location?.latitude,
-    longtitude: location?.longitude,
-    images:image,
-    boardType:boardType
-    }
-  try{
-    const res=await axios.post('http://13.125.118.92:8080/api/auth/board',datas)
-    if(res.status===200){
-      console.log(res.data)
 
+const handleShowMapSearch=()=>{
+  setShowMapSearch(true)
+}
+const handleMapSearchComplete = (data: any, details: any) => {
+  const selectedLocation = {
+    latitude: details.geometry.location.lat,
+    longitude: details.geometry.location.lng,
+  };
+  moveToLocation(selectedLocation.latitude, selectedLocation.longitude);
+  const words = data.description.split(" ");
+  
+  // Finding the index of "대한민국"
+  const index = words.findIndex((word: string) => word === "대한민국");
+
+  // If "대한민국" is found, updating the address from the next word
+  if (index !== -1) {
+    const addressStart = words.slice(index + 1).join(" ");
+    setAddress(addressStart);
+  } else {
+    setAddress(data.description);
+  }
+  
+};
+
+useEffect(()=>{
+  if(title && category&&selectedValue&&time&&boardType&&price){
+    setIsComplete(true)
+  }else{
+    setIsComplete(false)
+  }
+},[title,category,selectedValue,time,boardType,price])
+
+const alert=()=>{
+  Alert.alert("입력하지 않은 항목이 있습니다. ")
+}
+
+
+const onSubmit = async () => {
+  const body = new FormData();
+  body.append('category', category);
+  body.append('title', title);
+  body.append('time', time + selectedValue);
+  body.append('price', price);
+  body.append('content', content);
+
+  if (showMap) {
+    body.append('address', address);
+    body.append('latitude', location?.latitude);
+    body.append('longitude', location?.longitude);
+  }
+
+  images.forEach((image, index) => {
+    const file = {
+      uri: image.uri,
+      type: image.type,
+      name: `image_${index}.jpg`,
+    };
+    body.append('images', file);
+  });
+
+  body.append('boardType', boardType);
+
+  try {
+    const store = await AsyncStorage.getItem('accessToken');
+    const token = store ? JSON.parse(store) : null;
+    
+    console.log(token);
+    
+    const res = await axios.post('http://13.125.118.92:8080/api/auth/board', body, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${token}`, 
+      },
+      transformRequest: [(data, headers) =>  data],
+    });
+
+    if (res.status === 200) {
+      console.log(res.data);
+      navigation.navigate('틈새시장');
     }
-  }catch(err){
-    console.log(err)
+  } catch(error) {
+    console.log(error);
   }
 }
+
+
   return (
     <ScrollView style={styles.Posting_container}>
       <View >
@@ -221,7 +328,13 @@ const onSubmit= async ()=>{
           <View style={styles.preview} >
             {/* {previews && <Image style={styles.previewImage} source={previews}/>} */}
             {Array.isArray(previews) && previews.map((preview, index) => (
-            <Image key={index} style={styles.previewImage} source={{ uri: preview }} />
+            // <Image key={index} style={styles.previewImage} source={{ uri: preview }} />
+            <View key={index} >
+            <Image style={styles.previewImage} source={{ uri: preview }} />
+            <TouchableOpacity onPress={() => deleteImage(index)} >
+              <Photo name='close' size={20} color='red' />
+            </TouchableOpacity>
+          </View>
             ))}
           </View>
           {/* <ScrollView horizontal>
@@ -284,8 +397,8 @@ const onSubmit= async ()=>{
                 borderColor: 'black',
               }}>
               <Picker.Item label="단위" value="" />
-              <Picker.Item label="분" value="minutes" />
-              <Picker.Item label="시간" value="hours" />
+              <Picker.Item label="분" value="분" />
+              <Picker.Item label="시간" value="시간" />
             </Picker>
           </View>
         </View>
@@ -335,16 +448,62 @@ const onSubmit= async ()=>{
           </View>
           {showMap&&(
             <>
-              <Text style={{ fontSize: 20, borderWidth: 1, borderColor: 'gray', margin: 10, height: 40, borderRadius: 5, textAlignVertical: 'center' }}>{address}
-                <Right name='right' size={20} />
+              <Text style={{ fontSize: 15, borderWidth: 1, borderColor: 'gray', margin: 10, height: 40, borderRadius: 5, textAlignVertical: 'center' }}>{address}
+                <Right name='right' size={20} onPress={handleShowMapSearch} />
               </Text>
-              <ScrollView style={styles.mapContainer}>
-                <MapSearch location={location} />
-              </ScrollView>
+              <View style={{zIndex:4,flex:2}}>
+                <GooglePlacesAutocomplete minLength={2} 
+                    placeholder={'장소를 검색하세요'}
+                    query={{
+                    key:'AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ',
+                    language:'ko',
+                    components:'country:kr',
+                }}
+                keyboardShouldPersistTaps={"handled"}
+                fetchDetails={true}
+                onPress={(data,details=null)=>{
+                  console.log(data,details)
+                  moveToLocation(details?.geometry.location.lat,details?.geometry.location.lng)
+                  handleMapSearchComplete(data, details)
+              }}
+                onFail={(error) => console.log(error)}
+                onNotFound={() => console.log("no results")}
+                keepResultsAfterBlur={true}
+                enablePoweredByContainer={false}
+                
+                />
+                
+            </View>
+              {location&&(
+                <MapView
+                style={{ flex: 1 , width:Dimensions.get('screen').width,height:250, marginBottom:20}}
+                ref={mapRef}
+                provider={PROVIDER_GOOGLE}
+                initialRegion={{
+                latitude:location?.latitude,
+                longitude:location?.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+                }}   
+              >
+              {markerLocation&&(
+                <Marker coordinate={markerLocation}/>
+            )}
+            </MapView>
+            
+              )}
             </>
           )}
         </View>
       </View>
+      <View style={styles.complete}>
+          <TouchableOpacity onPress={isComplete?onSubmit:alert} style={{ justifyContent:'center'}}>
+            <Text style={styles.completeBtn}
+            disabled={!isComplete}
+            >
+              완료</Text>
+          </TouchableOpacity>
+          </View>
     </ScrollView>
     
   );
@@ -354,7 +513,7 @@ const styles = StyleSheet.create({
   Posting_container: {
     height: Dimensions.get('screen').height,
     backgroundColor: 'white',
-    flex: 1,
+    
   },
   container: {
     flexDirection: 'column',
@@ -470,9 +629,23 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     
-    height: Dimensions.get('window').height / 4, // Adjust the height according to your requirement
+    height: Dimensions.get('window').height / 2,
     marginBottom: 20,
   },
+  complete:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
+    paddingBottom:30
+  },
+  completeBtn:{
+    fontSize:18,
+    textAlign:'center',
+    color:'black',
+    borderWidth:2, width:140, borderRadius:5,
+    borderColor:'gray',fontFamily:'NanumGothic-Regular',height:30, 
+    textAlignVertical:'center',backgroundColor:'#C9BAE5'
+  }
 });
 
 export default Posting;
