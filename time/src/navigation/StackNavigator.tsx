@@ -7,6 +7,7 @@ import SignUp from '../pages/SignUp';
 import BottomTabNavigation from './BottmTabNavigation'
 import { RootStackParamList } from '../../types/Type';
 import DeleteMem from '../pages/DeleteMem';
+import BottmTabNavigation from './BottmTabNavigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
 interface StackNavProps{
@@ -27,7 +28,7 @@ const StackNavigators:React.FC<StackNavProps>=({onLoginSuccess}) => {
                 fontSize: 28, color:'black'
             },
         }}/>
-        <Stack.Screen name='BottomTabNavigation' component={BottomTabNavigation}
+        <Stack.Screen name='BottmTabNavigation' component={BottmTabNavigation}
         options={{
             headerShown:false
         }}

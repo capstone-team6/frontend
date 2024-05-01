@@ -28,6 +28,7 @@ import StackNavigators from './StackNavigator';
 import App from '../../App';
 
 
+
 const Stack = createStackNavigator();
 type writeNavigation=StackNavigationProp<RootStackParamList,'Appeal'>
 type SettingNavigationProp=StackNavigationProp<RootStackParamList,'Setting'>

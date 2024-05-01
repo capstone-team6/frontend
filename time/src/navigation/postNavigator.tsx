@@ -10,6 +10,8 @@ import PostDetail from '../pages/PostDetail';
 import {View} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Posting from '../pages/Posting';
+import BottmTabNavigation from './BottmTabNavigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -46,6 +48,17 @@ const postStackNavigator = () => {
         }}
       />
       <Stack.Screen name="PostDetail" component={PostDetail} />
+      {/* <Stack.Screen name='MapSearchSet' component={MapSearchSet}
+                    options={{
+                        headerTitle:"장소 검색",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        
+                    }}
+                /> */}
+      
     </Stack.Navigator>
   );
 };
