@@ -61,11 +61,13 @@ const SignIn:React.FC<SignInProps>=({onLoginSuccess})=> {
                         headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
                         }
-                    }).then(res=>{
+                    }).then(async res=>{
                       //성공
                         console.log(res.data);
                         const result = res.data.data;
                         console.log('isOurMember :' + result.isOurMemeber); // true값이 담김
+                        console.log('토큰'+result.accessToken)
+                        await AsyncStorage.setItem('accessToken',JSON.stringify(result.accessToken))
                         onLoginSuccess()
                     }).catch(err=>{
                       //실패 : 회원가입 로직으로 이동
