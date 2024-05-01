@@ -25,4 +25,6 @@ export type RootStackParamList = {
   틈새시장: undefined;
   MapSearchSet:undefined;
   Posting:undefined
+  ChargePay:undefined
+  MinusPay:undefined
 };
