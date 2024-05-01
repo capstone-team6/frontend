@@ -15,73 +15,95 @@ import ChatScreen from './ChatScreen';
 import {RootStackParamList} from '../../types/Type';
 import {NavigationProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
-
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 interface RoomData {
   roomId: number;
-  userName: string;
-  location: string;
+  name: string;
+  message: string;
   time: string;
-  contents: string;
-  image: string;
   // chatCount: any;
 }
 
 type ChatNavigationProp = StackNavigationProp<RootStackParamList, 'Chatting'>;
 
 const Chatting = () => {
+  const [chatRoomDetails, setChatRoomDetails] = useState([]);
   const navigation = useNavigation<ChatNavigationProp>();
 
-  const generateId = (() => {
-    let id = 0;
-    return () => {
-      id += 1;
-      return id;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const kakaoId = await getKakaoId();
+        if (kakaoId) {
+          const response = await axios.get(
+            'http://13.125.118.92:8080/my-page/chat',
+            {
+              headers: {'Content-Type': 'application/json'},
+              params: {kakaoId: kakaoId},
+            },
+          );
+          console.log('Server response:', response.data);
+          setChatRoomDetails(response.data.data.chatRoomDetails);
+        } else {
+          console.log('kakaoId not found in AsyncStorage');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
-  })();
 
-  const handleChatRoomPress = (roomId: number) => {
+    fetchData();
+  }, []);
+
+  const getKakaoId = async () => {
+    try {
+      const kakaoId = await AsyncStorage.getItem('kakaoId');
+      return kakaoId;
+    } catch (error) {
+      console.error('Error getting kakaoId from AsyncStorage:', error);
+      return null;
+    }
+  };
+
+  const handleChatRoomPress = (roomId: number, userName: string) => {
     navigation.navigate('ChatScreen', {
       roomId,
+      userName,
     });
   };
 
   const chatData = [
     {
       roomId: 1,
-      userName: '홍길동',
-      location: '역삼동',
+      name: '홍길동',
+      message: '안녕하세요!',
       time: '30분전',
-      contents: '안녕하세요!',
-      chatCount: '1',
-      image: require('../assets/images/profile.png'),
+
+      // chatCount: '1',
     },
     {
       roomId: 2,
-      userName: '틈새2',
-      location: '역삼동',
+      name: '틈새2',
+      message: '감사합니다!! 조심히가세요!',
       time: '1일 전',
-      contents: '감사합니다!! 조심히가세요!',
-      image: require('../assets/images/profile.png'),
     },
     {
       roomId: 3,
-      userName: '틈새3',
-      location: '역삼동',
+      name: '틈새3',
+      message: '시간 구매하고 싶어요',
       time: '1일 전',
-      contents: '시간 구매하고 싶어요',
-      chatCount: '3',
-      image: require('../assets/images/profile.png'),
+
+      // chatCount: '3',
     },
     {
       roomId: 4,
-      userName: '틈새4',
-      location: '역삼동',
+      name: '틈새4',
+      message: '감사합니다!! 조심히 가세요!',
       time: '1주일 전',
-      contents: '감사합니다!! 조심히 가세요!',
-      chatCount: '1',
-      image: require('../assets/images/profile.png'),
+
+      // chatCount: '1',
     },
   ];
 
@@ -91,21 +113,17 @@ const Chatting = () => {
         data={chatData}
         keyExtractor={item => item.roomId.toString()}
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
-          <TouchableOpacity onPress={() => handleChatRoomPress(item.roomId)}>
+          <TouchableOpacity
+            onPress={() => handleChatRoomPress(item.roomId, item.name)}>
             <View style={styles.chatItemContainer}>
-              <Image
-                source={require('../assets/images/profile.png')}
-                style={styles.userImage}
-              />
+              <Ionicons name="person-circle" size={80} color={'#352456'} />
               <View style={styles.chatTextContainer}>
                 <View style={styles.info}>
-                  <Text style={styles.userName}>{item.userName}</Text>
+                  <Text style={styles.userName}>{item.name}</Text>
                   <View style={{width: 7}} />
-                  <Text style={styles.info_text}>
-                    {item.location} · {item.time}
-                  </Text>
+                  <Text style={styles.info_text}>{item.time}</Text>
                 </View>
-                <Text style={styles.chatContent}>{item.contents}</Text>
+                <Text style={styles.chatContent}>{item.message}</Text>
               </View>
               {/* {item.contents && (
                 <View style={styles.chatCountContainer}>
@@ -142,6 +160,7 @@ const styles = StyleSheet.create({
   },
   chatTextContainer: {
     flex: 1,
+    marginLeft: 5,
   },
   userName: {
     fontFamily: 'NanumGothic-Bold',
