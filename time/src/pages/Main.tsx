@@ -1,7 +1,4 @@
 import Geolocation from '@react-native-community/geolocation';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
 import React, {useEffect, useState} from 'react';
 import {
   Text,
@@ -18,16 +15,11 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import Geocoder from 'react-native-geocoding';
-import {err} from 'react-native-svg';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
-import Octicons from 'react-native-vector-icons/Octicons';
-import Posting from './Posting';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import {RootStackParamList} from '../../types/Type';
 import {StackNavigationProp} from '@react-navigation/stack';
-import PostDetail from './PostDetail';
 import {useNavigation} from '@react-navigation/native';
 
 Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko'});
@@ -65,33 +57,21 @@ interface SlideableCategoryButtonsProps {
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 function Main() {
+  const navigation = useNavigation<MainNavigationProp>();
+  const goToPostDetail = (boardId: number) => {
+    navigation.navigate('PostDetail', {boardId});
+  };
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const [posts, setPosts] = useState([]);
   const [address, setAddress] = useState<string>('');
-  const [selectedTab, setSelectedTab] = useState('buy');
-  const [selectedCategoryForBuy, setSelectedCategoryForBuy] = useState(
-    'defaultCategoryForBuy',
-  );
-  const [selectedCategoryForSell, setSelectedCategoryForSell] = useState(
-    'defaultCategoryForSell',
-  );
-
-  // 함수 선언
-  const handleSelectCategory = (category: string) => {
-    if (selectedTab === 'buy') {
-      setSelectedCategoryForBuy(category);
-    } else if (selectedTab === 'sell') {
-      setSelectedCategoryForSell(category);
-    }
-  };
-
-  const navigation = useNavigation<MainNavigationProp>();
-  const goToPostDetail = (boardId: number) => {
-    navigation.navigate('PostDetail', {boardId});
-  };
+  const [selectedTab, setSelectedTab] = useState('BUY');
+  const [selectedCategoryForBuy, setSelectedCategoryForBuy] =
+    useState('Talent');
+  const [selectedCategoryForSell, setSelectedCategoryForSell] =
+    useState('Talent');
 
   const categories = [
     '재능기부',
@@ -102,6 +82,35 @@ function Main() {
     '나눔',
     '기타',
   ];
+
+  const convertToEnglish = (category: string) => {
+    switch (category) {
+      case '재능기부':
+        return 'TALENT';
+      case '개산책':
+        return 'EXERCISE';
+      case '심부름':
+        return 'ERRANDS';
+      case '티켓팅':
+        return 'TICKETING';
+      case '오픈런':
+        return 'WAITING';
+      case '나눔':
+        return 'FREE';
+      case '기타':
+        return 'ETC';
+      default:
+        return category;
+    }
+  };
+
+  const handleSelectCategory = (category: string) => {
+    if (selectedTab === 'BUY') {
+      setSelectedCategoryForBuy(category);
+    } else if (selectedTab === 'SELL') {
+      setSelectedCategoryForSell(category);
+    }
+  };
 
   const SlideableCategoryButtons: React.FC<SlideableCategoryButtonsProps> = ({
     selectedCategory,
@@ -133,17 +142,27 @@ function Main() {
       .get('http://13.125.118.92:8080/api/board', {
         params: {
           pageNum: 0,
-          category: 'ETC',
-          boardType: 'BUY',
+          boardType: selectedTab,
+          category:
+            selectedTab === 'BUY'
+              ? convertToEnglish(selectedCategoryForBuy)
+              : convertToEnglish(selectedCategoryForSell),
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          // Authorization: `Bearer ${token}`,
         },
       })
       .then((response: any) => {
         setPosts(response.data.boards);
+        console.log(response.data.board);
       })
       .catch(error => {
         console.error(error);
       });
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell]);
 
+  useEffect(() => {
     requestPermission().then(result => {
       console.log({result});
       if (result === 'granted') {
@@ -174,6 +193,19 @@ function Main() {
         );
       }
     });
+
+    axios
+      .post('http://13.125.118.92:8080/api/auth/point', {
+        longitude: location?.longitude,
+        latitude: location?.latitude,
+        address: address,
+      })
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }, []);
 
   return (
@@ -188,39 +220,40 @@ function Main() {
       <View style={styles.options}>
         <View>
           <View style={{flexDirection: 'row', width: '100%'}}>
-            <TouchableWithoutFeedback onPress={() => setSelectedTab('buy')}>
+            <TouchableWithoutFeedback onPress={() => setSelectedTab('BUY')}>
               <View style={[{alignItems: 'center', width: '50%'}]}>
                 <Text
                   style={[
                     styles.option1,
-                    selectedTab === 'buy' && styles.selectedOption,
-                    styles.tabTextMargin, // Apply margin to the text
+                    selectedTab === 'BUY' && styles.selectedOption,
+                    styles.tabTextMargin,
                   ]}>
                   구매글
                 </Text>
-                {selectedTab === 'buy' && (
+                {selectedTab === 'BUY' && (
                   <View style={[styles.lineUnderOption]}></View>
                 )}
               </View>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback onPress={() => setSelectedTab('sell')}>
+            <TouchableWithoutFeedback onPress={() => setSelectedTab('SELL')}>
               <View style={[{alignItems: 'center', width: '50%'}]}>
                 <Text
                   style={[
                     styles.option2,
-                    selectedTab === 'sell' && styles.selectedOption,
-                    styles.tabTextMargin, // Apply margin to the text
+                    selectedTab === 'SELL' && styles.selectedOption,
+                    styles.tabTextMargin,
                   ]}>
                   판매글
                 </Text>
-                {selectedTab === 'sell' && (
+                {selectedTab === 'SELL' && (
                   <View style={[styles.lineUnderOption]}></View>
                 )}
               </View>
             </TouchableWithoutFeedback>
           </View>
+
           <View style={{marginTop: 10}}>
-            {selectedTab === 'buy' ? (
+            {selectedTab === 'BUY' ? (
               <SlideableCategoryButtons
                 selectedCategory={selectedCategoryForBuy}
                 onSelectCategory={handleSelectCategory}
@@ -233,30 +266,7 @@ function Main() {
             )}
           </View>
         </View>
-        <View>
-          {selectedTab === 'buy' && (
-            <TouchableOpacity
-              style={styles.postContainer}
-              onPress={() => {
-                goToPostDetail(0);
-              }}></TouchableOpacity>
-          )}
-        </View>
       </View>
-
-      {selectedTab === 'sell' && (
-        <FlatList
-          data={posts}
-          keyExtractor={item => item.boardId.toString()}
-          renderItem={({item}: ListRenderItemInfo<RoomData>) => (
-            <TouchableOpacity
-              style={styles.postContainer}
-              onPress={() => {
-                goToPostDetail(item.boardId);
-              }}></TouchableOpacity>
-          )}
-        />
-      )}
 
       {/* 임시 데이터 */}
       <TouchableOpacity
@@ -284,6 +294,7 @@ function Main() {
           </View>
         </View>
       </TouchableOpacity>
+
       <FlatList
         data={posts}
         keyExtractor={item => item.boardId.toString()}
