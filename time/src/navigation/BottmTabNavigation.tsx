@@ -96,6 +96,7 @@ const BottmTabNavigation = () => {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
           },
+          unmountOnBlur:true,
           tabBarIcon: () => (
             <AntDesign name="pluscircle" size={45} color="#C9BAE5" />
           ),

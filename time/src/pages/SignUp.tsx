@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 
 
 type SignInNavigation=StackNavigationProp<RootStackParamList,'SignIn'>
-type MainNavigation=StackNavigationProp<RootStackParamList,'BottomTabNavigation'>
+type MainNavigation=StackNavigationProp<RootStackParamList,'BottmTabNavigation'>
 const SignUp:React.FC=()=> {
 
     //닉네임 설정
@@ -62,7 +62,7 @@ const SignUp:React.FC=()=> {
             .then(res=>{
                 const result=res.data.data
                 console.log(result)
-                mainNavigation.navigate('BottomTabNavigation')
+                mainNavigation.navigate('BottmTabNavigation')
                 
             }).catch(err=>{
                 const result=err.response.data.data

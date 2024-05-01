@@ -13,7 +13,7 @@ export type RootStackParamList = {
   ChatScreen: {roomId: number};
   Chatting: undefined;
   SignIn: undefined;
-  BottomTabNavigation: undefined;
+  BottmTabNavigation: undefined;
   Setting: undefined;
   Logout: undefined;
   DeleteMem: undefined;
@@ -23,4 +23,6 @@ export type RootStackParamList = {
   Main: undefined;
   PostDetail: {boardId: number};
   틈새시장: undefined;
+  MapSearchSet:undefined;
+  Posting:undefined
 };
