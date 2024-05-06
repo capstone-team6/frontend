@@ -19,6 +19,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
 import SockJS from 'sockjs-client';
 import Stomp, {Client} from 'stompjs';
+import * as StompJs from '@stomp/stompjs';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
@@ -34,8 +35,12 @@ interface Props {
 }
 
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
-  //Chatting에서 roomId
   const {roomId, userName} = route.params;
+  const [role, setRole] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [stompClient, setStompClient] = useState<Stomp.Client | null>(null);
+  const [client, changeClient] = useState<StompJs.Client | null>(null);
+  const [messageInput, setMessageInput] = useState('');
   const [chatList, setChatList] = useState<
     {
       roomId: number;
@@ -45,10 +50,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       // role: string;
     }[]
   >([]);
-  const [role, setRole] = useState('');
-  const [stompClient, setStompClient] = useState<Stomp.Client | null>(null);
-  const [messageInput, setMessageInput] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
 
   const goBack = () => {
     navigation.goBack();
@@ -56,6 +57,11 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
   const onCameraPress = () => {
     // 카메라 접근 코드 작성
+    setModalVisible(false);
+  };
+
+  const onGalleryPress = () => {
+    // 갤러리 접근 코드 작성
     setModalVisible(false);
   };
 
@@ -171,42 +177,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     };
     setChatList(prevMessages => [...prevMessages, transferInfo]);
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          'http://13.125.118.92:8080/api/board/3/chat/2/who',
-        );
-        setRole(response.data.role);
-      } catch (error) {
-        console.error('Error fetching chat data:', error);
-      }
-    };
-
-    fetchData();
-
-    const socket = new SockJS('http://13.125.118.92:8080/ws');
-    const client = Stomp.over(socket);
-    setStompClient(client);
-    client.connect({}, () => {
-      console.log('Connected to WebSocket');
-      client.subscribe(`/sub/chat/room/${roomId}`, (message: any) => {
-        const newMessage = JSON.parse(message.body);
-        console.log(newMessage);
-        addMessage(newMessage);
-      });
-    });
-
-    const disconnectCallback = () => {
-      console.log('Disconnected from server');
-    };
-
-    return () => {
-      if (stompClient !== null) {
-        stompClient.disconnect(disconnectCallback);
-      }
-    };
-  }, [chatList, roomId]);
 
   const addMessage = (message: any) => {
     setChatList(prev => [...prev, message]);
@@ -225,10 +195,107 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       setMessageInput('');
     }
   };
-  const onGalleryPress = () => {
-    // 갤러리 접근 코드 작성
-    setModalVisible(false);
+
+  //@stompjs/stomp
+  const connect = () => {
+    // 소켓 연결
+    try {
+      const clientdata = new StompJs.Client({
+        brokerURL: 'ws://13.125.118.92:8080/ws',
+        connectHeaders: {
+          login: '',
+          passcode: 'password',
+        },
+        debug: function (str) {
+          console.log(str);
+        },
+        reconnectDelay: 5000, // 자동 재 연결
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
+      console.log(clientdata);
+
+      // 구독
+      clientdata.onConnect = function () {
+        clientdata.subscribe(`/sub/chat/room/1`, (message: any) => {
+          if (message.body) {
+            let msg = JSON.parse(message.body);
+            setChatList(chats => [...chats, msg]);
+          }
+        });
+      };
+
+      clientdata.activate(); // 클라이언트 활성화
+      changeClient(clientdata); // 클라이언트 갱신
+    } catch (err) {
+      console.log(err);
+    }
   };
+  const disConnect = () => {
+    // 연결 끊기
+    if (client === null) {
+      return;
+    }
+    client.deactivate();
+  };
+  const sendChat = () => {
+    if (messageInput === '') {
+      return;
+    }
+    if (client) {
+      client.publish({
+        destination: `/pub/chat/send/1`,
+        body: JSON.stringify({
+          roomId: roomId,
+          writer: userName,
+          message: messageInput,
+          type: 'text',
+        }),
+      });
+    }
+    setMessageInput('');
+  };
+
+  useEffect(() => {
+    // 판매자, 구매자
+    // const fetchData = async () => {
+    //   try {
+    //     const response = await axios.get(
+    //       'http://13.125.118.92:8080/api/board/3/chat/2/who',
+    //     );
+    //     setRole(response.data.role);
+    //   } catch (error) {
+    //     console.error('Error fetching chat data:', error);
+    //   }
+    // };
+    // fetchData();
+
+    //WebSocket 연결
+    // const socket = new WebSocket('ws://13.125.118.92:8080/ws');
+    // const client = Stomp.over(socket);
+    // setStompClient(client);
+    // client.connect({}, () => {
+    //   console.log('Connected to WebSocket');
+    //   client.subscribe(`/sub/chat/room/${roomId}`, (message: any) => {
+    //     const newMessage = JSON.parse(message.body);
+    //     console.log(newMessage);
+    //     addMessage(newMessage);
+    //   });
+    // });
+    // const disconnectCallback = () => {
+    //   console.log('Disconnected from server');
+    // };
+    // return () => {
+    //   if (stompClient !== null) {
+    //     stompClient.disconnect(disconnectCallback);
+    //   }
+    // };
+
+    connect();
+    return () => {
+      disConnect();
+    };
+  }, []);
 
   return (
     <View
