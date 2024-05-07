@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,90 @@ import {
   Image,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-const PostDetail = () => {
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../../types/Type';
+import axios from 'axios';
+
+type PostDetailRouteProps = RouteProp<RootStackParamList, 'PostDetail'>;
+interface Props {
+  route: PostDetailRouteProps;
+}
+
+interface BoardData {
+  boardId: number;
+  scrapStus: string;
+  userId: number;
+  nickname: string;
+  mannerTime: number;
+  title: string;
+  content: string;
+  createdDate: string;
+  itemTime: string;
+  itemPrice: number;
+  chatCount: number;
+  scrapCount: number;
+  address: string;
+  longitude: number;
+  latitude: number;
+  boardState: string;
+  category: string;
+  boardType: string;
+  images: string[];
+}
+
+const PostDetail: React.FC<Props> = ({route}) => {
+  const boardId = route.params;
+
+  const [isScrap, setIsScrap] = useState(false);
+  const [boardData, setBoardData] = useState<BoardData | null>(null);
+
+  const handleHeartPress = async (boardId: number) => {
+    const newScrapValue = !isScrap;
+    try {
+      setIsScrap(newScrapValue);
+      const res = await axios.post(
+        `http://13.125.118.92:8080/api/board/1/scrap`,
+        {
+          isScrap: newScrapValue,
+        },
+      );
+      if (res.status === 200) {
+        console.log(res.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    axios
+      .get(`http://13.125.118.92:8080/api/board/1`)
+      .then(response => {
+        console.log('Data received:', response.data);
+        setBoardData(response.data.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
+  // const dateStr = boardData?.itemTime;
+  // const date = new Date(dateStr);
+
+  // const options = {
+  //   year: 'numeric',
+  //   month: 'long',
+  //   day: 'numeric',
+  //   hour: 'numeric',
+  //   minute: 'numeric',
+  //   second: 'numeric',
+  //   hour12: false,
+  //   timeZone: 'Asia/Seoul',
+  // };
+
+  // const koreanDateStr = date.toLocaleDateString('ko-KR', options);
+
   return (
     <View style={styles.PostDetail_container}>
       <View style={styles.postingImg}>
@@ -28,31 +111,39 @@ const PostDetail = () => {
             source={require('../assets/images/profile.png')}
           />
           <View style={{flexDirection: 'row'}}>
-            <Text style={styles.user_name}>하하호호</Text>
+            <Text style={styles.user_name}>{boardData?.nickname}</Text>
             <View style={styles.icon_container}>
               <AntDesign name="message1" size={13} color="black" />
-              <Text>2</Text>
+              <Text>{boardData?.chatCount}</Text>
             </View>
             <View style={styles.icon_container}>
               <AntDesign name="hearto" size={13} color="black" />
-              <Text>2</Text>
-              <AntDesign name="heart" size={13} color="black" />
+              <Text>{boardData?.scrapCount}</Text>
             </View>
+          </View>
+          <View style={styles.appeal_icon}>
+            <TouchableOpacity onPress={() => handleHeartPress(0)}>
+              <Ionicons
+                name={isScrap ? 'heart' : 'heart-outline'}
+                size={24}
+                color={isScrap ? 'red' : 'gray'}
+              />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
 
       <View style={styles.title}>
         <TouchableOpacity style={styles.categoryBtn}>
-          <Text style={styles.categoryBtn_text}>심부름</Text>
+          <Text style={styles.categoryBtn_text}>{boardData?.title}</Text>
         </TouchableOpacity>
-        <Text style={styles.title_text}>자취방 벌레 잡아주세요..</Text>
+        <Text style={styles.title_text}>{boardData?.content}</Text>
         <View style={styles.title_location}>
-          <Text style={styles.title_time}>김량장동</Text>
+          <Text style={styles.title_time}>{boardData?.address}</Text>
           <Text style={styles.title_time}>1분 전</Text>
         </View>
         <View style={{height: 5}} />
-        <Text style={styles.title_content}>급해요 제발요ㅠㅠㅠㅠ</Text>
+        <Text style={styles.title_content}>{boardData?.content}</Text>
       </View>
 
       <View style={styles.info_detail}>
@@ -64,7 +155,7 @@ const PostDetail = () => {
       <View style={styles.info_detail}>
         <Text style={styles.text}>가격</Text>
         <View style={{width: 28}} />
-        <Text style={styles.text}>10000원</Text>
+        <Text style={styles.text}>{boardData?.itemPrice}</Text>
       </View>
 
       <View style={styles.location}>
@@ -165,14 +256,12 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   space: {width: 5},
-
   location: {margin: 20},
   location_text: {
     fontFamily: 'NanumGothic-Bold',
     color: 'black',
   },
   icon_container: {flexDirection: 'row', alignItems: 'center'},
-
   mapBtn: {
     backgroundColor: '#3C444C',
     width: 50,
@@ -221,5 +310,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
+  appeal_icon: {position: 'absolute', right: 15, top: 10},
 });
 export default PostDetail;

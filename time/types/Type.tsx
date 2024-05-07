@@ -10,15 +10,22 @@ export type RootStackParamList = {
   AppealWrite: undefined;
   StackNavigator: undefined;
   SignUp: undefined;
-  ChatScreen: {userName: string};
+  ChatScreen: {roomId: number; userName: string};
   Chatting: undefined;
-  SignIn:undefined
-  BottomTabNavigation:undefined
-  Setting:undefined
-  Logout: undefined
-  DeleteMem:undefined
-  NameChange:undefined
-  StackNavigators:undefined
-  App:undefined
-
+  SignIn: undefined;
+  BottmTabNavigation: undefined;
+  Setting: undefined;
+  Logout: undefined;
+  DeleteMem: undefined;
+  NameChange: undefined;
+  StackNavigators: undefined;
+  App: undefined;
+  Main: undefined;
+  PostDetail: {boardId: number};
+  틈새시장: undefined;
+  MapSearchSet:undefined;
+  Posting:undefined
+  ChargePay:undefined
+  MinusPay:undefined
+  LoginStackNavigation:undefined
 };

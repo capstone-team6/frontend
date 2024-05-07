@@ -26,6 +26,9 @@ import DeleteMem from '../pages/DeleteMem';
 import NameChange from '../pages/NameChange';
 import StackNavigators from './StackNavigator';
 import App from '../../App';
+import ChargePay from '../pages/ChargePay';
+import MinusPay from '../pages/MinusPay';
+
 
 
 const Stack = createStackNavigator();
@@ -183,6 +186,26 @@ const StackNavigator:React.FC = () => {
                 <Stack.Screen name='NameChange' component={NameChange}
                     options={{
                         headerTitle:"닉네임 변경",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        
+                    }}
+                />
+                <Stack.Screen name='ChargePay' component={ChargePay}
+                    options={{
+                        headerTitle:"충전하기",
+                        headerTitleStyle:{
+                            fontFamily:'NanumGothic-Bold',
+                            fontSize: 28, color:'black'
+                        },
+                        
+                    }}
+                />
+                <Stack.Screen name='MinusPay' component={MinusPay}
+                    options={{
+                        headerTitle:"인출하기",
                         headerTitleStyle:{
                             fontFamily:'NanumGothic-Bold',
                             fontSize: 28, color:'black'

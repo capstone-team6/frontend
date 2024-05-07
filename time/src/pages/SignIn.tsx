@@ -70,7 +70,6 @@ const SignIn:React.FC<SignInProps>=({onLoginSuccess})=> {
                         console.log('토큰'+result.accessToken)
                         await AsyncStorage.setItem('accessToken',JSON.stringify(result.accessToken))
                         await AsyncStorage.setItem('refreshToken',JSON.stringify(result.refreshToken))
-
                         onLoginSuccess()
                     }).catch(err=>{
                       //실패 : 회원가입 로직으로 이동
