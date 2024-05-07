@@ -27,4 +27,5 @@ export type RootStackParamList = {
   Posting:undefined
   ChargePay:undefined
   MinusPay:undefined
+  LoginStackNavigation:undefined
 };
