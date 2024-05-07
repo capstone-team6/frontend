@@ -1,5 +1,5 @@
 import Geolocation from '@react-native-community/geolocation';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
@@ -21,6 +21,10 @@ import axios from 'axios';
 import {RootStackParamList} from '../../types/Type';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import FastImage from 'react-native-fast-image'
+import { NativeSyntheticEvent } from 'react-native';
+import { NativeScrollEvent } from 'react-native';
 
 Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko'});
 
@@ -55,9 +59,10 @@ interface SlideableCategoryButtonsProps {
 }
 
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
-
+type LoginNav=StackNavigationProp<RootStackParamList,'LoginStackNavigation'>
 function Main() {
   const navigation = useNavigation<MainNavigationProp>();
+  const loginNavigation=useNavigation<LoginNav>()
   const goToPostDetail = (boardId: number) => {
     navigation.navigate('PostDetail', {boardId});
   };
@@ -65,14 +70,14 @@ function Main() {
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<RoomData[]>([]);
   const [address, setAddress] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState('BUY');
   const [selectedCategoryForBuy, setSelectedCategoryForBuy] =
-    useState('Talent');
+    useState('TALENT');
   const [selectedCategoryForSell, setSelectedCategoryForSell] =
-    useState('Talent');
-
+    useState('TALENT');
+  
   const categories = [
     '재능기부',
     '개산책',
@@ -82,6 +87,17 @@ function Main() {
     '나눔',
     '기타',
   ];
+
+  const [pageNum, setPageNum]=useState<number>(0)
+  // const totalPosts=posts.length
+  // const postsPage=8 //한 페이지에 보여줄 게시물 개수
+  // const totalPage=Math.ceil(totalPosts/postsPage)
+  // const handelPageChange=(page:number)=>{
+  //   setPageNum(page)
+  // }
+  // const startIndex=pageNum*postsPage
+  // const endIndex=startIndex+postsPage
+  // const currentPosts=posts.slice(startIndex,endIndex)
 
   const convertToEnglish = (category: string) => {
     switch (category) {
@@ -107,8 +123,10 @@ function Main() {
   const handleSelectCategory = (category: string) => {
     if (selectedTab === 'BUY') {
       setSelectedCategoryForBuy(category);
+      setPosts([])
     } else if (selectedTab === 'SELL') {
       setSelectedCategoryForSell(category);
+      setPosts([])
     }
   };
 
@@ -116,12 +134,27 @@ function Main() {
     selectedCategory,
     onSelectCategory,
   }) => {
+    // const scrollViewRef=useRef<ScrollView>(null)
+    const [scrollEnabled, setScrollEnabled] = useState(true);
+    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+      const currentPosition = contentOffset.x;
+      const maxOffset = contentSize.width - layoutMeasurement.width;
+  
+      // 스크롤이 좌측 끝이거나 우측 끝에 도달했을 때 스크롤을 막습니다.
+      if (currentPosition <= 0 || currentPosition >= maxOffset) {
+        setScrollEnabled(false);
+      } else {
+        setScrollEnabled(true);
+      }
+    };
     return (
       <ScrollView
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.container}
-        style={styles.scrollView}>
+        style={styles.scrollView}
+        onScroll={handleScroll}>
         {categories.map((category, index) => (
           <TouchableOpacity
             key={index}
@@ -137,31 +170,7 @@ function Main() {
     );
   };
 
-  useEffect(() => {
-    axios
-      .get('http://13.125.118.92:8080/api/board', {
-        params: {
-          pageNum: 0,
-          boardType: selectedTab,
-          category:
-            selectedTab === 'BUY'
-              ? convertToEnglish(selectedCategoryForBuy)
-              : convertToEnglish(selectedCategoryForSell),
-        },
-        headers: {
-          'Content-Type': 'application/json',
-          // Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response: any) => {
-        setPosts(response.data.boards);
-        console.log(response.data.board);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell]);
-
+  
   useEffect(() => {
     requestPermission().then(result => {
       console.log({result});
@@ -169,6 +178,8 @@ function Main() {
         Geolocation.getCurrentPosition(
           pos => {
             setLocation(pos.coords);
+            const latitude=pos.coords.latitude
+            const longitude=pos.coords.longitude
             Geocoder.from(pos.coords.latitude, pos.coords.longitude, 'ko')
               .then(json => {
                 console.log(json);
@@ -176,11 +187,87 @@ function Main() {
                 const desireAddress = addressComponent.split(', ')[0];
                 const words = desireAddress.split(' ');
                 const lastAddress = `${words[1]} ${words[2]} ${words[3]}`;
-                // 주소에서 한글 부분을 선택
-                // const desireAddress=addressArray.filter(address => address !== "대한민국").join(', ');
+                
                 setAddress(lastAddress);
-              })
-              .catch(error => console.warn(error));
+                console.log(longitude,latitude,address)
+
+                if(longitude&&latitude&&address){
+                  AsyncStorage.getItem('kakaoId').then(id=>{
+                    const kakaoId=id
+                  
+                    const locationData={
+                      longitude:longitude,
+                      latitude:latitude,
+                      address:address,
+                      kakaoId:kakaoId
+                    }
+                    
+                    console.log(location?.longitude,location?.latitude,address)
+                    console.log(kakaoId)
+  
+                    axios.post('http://13.125.118.92:8080/api/auth/point',locationData,{
+                      headers:{
+                        'Content-Type': 'application/json',
+                      }
+                    })
+                    
+                    .then(res => {
+                      console.log(res.data);
+                    })
+                    .catch(error => {
+                      console.log(error)
+                    });
+                  })
+
+                  
+                }
+
+                
+                AsyncStorage.getItem('accessToken').then(token=>{
+                      const accessToken=token?JSON.parse(token):null
+                      console.log(accessToken)
+                      axios
+                        .get('http://13.125.118.92:8080/api/board', {
+                          params: {
+                            pageNum: 0,
+                            boardType: selectedTab,
+                            category:
+                              selectedTab === 'BUY'
+                                ? convertToEnglish(selectedCategoryForBuy)
+                                : convertToEnglish(selectedCategoryForSell),
+                          },
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}`,
+                          },
+                        })
+                        .then((response) => {
+                          console.log(JSON.stringify(response.data.data.boards))
+                          const boards=JSON.stringify(response.data.data.boards)
+                          console.log(boards)
+                          const now = new Date();
+                          // const koreanTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+                          const koreanTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
+                          console.log("한국 현재 시간:", koreanTime);
+
+                          if(boards){
+                            const b=JSON.parse(boards)
+                            setPosts(b)
+                            b.forEach((board:any) => {
+                              Object.entries(board).forEach(([key, value]) => {
+                                console.log(`${key}: ${value}`);
+                            });
+  
+                            });
+                          }
+                        })
+                        .catch(error => {
+                          console.error(error);
+                        });
+                    })
+                .catch(error => console.warn(error));
+                })
+                
           },
           error => {
             console.log(error);
@@ -193,20 +280,12 @@ function Main() {
         );
       }
     });
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell]);
 
-    axios
-      .post('http://13.125.118.92:8080/api/auth/point', {
-        longitude: location?.longitude,
-        latitude: location?.latitude,
-        address: address,
-      })
-      .then(response => {
-        console.log(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
+
+const handleLoadMore=()=>{
+  setPageNum(pageNum+1)
+}
 
   return (
     <View style={styles.main_container}>
@@ -257,6 +336,7 @@ function Main() {
               <SlideableCategoryButtons
                 selectedCategory={selectedCategoryForBuy}
                 onSelectCategory={handleSelectCategory}
+                
               />
             ) : (
               <SlideableCategoryButtons
@@ -269,7 +349,7 @@ function Main() {
       </View>
 
       {/* 임시 데이터 */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.postContainer}
         onPress={() => {
           goToPostDetail(0);
@@ -293,7 +373,7 @@ function Main() {
             <Text style={styles.interactionText}>2</Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <FlatList
         data={posts}
@@ -304,19 +384,28 @@ function Main() {
             onPress={() => {
               goToPostDetail(item.boardId);
             }}>
-            <Image
-              source={{
-                uri: `http:://13.125.118.92:8080/var/www/myapp/images/${item.firstImage}`,
-              }}
-              style={styles.post_image}
+            {item.firstImage?
+            <FastImage
+            source={{
+              uri: `http://13.125.118.92:8080/images/jpg/${item.firstImage}`
+            }}
+            style={styles.post_image}
+            // resizeMethod='resize'
+            // onError={(error) => console.error("이미지 로딩 오류:", error)}
+          />:
+            <Image source={require('../assets/images/postingImage.png')}
+            style={styles.post_image}
+            
             />
+            }
             <View style={styles.post_info}>
               <Text style={styles.info1}>
-                {item.distance} · {item.createdDate}
+                {item.distance+"km"} · {item.createdDate}
               </Text>
               <Text style={styles.info2}>{item.title}</Text>
               <Text style={styles.info3}>
-                {item.itemPrice}/{item.itemTime}
+                {item.itemPrice+"원"}/{item.itemTime}
+                
               </Text>
             </View>
             <View style={styles.appeal_icon}></View>
@@ -332,6 +421,8 @@ function Main() {
             </View>
           </TouchableOpacity>
         )}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
       />
     </View>
   );
@@ -385,6 +476,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderWidth: 0.1,
     borderColor: 'black',
+    marginTop:10
   },
   post_image: {
     width: 95,
@@ -396,6 +488,7 @@ const styles = StyleSheet.create({
   },
   post_info: {
     flexDirection: 'column',
+    marginLeft:15
   },
   info1: {
     fontFamily: 'NanumGothic',
