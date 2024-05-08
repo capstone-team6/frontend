@@ -1,3 +1,16 @@
+interface MainParams {
+  dataFromParent: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  }|any;
+  // dataToMain?: {
+  //   latitude: number;
+  //   longitude: number;
+  //   address: string;
+  // };
+}
+
 export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
@@ -22,10 +35,11 @@ export type RootStackParamList = {
   App: undefined;
   Main: undefined;
   PostDetail: {boardId: number};
-  틈새시장: undefined;
+  틈새시장: MainParams;
   MapSearchSet:undefined;
   Posting:undefined
   ChargePay:undefined
   MinusPay:undefined
   LoginStackNavigation:undefined
+  LocationSearch:undefined
 };

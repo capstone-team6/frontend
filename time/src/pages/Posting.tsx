@@ -312,7 +312,7 @@ const onSubmit = async () => {
 
     if (res.status === 200) {
       console.log(res.data);
-      navigation.navigate('틈새시장');
+      navigation.goBack();
     }
   } catch(error) {
     console.log(error);

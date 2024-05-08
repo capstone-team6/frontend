@@ -20,14 +20,14 @@ import Feather from 'react-native-vector-icons/Feather';
 import axios from 'axios';
 import {RootStackParamList} from '../../types/Type';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {useNavigation} from '@react-navigation/native';
+import {NavigationProp, NavigationState, RouteProp, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FastImage from 'react-native-fast-image'
 import { NativeSyntheticEvent } from 'react-native';
 import { NativeScrollEvent } from 'react-native';
 
-Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko'});
 
+Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"});
 async function requestPermission() {
   try {
     if (Platform.OS === 'android') {
@@ -58,14 +58,23 @@ interface SlideableCategoryButtonsProps {
   onSelectCategory: (category: string) => void;
 }
 
+interface MainProps{
+  route:RouteProp<RootStackParamList,'틈새시장'>
+}
+
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 type LoginNav=StackNavigationProp<RootStackParamList,'LoginStackNavigation'>
-function Main() {
+type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
+const Main:React.FC<MainProps>=({route})=>{
+  // const {dataToMain}=route.params||{}
+  const { dataFromParent }= route.params || {};
+  console.log(dataFromParent)
   const navigation = useNavigation<MainNavigationProp>();
   const loginNavigation=useNavigation<LoginNav>()
   const goToPostDetail = (boardId: number) => {
     navigation.navigate('PostDetail', {boardId});
   };
+  const goToSearch=useNavigation<SearchNav>()
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -119,6 +128,7 @@ function Main() {
         return category;
     }
   };
+
 
   const handleSelectCategory = (category: string) => {
     if (selectedTab === 'BUY') {
@@ -177,7 +187,15 @@ function Main() {
       if (result === 'granted') {
         Geolocation.getCurrentPosition(
           pos => {
-            setLocation(pos.coords);
+            if(!dataFromParent){
+              setLocation(pos.coords);
+            }else{
+              setLocation({
+                latitude:dataFromParent.makerLocation.latitude,
+                longitude:dataFromParent.makerLocation.longitude,
+              })
+            }
+            
             const latitude=pos.coords.latitude
             const longitude=pos.coords.longitude
             Geocoder.from(pos.coords.latitude, pos.coords.longitude, 'ko')
@@ -186,9 +204,13 @@ function Main() {
                 const addressComponent = json.results[0].formatted_address;
                 const desireAddress = addressComponent.split(', ')[0];
                 const words = desireAddress.split(' ');
-                const lastAddress = `${words[1]} ${words[2]} ${words[3]}`;
+                const lastAddress = `${words[1]} ${words[2]} ${words[3]} ${words[4]}`;
                 
-                setAddress(lastAddress);
+                if(!dataFromParent){
+                  setAddress(lastAddress)
+                }else{
+                  setAddress(dataFromParent.address)
+                }
                 console.log(longitude,latitude,address)
 
                 if(longitude&&latitude&&address){
@@ -244,18 +266,14 @@ function Main() {
                         .then((response) => {
                           console.log(JSON.stringify(response.data.data.boards))
                           const boards=JSON.stringify(response.data.data.boards)
-                          console.log(boards)
-                          const now = new Date();
-                          // const koreanTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-                          const koreanTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
-                          console.log("한국 현재 시간:", koreanTime);
+                          // console.log(boards)
 
                           if(boards){
                             const b=JSON.parse(boards)
                             setPosts(b)
                             b.forEach((board:any) => {
                               Object.entries(board).forEach(([key, value]) => {
-                                console.log(`${key}: ${value}`);
+                                // console.log(`${key}: ${value}`);
                             });
   
                             });
@@ -280,21 +298,54 @@ function Main() {
         );
       }
     });
-  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell]);
-
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,dataFromParent]);
+  useEffect(()=>{
+    if(dataFromParent){
+      console.log(dataFromParent)
+      setLocation({
+        latitude:dataFromParent.latitude,
+        longitude:dataFromParent.longitude,
+      })
+      setAddress(dataFromParent.address)
+    }
+  },[dataFromParent])
 
 const handleLoadMore=()=>{
   setPageNum(pageNum+1)
 }
+const goToLocationSearch=()=>{
+  goToSearch.navigate('LocationSearch')
+}
 
+// useEffect(()=>{
+//   const {updatedAddress}=newAddress.params
+//   setAddress(updatedAddress)
+// },[])
+
+function timeDiffence(targetTime:Date):string{
+  const koreanTime = new Date().getTime()
+  const create=new Date(targetTime)
+  const diffInMinutes = Math.floor((new Date(koreanTime).getTime() - targetTime.getTime()) / (1000 * 60));
+  if(diffInMinutes<60){
+    return `${diffInMinutes}분 전`
+  }else if(diffInMinutes<60*24){
+    const diffInHour=Math.floor(diffInMinutes/60)
+    return `${diffInHour}시간 전`
+  }else{
+    const diffInDays=Math.floor(diffInMinutes/(60*24))
+    return `${diffInDays}일 전`
+  }
+}
   return (
     <View style={styles.main_container}>
-      <View style={styles.location}>
-        <Text style={styles.location_text}>
-          {address ? address : 'Loading...'}
-        </Text>
-        <AntDesign name="caretdown" size={13} style={styles.down_icon} />
-      </View>
+      <TouchableOpacity onPress={goToLocationSearch}>
+        <View style={styles.location}>
+          <Text style={styles.location_text}>
+            {address ? address : 'Loading...'}
+          </Text>
+          <AntDesign name="caretdown" size={13} style={styles.down_icon} />
+        </View>
+      </TouchableOpacity>
 
       <View style={styles.options}>
         <View>
@@ -400,7 +451,7 @@ const handleLoadMore=()=>{
             }
             <View style={styles.post_info}>
               <Text style={styles.info1}>
-                {item.distance+"km"} · {item.createdDate}
+                {item.distance+"km"} · {timeDiffence(new Date(item.createdDate))}
               </Text>
               <Text style={styles.info2}>{item.title}</Text>
               <Text style={styles.info3}>
@@ -482,13 +533,14 @@ const styles = StyleSheet.create({
     width: 95,
     height: 95,
     borderRadius: 25,
-    marginRight: 10,
+    // marginRight: 10,
     position: 'absolute',
     left: 10,
   },
   post_info: {
     flexDirection: 'column',
-    marginLeft:15
+    left:-20
+    
   },
   info1: {
     fontFamily: 'NanumGothic',
