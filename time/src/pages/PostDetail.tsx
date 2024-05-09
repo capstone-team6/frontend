@@ -15,6 +15,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../types/Type';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Carousel,{Pagination} from 'react-native-snap-carousel';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 type PostDetailRouteProps = RouteProp<RootStackParamList, 'PostDetail'>;
 interface Props {
@@ -43,41 +46,90 @@ interface BoardData {
   images: string[];
 }
 
+const convertToKorean = (category: string) => {
+  switch (category) {
+    case 'TALENT':
+      return '재능기부';
+    case 'EXERCISE':
+      return '운동';
+    case 'ERRANDS':
+      return '심부름';
+    case 'TICKETING':
+      return '티켓팅';
+    case 'WAITING':
+      return '오픈런';
+    case 'FREE':
+      return '나눔';
+    case 'ETC':
+      return '기타';
+    default:
+      return category;
+  }
+};
+
 const PostDetail: React.FC<Props> = ({route}) => {
-  const boardId = route.params;
-
+  const {boardId} = route.params;
+  console.log(boardId)
   const [isScrap, setIsScrap] = useState(false);
-  const [boardData, setBoardData] = useState<BoardData | null>(null);
+  const [boardData, setBoardData] = useState<BoardData|null>(null);
 
-  const handleHeartPress = async (boardId: number) => {
+  const handleHeartPress = async () => {
     const newScrapValue = !isScrap;
-    try {
-      setIsScrap(newScrapValue);
-      const res = await axios.post(
-        `http://13.125.118.92:8080/api/board/1/scrap`,
-        {
-          isScrap: newScrapValue,
-        },
-      );
-      if (res.status === 200) {
-        console.log(res.data);
+    AsyncStorage.getItem('accessToken').then(async item=>{
+      const token=item?JSON.parse(item):null
+      try {
+        setIsScrap(newScrapValue);
+        const res = await axios.post(
+          `http://13.125.118.92:8080/api/board/${boardId}/scrap`,{},
+          {headers:{
+          Authorization:`Bearer ${token}`
+          }}
+        );
+        if (res.status === 200) {
+          console.log(res.data);
+        }
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
-    }
+    })
+    
   };
 
-  useEffect(() => {
-    axios
-      .get(`http://13.125.118.92:8080/api/board/1`)
+  useEffect(()=>{
+    AsyncStorage.getItem('accessToken').then(item=>{
+      const token=item ? JSON.parse(item) : null;
+      console.log(token)
+      axios
+      .get(`http://13.125.118.92:8080/api/board/${boardId}`,{
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      })
       .then(response => {
         console.log('Data received:', response.data);
+        console.log(response.data.data.images)
         setBoardData(response.data.data);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-  }, []);
+    })
+  },[])
+
+  function timeDiffence(targetTime:Date):string{
+    const koreanTime = new Date().getTime()
+    const create=new Date(targetTime)
+    const diffInMinutes = Math.floor((new Date(koreanTime).getTime() - targetTime.getTime()) / (1000 * 60));
+    if(diffInMinutes<60){
+      return `${diffInMinutes}분 전`
+    }else if(diffInMinutes<60*24){
+      const diffInHour=Math.floor(diffInMinutes/60)
+      return `${diffInHour}시간 전`
+    }else{
+      const diffInDays=Math.floor(diffInMinutes/(60*24))
+      return `${diffInDays}일 전`
+    }
+  }
 
   // const dateStr = boardData?.itemTime;
   // const date = new Date(dateStr);
@@ -94,14 +146,51 @@ const PostDetail: React.FC<Props> = ({route}) => {
   // };
 
   // const koreanDateStr = date.toLocaleDateString('ko-KR', options);
-
-  return (
-    <View style={styles.PostDetail_container}>
-      <View style={styles.postingImg}>
+  
+  const renderItem = ({ item, index }: { item: string, index: number }) => {
+    return (
+      <View>
         <Image
-          source={require('../assets/images/logo.png')}
-          style={{height: 133, width: 124}}
+          source={{ uri: `http://13.125.118.92:8080/images/jpg/${item}` }}
+          style={{ height: 300, width: 300 }}
+          resizeMode='contain'
         />
+      </View>
+    );
+  };
+  const [activeSlide, setActiveSlide]=useState(0)
+  const renderPagination = () => {
+    return (
+      <Pagination
+        dotsLength={boardData?.images.length ?? 0}
+        activeDotIndex={activeSlide}
+        containerStyle={{ paddingVertical: 10 }}
+        dotStyle={{
+          width: 10,
+          height: 10,
+          borderRadius: 5,
+          backgroundColor: 'rgba(255, 255, 255, 0.92)'
+        }}
+        inactiveDotOpacity={0.4}
+        inactiveDotScale={0.6}
+      />
+    );
+  };
+  return (
+    <ScrollView>
+      <View style={styles.PostDetail_container}>
+      <View style={styles.postingImg}>
+
+      <Carousel
+        data={boardData?.images ?? []}
+        renderItem={renderItem}
+        sliderWidth={300}
+        itemWidth={300}
+        layout="default"
+        style={{alignContent:'center', alignItems:'center'}}
+        onSnapToItem={(index) => setActiveSlide(index)}
+      />
+      {renderPagination()}
       </View>
 
       <View style={styles.user}>
@@ -111,18 +200,18 @@ const PostDetail: React.FC<Props> = ({route}) => {
             source={require('../assets/images/profile.png')}
           />
           <View style={{flexDirection: 'row'}}>
-            <Text style={styles.user_name}>{boardData?.nickname}</Text>
+            <Text style={styles.user_name}>{boardData?.nickname}  </Text>
             <View style={styles.icon_container}>
               <AntDesign name="message1" size={13} color="black" />
-              <Text>{boardData?.chatCount}</Text>
+              <Text> {boardData?.chatCount} </Text>
             </View>
             <View style={styles.icon_container}>
               <AntDesign name="hearto" size={13} color="black" />
-              <Text>{boardData?.scrapCount}</Text>
+              <Text> {boardData?.scrapCount}</Text>
             </View>
           </View>
           <View style={styles.appeal_icon}>
-            <TouchableOpacity onPress={() => handleHeartPress(0)}>
+            <TouchableOpacity onPress={() => handleHeartPress()}>
               <Ionicons
                 name={isScrap ? 'heart' : 'heart-outline'}
                 size={24}
@@ -135,41 +224,63 @@ const PostDetail: React.FC<Props> = ({route}) => {
 
       <View style={styles.title}>
         <TouchableOpacity style={styles.categoryBtn}>
-          <Text style={styles.categoryBtn_text}>{boardData?.title}</Text>
+          <Text style={styles.categoryBtn_text}>{convertToKorean(boardData?.category??'')}</Text>
         </TouchableOpacity>
-        <Text style={styles.title_text}>{boardData?.content}</Text>
+        <Text style={styles.title_text}>{boardData?.title}</Text>
         <View style={styles.title_location}>
-          <Text style={styles.title_time}>{boardData?.address}</Text>
-          <Text style={styles.title_time}>1분 전</Text>
+          <Text style={styles.title_time}>{boardData?.address}   </Text>
+          <Text style={styles.title_time}>{timeDiffence(new Date(boardData?.createdDate??''))}</Text>
         </View>
         <View style={{height: 5}} />
         <Text style={styles.title_content}>{boardData?.content}</Text>
       </View>
 
       <View style={styles.info_detail}>
-        <Text style={styles.text}>시간대</Text>
+        <Text style={styles.text}>시간</Text>
         <View style={{width: 15}} />
-        <Text style={styles.text}>지금 당장</Text>
+        <Text style={styles.text}>{boardData?.itemTime}</Text>
       </View>
       <View style={{height: 10}} />
       <View style={styles.info_detail}>
         <Text style={styles.text}>가격</Text>
         <View style={{width: 28}} />
-        <Text style={styles.text}>{boardData?.itemPrice}</Text>
+        <Text style={styles.text}>{boardData?.itemPrice+"원"}</Text>
       </View>
 
       <View style={styles.location}>
         <Text style={styles.location_text}>틈새위치</Text>
       </View>
 
-      <View style={styles.mapContainer}>
-        <AntDesign name="location-pin" size={13} color="black" />
-        <View style={styles.map}>
-          <TouchableOpacity style={styles.mapBtn}>
+      {/* <View style={styles.mapContainer}> */}
+        {/* <AntDesign name="location-pin" size={13} color="black" /> */}
+        {/* <View style={styles.map}> */}
+          {/* <TouchableOpacity style={styles.mapBtn}>
             <Text style={styles.mapBtn_text}>지도보기</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          </TouchableOpacity> */}
+          <View style={{flex:1}}>
+          <MapView
+                style={styles.mapContainer}
+                
+                provider={PROVIDER_GOOGLE}
+                initialRegion={{
+                latitude:boardData?.latitude||0,
+                longitude:boardData?.longitude||0,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+                }}  
+              >
+              {boardData?.latitude && boardData?.longitude && (
+                <Marker
+                  coordinate={{
+                    latitude: boardData.latitude,
+                    longitude: boardData.longitude,
+                  }}
+                />
+              )}
+            </MapView>
+          </View>
+        {/* </View> */}
+      {/* </View> */}
 
       <View style={styles.btnContainer}>
         <TouchableOpacity style={styles.chatBtn}>
@@ -177,6 +288,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
         </TouchableOpacity>
       </View>
     </View>
+    </ScrollView>
   );
 };
 const styles = StyleSheet.create({
@@ -282,9 +394,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'flex-end',
     justifyContent: 'center',
+    
   },
   mapContainer: {
-    backgroundColor: '#D9D9D9',
+    flex:1,
     width: Dimensions.get('screen').width - 40,
     height: 100,
     marginHorizontal: 20,
@@ -292,10 +405,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnContainer: {
-    position: 'absolute',
     bottom: 0,
     marginBottom: 20,
     alignSelf: 'center',
+    paddingTop:10
   },
   chatBtn: {
     width: 200,
