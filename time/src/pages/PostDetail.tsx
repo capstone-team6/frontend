@@ -131,21 +131,6 @@ const PostDetail: React.FC<Props> = ({route}) => {
     }
   }
 
-  // const dateStr = boardData?.itemTime;
-  // const date = new Date(dateStr);
-
-  // const options = {
-  //   year: 'numeric',
-  //   month: 'long',
-  //   day: 'numeric',
-  //   hour: 'numeric',
-  //   minute: 'numeric',
-  //   second: 'numeric',
-  //   hour12: false,
-  //   timeZone: 'Asia/Seoul',
-  // };
-
-  // const koreanDateStr = date.toLocaleDateString('ko-KR', options);
   
   const renderItem = ({ item, index }: { item: string, index: number }) => {
     return (
