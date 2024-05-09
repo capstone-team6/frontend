@@ -60,7 +60,10 @@ const postStackNavigator = () => {
           ),
         }}
       ></Stack.Screen>
-      <Stack.Screen name="PostDetail" component={PostDetail} />
+      <Stack.Screen name="PostDetail" component={PostDetail} options={{
+        headerTransparent:true,
+        headerTitle:''
+      }}/>
       <Stack.Screen name="App" component={App}/>
 
       <Stack.Screen name='LocationSearch' 
