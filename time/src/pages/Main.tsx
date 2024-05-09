@@ -27,7 +27,7 @@ import { NativeSyntheticEvent } from 'react-native';
 import { NativeScrollEvent } from 'react-native';
 
 
-Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"});
+Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
 async function requestPermission() {
   try {
     if (Platform.OS === 'android') {
@@ -89,7 +89,7 @@ const Main:React.FC<MainProps>=({route})=>{
   
   const categories = [
     '재능기부',
-    '개산책',
+    '운동',
     '심부름',
     '티켓팅',
     '오픈런',
@@ -112,7 +112,7 @@ const Main:React.FC<MainProps>=({route})=>{
     switch (category) {
       case '재능기부':
         return 'TALENT';
-      case '개산책':
+      case '운동':
         return 'EXERCISE';
       case '심부름':
         return 'ERRANDS';
