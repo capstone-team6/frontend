@@ -44,6 +44,7 @@ interface BoardData {
   category: string;
   boardType: string;
   images: string[];
+  who:string;
 }
 
 const convertToKorean = (category: string) => {
@@ -245,13 +246,12 @@ const PostDetail: React.FC<Props> = ({route}) => {
           <View style={{flex:1}}>
           <MapView
                 style={styles.mapContainer}
-                
                 provider={PROVIDER_GOOGLE}
                 initialRegion={{
                 latitude:boardData?.latitude||0,
                 longitude:boardData?.longitude||0,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
                 }}  
               >
               {boardData?.latitude && boardData?.longitude && (
@@ -268,9 +268,11 @@ const PostDetail: React.FC<Props> = ({route}) => {
       {/* </View> */}
 
       <View style={styles.btnContainer}>
-        <TouchableOpacity style={styles.chatBtn}>
-          <Text style={styles.chatBtn_text}> 채팅하기</Text>
-        </TouchableOpacity>
+        {boardData?.who=='writer'?'':
+         <TouchableOpacity style={styles.chatBtn}>
+         <Text style={styles.chatBtn_text}> 채팅하기</Text>
+       </TouchableOpacity>
+        }
       </View>
     </View>
     </ScrollView>

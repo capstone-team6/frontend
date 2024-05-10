@@ -26,7 +26,6 @@ import FastImage from 'react-native-fast-image'
 import { NativeSyntheticEvent } from 'react-native';
 import { NativeScrollEvent } from 'react-native';
 
-
 Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
 async function requestPermission() {
   try {
