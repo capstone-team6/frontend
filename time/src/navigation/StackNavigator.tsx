@@ -8,14 +8,15 @@ import BottomTabNavigation from './BottmTabNavigation'
 import { RootStackParamList } from '../../types/Type';
 import DeleteMem from '../pages/DeleteMem';
 import BottmTabNavigation from './BottmTabNavigation';
+import Main from '../pages/Main';
 
 const Stack = createStackNavigator<RootStackParamList>();
 interface StackNavProps{
     onLoginSuccess:()=>void
 }
+
 const StackNavigators:React.FC<StackNavProps>=({onLoginSuccess}) => {
     
-
     return (
     <Stack.Navigator>
         <Stack.Screen name='SignIn' options={{headerShown:false}}>
@@ -33,6 +34,9 @@ const StackNavigators:React.FC<StackNavProps>=({onLoginSuccess}) => {
             headerShown:false
         }}
         />
+        {/* <Stack.Screen name='Main' component={Main} options={{
+            headerShown:true
+        }}/> */}
     </Stack.Navigator>
 );
 };

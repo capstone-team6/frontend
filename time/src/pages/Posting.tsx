@@ -34,6 +34,7 @@ type ImageType={
   type:string;
   name:string;
 }
+
 Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{lanuage:"ko",region:"KR"})
 
 async function requestPermission() {
@@ -79,7 +80,7 @@ const [showMap, setShowMap]=useState<boolean>(true)
 const [isComplete,setIsComplete]=useState<boolean>(false)
 const [isActive,setIsActive]=useState<{[key:string]:boolean}>({
   'TALENT':false,
-  'ECERCISE':false,
+  'EXERCISE':false,
   'ERRANDS':false,
   'FREE':false,
   'TICKETING':false,
@@ -100,7 +101,7 @@ useEffect(()=>{
             Geolocation.getCurrentPosition(
                 pos=>{
                     setLocation(pos.coords);
-                    Geocoder.from(pos.coords.latitude, pos.coords.longitude,"ko-KR")
+                    Geocoder.from(pos.coords.latitude, pos.coords.longitude,"ko")
                         .then(json => {
                           console.log(json.results[0])
                             const addressComponent = json.results[0].formatted_address;
@@ -167,8 +168,8 @@ const onResponse = useCallback(async (response:any) => {
   console.log('orientation', orientation);
   return ImageResizer.createResizedImage(
     response.path,
-    response.width/10,
-    50,
+    response.width,
+    response.height,
     response.mime.includes('jpeg') ? 'JPEG' : 'PNG',
     100,
     0,
@@ -312,7 +313,7 @@ const onSubmit = async () => {
 
     if (res.status === 200) {
       console.log(res.data);
-      navigation.navigate('틈새시장');
+      navigation.goBack();
     }
   } catch(error) {
     console.log(error);
@@ -482,8 +483,8 @@ const onSubmit = async () => {
                 initialRegion={{
                 latitude:location?.latitude,
                 longitude:location?.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
                 }}   
               >
               {markerLocation&&(
