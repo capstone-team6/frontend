@@ -18,8 +18,8 @@ import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
 import SockJS from 'sockjs-client';
-import Stomp, {Client} from 'stompjs';
-import * as StompJs from '@stomp/stompjs';
+import Stomp from 'stompjs';
+import {Client} from '@stomp/stompjs';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
@@ -39,7 +39,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const [role, setRole] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [stompClient, setStompClient] = useState<Stomp.Client | null>(null);
-  const [client, changeClient] = useState<StompJs.Client | null>(null);
+  const [client, changeClient] = useState<Client | null>(null);
   const [messageInput, setMessageInput] = useState('');
   const [chatList, setChatList] = useState<
     {
@@ -65,25 +65,25 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     setModalVisible(false);
   };
 
-  const onTransactionPress = () => {
-    if (stompClient !== null) {
-      const transactionMessage = {
-        roomId: roomId,
-        writer: userName,
-        message: '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
-        type: 'goTransaction',
-        role: 'buyer',
-      };
-      // setChatList(prevMessages => [...prevMessages, transactionMessage]);
-      stompClient.send(
-        `/pub/chat/send`,
-        {},
-        JSON.stringify({transactionMessage}),
-      );
-      addMessage(transactionMessage);
-    }
-    setModalVisible(false);
-  };
+  // const onTransactionPress = () => {
+  //   if (stompClient !== null) {
+  //     const transactionMessage = {
+  //       roomId: roomId,
+  //       writer: userName,
+  //       message: '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
+  //       type: 'goTransaction',
+  //       role: 'buyer',
+  //     };
+  // setChatList(prevMessages => [...prevMessages, transactionMessage]);
+  // stompClient.send(
+  //   `/pub/chat/send`,
+  //   {},
+  //   JSON.stringify({transactionMessage}),
+  // );
+  //     addMessage(transactionMessage);
+  //   }
+  //   setModalVisible(false);
+  // };
 
   const goTransaction = (pay: string) => {
     const transactionMessage = {
@@ -182,40 +182,131 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     setChatList(prev => [...prev, message]);
   };
 
+  // const sendMessage = () => {
+  //   if (stompClient !== null) {
+  //     const message = {
+  //       roomId: roomId,
+  //       writer: userName,
+  //       message: messageInput,
+  //       type: 'text',
+  //     };
+  //     // stompClient.send(`/pub/chat/send/`, {}, JSON.stringify({message}));
+  //     setChatList(prevMessages => [...prevMessages, message]);
+  //     setMessageInput('');
+  //   }
+  // };
+
+  const sendChat = () => {
+    client?.publish({
+      destination: `/pub/chat/send/1`,
+      body: JSON.stringify({
+        roomId: 1,
+        writer: 'SUMIN',
+        message: 'HI',
+        type: 'MESSAGE',
+      }),
+    });
+  };
+
   const sendMessage = () => {
-    if (stompClient !== null) {
-      const message = {
-        roomId: roomId,
-        writer: userName,
-        message: messageInput,
-        type: 'text',
-      };
-      stompClient.send(`/pub/chat/send/`, {}, JSON.stringify({message}));
-      setChatList(prevMessages => [...prevMessages, message]);
-      setMessageInput('');
+    if (client?.connected) {
+      client?.publish({
+        destination: '/pub/chat/send/1',
+        body: JSON.stringify({
+          roomId: 1,
+          writer: 'SUMIN',
+          message: 'HI',
+          type: 'MESSAGE',
+        }),
+      });
+    } else {
+      console.log('STOMP client is not connected.');
     }
   };
 
   //@stompjs/stomp
+  // useEffect(() => {
+  //   console.log('시작');
+  //   const stomp = new Client({
+  //     connectHeaders: {},
+  //     brokerURL: 'ws://13.125.118.92:8080/ws',
+  //     debug: function (str: any) {
+  //       console.log(str);
+  //     },
+  //     reconnectDelay: 200,
+  //     heartbeatIncoming: 4000,
+  //     heartbeatOutgoing: 4000,
+  //     forceBinaryWSFrames: true,
+  //     appendMissingNULLonIncoming: true,
+  //   });
+
+  //   stomp.onConnect = function (frame: any) {
+  //     console.log('connected');
+  //     stomp?.subscribe('/sub/chat/room/1', function (message) {
+  //       console.log(JSON.parse(message.body));
+  //     });
+  //   };
+
+  //   stomp.onStompError = function (frame) {
+  //     console.log('Broker reported error: ' + frame.headers['message']);
+  //     console.log('Additional details: ' + frame.body);
+  //   };
+
+  //   const cleanup = () => {
+  //     if (stomp && stomp.connected) {
+  //       stomp.deactivate();
+  //     }
+  //   };
+  //   return cleanup;
+  // }, []);
+
+  // const stompConfig = {
+  //   connectHeaders: {},
+  //   brokerURL: 'ws://13.125.118.92:8080/ws',
+  //   debug: function (str: any) {
+  //     console.log('STOMP: ' + str);
+  //   },
+  //   reconnectDelay: 5000,
+  //   forceBinaryWSFrames: true,
+  //   appendMissingNULLonIncoming: true,
+  //   onConnect: function (frame: any) {
+  //     console.log('connected');
+  //     const subscription = stompClient?.subscribe(
+  //       '/sub/chat/room/1',
+  //       function (message) {
+  //         console.log(JSON.parse(message.body));
+  //       },
+  //     );
+  //   },
+  //   onStompError: (frame: any) => {
+  //     console.log('Broker reported error: ' + frame.headers['message']);
+  //     console.log('Additional details: ' + frame.body);
+  //   },
+  // };
+
+  // const stompClient = new Client(stompConfig);
+
+  // useEffect(() => {
+  //   stompClient.activate();
+  // }, []);
+
+  //@stompjs/stomp
   const connect = () => {
-    // 소켓 연결
     try {
-      const clientdata = new StompJs.Client({
+      const clientdata = new Client({
         brokerURL: 'ws://13.125.118.92:8080/ws',
-        connectHeaders: {
-          login: '',
-          passcode: 'password',
+        connectHeaders: {},
+        debug: function (str: any) {
+          console.log('STOMP:' + str);
         },
-        debug: function (str) {
-          console.log(str);
-        },
-        reconnectDelay: 5000, // 자동 재 연결
+        reconnectDelay: 5000,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
+        forceBinaryWSFrames: true,
+        appendMissingNULLonIncoming: true,
       });
-      console.log(clientdata);
 
-      // 구독
+      // changeClient(clientdata);
       clientdata.onConnect = function () {
         clientdata.subscribe(`/sub/chat/room/1`, (message: any) => {
           if (message.body) {
@@ -223,37 +314,23 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             setChatList(chats => [...chats, msg]);
           }
         });
+        sendMessage();
       };
-
-      clientdata.activate(); // 클라이언트 활성화
-      changeClient(clientdata); // 클라이언트 갱신
+      clientdata.onStompError = function (frame) {
+        console.log('Broker reported error: ' + frame.headers['message']);
+        console.log('Additional details: ' + frame.body);
+      };
+      clientdata.activate();
     } catch (err) {
       console.log(err);
     }
   };
+
   const disConnect = () => {
-    // 연결 끊기
     if (client === null) {
       return;
     }
     client.deactivate();
-  };
-  const sendChat = () => {
-    if (messageInput === '') {
-      return;
-    }
-    if (client) {
-      client.publish({
-        destination: `/pub/chat/send/1`,
-        body: JSON.stringify({
-          roomId: roomId,
-          writer: userName,
-          message: messageInput,
-          type: 'text',
-        }),
-      });
-    }
-    setMessageInput('');
   };
 
   useEffect(() => {
@@ -269,18 +346,22 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     //   }
     // };
     // fetchData();
-
     //WebSocket 연결
     // const socket = new WebSocket('ws://13.125.118.92:8080/ws');
     // const client = Stomp.over(socket);
     // setStompClient(client);
+    // client.heartbeat.outgoing = 90000;
     // client.connect({}, () => {
     //   console.log('Connected to WebSocket');
-    //   client.subscribe(`/sub/chat/room/${roomId}`, (message: any) => {
+    //   client.subscribe(`/sub/chat/room/1`, (message: any) => {
     //     const newMessage = JSON.parse(message.body);
     //     console.log(newMessage);
     //     addMessage(newMessage);
     //   });
+    //   const sendMessage = (content: any) => {
+    //     client.send('/pub/chat/send/1', {}, JSON.stringify({message: content}));
+    //   };
+    //   sendMessage('안녕하세요!');
     // });
     // const disconnectCallback = () => {
     //   console.log('Disconnected from server');
@@ -290,8 +371,9 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     //     stompClient.disconnect(disconnectCallback);
     //   }
     // };
-
+    console.log('시작');
     connect();
+
     return () => {
       disConnect();
     };
@@ -634,7 +716,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         <TextInput
           value={messageInput}
           onChangeText={setMessageInput}
-          onSubmitEditing={sendMessage}
+          // onSubmitEditing={sendMessage}
           placeholder="Type your message..."
           style={{
             flex: 1,
@@ -646,7 +728,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           }}
         />
 
-        <TouchableOpacity onPress={sendMessage} style={styles.iconContainer}>
+        <TouchableOpacity style={styles.iconContainer}>
           <Image
             source={require('../assets/images/send.png')}
             style={{height: 20, width: 20}}
@@ -664,7 +746,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           <View style={styles.modalView}>
             <Button title="Camera" onPress={onCameraPress} />
             <Button title="Gallery" onPress={onGalleryPress} />
-            <Button title="Transaction" onPress={onTransactionPress} />
+            <Button title="Transaction" />
           </View>
         </View>
       </Modal>
