@@ -25,6 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import FastImage from 'react-native-fast-image'
 import { NativeSyntheticEvent } from 'react-native';
 import { NativeScrollEvent } from 'react-native';
+import postStackNavigator from '../navigation/postNavigator';
 
 Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
 async function requestPermission() {
@@ -66,8 +67,8 @@ type LoginNav=StackNavigationProp<RootStackParamList,'LoginStackNavigation'>
 type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
 const Main:React.FC<MainProps>=({route})=>{
   // const {dataToMain}=route.params||{}
-  const { dataFromParent }= route.params || {};
-  console.log(dataFromParent)
+  // const { dataFromParent }= route.params || {};
+  // console.log(dataFromParent)
   const navigation = useNavigation<MainNavigationProp>();
   const loginNavigation=useNavigation<LoginNav>()
   const goToPostDetail = (boardId: number) => {
@@ -186,14 +187,11 @@ const Main:React.FC<MainProps>=({route})=>{
       if (result === 'granted') {
         Geolocation.getCurrentPosition(
           pos => {
-            if(!dataFromParent){
+          
               setLocation(pos.coords);
-            }else{
-              setLocation({
-                latitude:dataFromParent.makerLocation.latitude,
-                longitude:dataFromParent.makerLocation.longitude,
-              })
-            }
+            
+             
+            
             
             const latitude=pos.coords.latitude
             const longitude=pos.coords.longitude
@@ -205,11 +203,11 @@ const Main:React.FC<MainProps>=({route})=>{
                 const words = desireAddress.split(' ');
                 const lastAddress = `${words[1]} ${words[2]} ${words[3]} ${words[4]}`;
                 
-                if(!dataFromParent){
+                
                   setAddress(lastAddress)
-                }else{
-                  setAddress(dataFromParent.address)
-                }
+               
+               
+             
                 console.log(longitude,latitude,address)
 
                 if(longitude&&latitude&&address){
@@ -297,17 +295,8 @@ const Main:React.FC<MainProps>=({route})=>{
         );
       }
     });
-  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,dataFromParent]);
-  useEffect(()=>{
-    if(dataFromParent){
-      console.log(dataFromParent)
-      setLocation({
-        latitude:dataFromParent.latitude,
-        longitude:dataFromParent.longitude,
-      })
-      setAddress(dataFromParent.address)
-    }
-  },[dataFromParent])
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell]);
+  
 
 const handleLoadMore=()=>{
   setPageNum(pageNum+1)
@@ -433,6 +422,7 @@ function timeDiffence(targetTime:Date):string{
             style={styles.postContainer}
             onPress={() => {
               goToPostDetail(item.boardId);
+              // postStackNavigator(item.boardId)
             }}>
             {item.firstImage?
             <FastImage
