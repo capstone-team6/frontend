@@ -73,7 +73,7 @@ const BottmTabNavigation = () => {
             />
           ),
         }}
-      />
+      ></Tab.Screen>
       <Tab.Screen
         name="관심목록"
         component={Scrap}
