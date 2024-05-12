@@ -1,18 +1,6 @@
-interface MainParams {
-  dataFromParent:
-    | {
-        latitude: number;
-        longitude: number;
-        address: string;
-      }
-    | any;
-  // dataToMain?: {
-  //   latitude: number;
-  //   longitude: number;
-  //   address: string;
-  // };
-}
-type ImageType = {
+
+
+type ImageType={
   firstImage: unknown;
   uri: string;
   type: string;
@@ -38,8 +26,17 @@ interface BoardData {
   category: string;
   boardType: string;
   images: ImageType[];
-  who: string;
-}
+  who:string;
+  }
+
+  interface LocationSet{
+    addressChange:string,
+    markerLocation:{
+      latitude:number,
+      longitude:number
+    }
+    
+  }
 export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
@@ -64,18 +61,17 @@ export type RootStackParamList = {
   App: undefined;
   Main: undefined;
   PostDetail: {boardId: number};
-  // 틈새시장: MainParams;
-  틈새시장: undefined;
-  MapSearchSet: undefined;
-  Posting: undefined;
-  ChargePay: undefined;
-  MinusPay: undefined;
-  LoginStackNavigation: undefined;
-  LocationSearch: undefined;
+  틈새시장:LocationSet,
+  MapSearchSet:undefined;
+  Posting:undefined
+  ChargePay:undefined
+  MinusPay:undefined
+  LoginStackNavigation:undefined
+  LocationSearch:undefined
   AccountEnter: undefined;
   ChatScreeen: undefined;
   chatScreenNavigator: {roomId: number; userName: string};
-  postNavigatoer: undefined;
-  PostDetailSet: {boardId: number};
-  PostingChange: {boardData: BoardData};
+  postNavigatoer:undefined
+  PostDetailSet:{boardId:number};
+  PostingChange:{boardData:BoardData}
 };
