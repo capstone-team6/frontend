@@ -1,15 +1,4 @@
-interface MainParams {
-  dataFromParent: {
-    latitude: number;
-    longitude: number;
-    address: string;
-  }|any;
-  // dataToMain?: {
-  //   latitude: number;
-  //   longitude: number;
-  //   address: string;
-  // };
-}
+
 type ImageType={
   firstImage: unknown;
   uri:string;
@@ -38,6 +27,15 @@ interface BoardData {
   images: ImageType[];
   who:string;
   }
+
+  interface LocationSet{
+    addressChange:string,
+    markerLocation:{
+      latitude:number,
+      longitude:number
+    }
+    
+  }
 export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
@@ -62,8 +60,7 @@ export type RootStackParamList = {
   App: undefined;
   Main: undefined;
   PostDetail: {boardId: number};
-  // 틈새시장: MainParams;
-  틈새시장:undefined,
+  틈새시장:LocationSet,
   MapSearchSet:undefined;
   Posting:undefined
   ChargePay:undefined
