@@ -17,6 +17,7 @@ import {RootStackParamList} from '../../types/Type';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import postStackNavigator from './postNavigator';
+import ScrapStackNavigator from './ScrapStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -76,9 +77,11 @@ const BottmTabNavigation = () => {
       ></Tab.Screen>
       <Tab.Screen
         name="관심목록"
-        component={Scrap}
+        component={ScrapStackNavigator}
         options={{
+          headerShown:false,
           tabBarLabel: '관심',
+          unmountOnBlur:true,
           tabBarIcon: ({focused}) => (
             <AntDesign
               name="hearto"
