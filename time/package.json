@@ -46,7 +46,8 @@
     "react-native-webview": "^13.8.4",
     "react-navigation": "^5.0.0",
     "sockjs-client": "^1.6.1",
-    "stompjs": "^2.3.3"
+    "stompjs": "^2.3.3",
+    "ws": "^8.17.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

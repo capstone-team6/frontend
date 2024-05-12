@@ -13,16 +13,18 @@ import {
   Image,
   Dimensions,
   Modal,
+  Alert,
 } from 'react-native';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
-import {Client} from '@stomp/stompjs';
+import {Client, Message} from '@stomp/stompjs';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
+import AccountEnter from './AccountEnter';
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -35,8 +37,8 @@ interface Props {
 }
 
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
-  const {roomId, userName} = route.params;
-  const [role, setRole] = useState('');
+  const {roomId, userName} = route.params || {};
+  const [role, setRole] = useState('BUYER');
   const [modalVisible, setModalVisible] = useState(false);
   const [stompClient, setStompClient] = useState<Stomp.Client | null>(null);
   const [client, changeClient] = useState<Client | null>(null);
@@ -47,7 +49,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       writer: string;
       message: string;
       type: string;
-      // role: string;
     }[]
   >([]);
 
@@ -65,25 +66,22 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     setModalVisible(false);
   };
 
-  // const onTransactionPress = () => {
-  //   if (stompClient !== null) {
-  //     const transactionMessage = {
-  //       roomId: roomId,
-  //       writer: userName,
-  //       message: '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
-  //       type: 'goTransaction',
-  //       role: 'buyer',
-  //     };
-  // setChatList(prevMessages => [...prevMessages, transactionMessage]);
-  // stompClient.send(
-  //   `/pub/chat/send`,
-  //   {},
-  //   JSON.stringify({transactionMessage}),
-  // );
-  //     addMessage(transactionMessage);
-  //   }
-  //   setModalVisible(false);
-  // };
+  const addMessage = (message: any) => {
+    setChatList(prev => [...prev, message]);
+  };
+
+  const onTransactionPress = () => {
+    setModalVisible(false);
+    if (client !== null) {
+      const transactionMessage = {
+        roomId: roomId,
+        writer: userName,
+        message: '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
+        type: 'goTransaction',
+      };
+      addMessage(transactionMessage);
+    }
+  };
 
   const goTransaction = (pay: string) => {
     const transactionMessage = {
@@ -92,13 +90,25 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       message: `${pay}로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.`,
       type: 'onTransaction',
     };
+
     if (pay === '틈새 페이') {
       transactionMessage.message +=
         '\n\n' +
         '"틈새페이" 는 안전한 결제를 위하여 포인트 차감 후\n결제완료시 시간 판매자의 틈새페이로 포인트가 전달됩니다.\n또한,시간 판매자가 거래완료를 누른 뒤 시간 구매자가\n거래완료를 눌러야 거래가 최종 완료됩니다.';
     }
     setChatList(prevMessages => [...prevMessages, transactionMessage]);
+
+    if (pay === '계좌이체') {
+      transferInfo();
+    }
+
     transferComplete();
+    client?.publish({
+      destination: '/pub/chat/send/1',
+      body: JSON.stringify({
+        transactionMessage,
+      }),
+    });
   };
 
   // const onMeet = () => {
@@ -148,26 +158,63 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     setChatList(prevMessages => [...prevMessages, meetComplete]);
   };
 
-  const completeMessage = () => {
+  const completeMessage = async () => {
     const completeMessage = {
       roomId: roomId,
       writer: 'System',
       message: '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
       type: 'review',
     };
-
     setChatList(prevMessages => [...prevMessages, completeMessage]);
+    try {
+      const response = await axios.put(
+        'http://13.125.118.92:8080/api/board/3/chat/2/complete',
+      );
+      if (response.status === 200) {
+        console.log(response.data);
+      } else {
+        console.error('Unexpected response status:', response.status);
+      }
+    } catch (error) {
+      console.error('Request failed:', error);
+    }
   };
-  const goToProfile = () => {};
+
+  const cancelMessage = async () => {
+    try {
+      const response = await axios.put(
+        'http://13.125.118.92:8080/api/board/2/chat/1/cancel',
+      );
+      if (response.status === 200) {
+        console.log(response.data);
+      } else {
+        console.error('Unexpected response status:', response.status);
+      }
+    } catch (error) {
+      console.error('Request failed:', error);
+    }
+  };
+
+  const goToProfile = () => {
+    navigation.navigate('Profile');
+  };
+
+  const goToAccountEnter = () => {
+    navigation.navigate('AccountEnter');
+  };
+
+  const goToPay = () => {};
+
   const transferInfo = () => {
     const transferInfo = {
       roomId: roomId,
-      writer: 'System',
+      writer: userName,
       message: '계좌 정보를 보냈어요.',
-      type: 'account',
+      type: 'transferInfo',
     };
     setChatList(prevMessages => [...prevMessages, transferInfo]);
   };
+
   const onPay = () => {
     const transferInfo = {
       roomId: roomId,
@@ -176,10 +223,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       type: 'pay',
     };
     setChatList(prevMessages => [...prevMessages, transferInfo]);
-  };
-
-  const addMessage = (message: any) => {
-    setChatList(prev => [...prev, message]);
   };
 
   // const sendMessage = () => {
@@ -300,13 +343,11 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           console.log('STOMP:' + str);
         },
         reconnectDelay: 5000,
-        heartbeatIncoming: 4000,
-        heartbeatOutgoing: 4000,
         forceBinaryWSFrames: true,
         appendMissingNULLonIncoming: true,
       });
 
-      // changeClient(clientdata);
+      changeClient(clientdata);
       clientdata.onConnect = function () {
         clientdata.subscribe(`/sub/chat/room/1`, (message: any) => {
           if (message.body) {
@@ -428,10 +469,10 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             key={index}
             style={{
               alignSelf:
-                msg.writer === userName &&
-                (msg.type === 'message' ||
-                  msg.type === 'goTransaction' ||
-                  msg.type === 'completeTransaction')
+                (msg.type === 'goTransaction' && role === 'BUYER') ||
+                msg.type === 'message' ||
+                msg.type === 'completeTransaction' ||
+                msg.type === 'transferInfo'
                   ? 'flex-end'
                   : msg.type === 'onTransaction' || msg.type === 'review'
                   ? 'center'
@@ -442,7 +483,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   ? '100%'
                   : 'auto',
             }}>
-            {msg.type === 'goTransaction' ? (
+            {msg.type === 'goTransaction' && role === 'BUYER' ? (
               <View
                 style={{
                   backgroundColor: '#F1F1F1',
@@ -491,7 +532,8 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                       marginBottom: 8,
                     }}
                     onPress={() => {
-                      goTransaction('계좌 이체');
+                      goToAccountEnter();
+                      goTransaction('계좌이체');
                     }}>
                     <Text
                       style={{
@@ -528,7 +570,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : msg.type == 'completeTransaction' ? (
+            ) : msg.type == 'completeTransaction' && role === 'BUYER' ? (
               <View
                 style={{
                   backgroundColor: '#F1F1F1',
@@ -575,7 +617,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                       justifyContent: 'center',
                       marginVertical: 8,
                     }}
-                    onPress={completeMessage}>
+                    onPress={cancelMessage}>
                     <Text
                       style={{
                         fontFamily: 'NanumGothic',
@@ -614,7 +656,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                       justifyContent: 'center',
                       marginVertical: 8,
                     }}
-                    onPress={goToProfile}>
+                    onPress={goToAccountEnter}>
                     <Text
                       style={{
                         fontFamily: 'NanumGothic',
@@ -628,7 +670,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : (
+            ) : msg.type === 'onTransaction' || msg.type === 'review' ? (
               <View
                 style={{
                   padding: 10,
@@ -654,14 +696,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                     <Text
                       style={{
                         color: 'black',
-                        // backgroundColor:
-                        // msg.writer === userName && msg.type === 'message'
-                        //   ? '#F1F1F1'
-                        //   : msg.type === 'onTransaction' ||
-                        //     msg.type === 'review'
-                        //   ? '#BDBBC2'
-                        //   : '#C9BAE5',
-
                         textAlign:
                           msg.type === 'onTransaction' || msg.type === 'review'
                             ? 'center'
@@ -697,7 +731,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </View>
                 </View>
               </View>
-            )}
+            ) : null}
           </View>
         ))}
       </ScrollView>
@@ -746,7 +780,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           <View style={styles.modalView}>
             <Button title="Camera" onPress={onCameraPress} />
             <Button title="Gallery" onPress={onGalleryPress} />
-            <Button title="Transaction" />
+            <Button title="Transaction" onPress={onTransactionPress} />
           </View>
         </View>
       </Modal>

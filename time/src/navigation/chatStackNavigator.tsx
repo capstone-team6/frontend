@@ -4,6 +4,7 @@ import Chatting from '../pages/Chatting';
 import ChatScreen from '../pages/ChatScreen';
 import {RootStackParamList} from '../../types/Type';
 import {RotationGestureHandlerStateChangeEvent} from 'react-native-gesture-handler';
+import chatScreenNavigator from './chatScreenNavigator';
 import React from 'react';
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -26,8 +27,8 @@ const ChatStackNavigator = () => {
         }}
       />
       <Stack.Screen
-        name="ChatScreen"
-        component={ChatScreen}
+        name="chatScreenNavigator"
+        component={chatScreenNavigator}
         options={{
           headerShown: false,
         }}
