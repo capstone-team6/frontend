@@ -23,16 +23,13 @@ async function requestPermission() {
         console.log(e)
     }
 }
-interface Props {
-    
-    sendDataToParent: (data: any) => void;
-    
-}
+
 
 type MainNav=StackNavigationProp<RootStackParamList,'Main'>
-const LocationSearch: React.FC<Props> = ({ sendDataToParent }) =>{
+const LocationSearch= () =>{
     const navigation=useNavigation<MainNav>()
     const mapRef=useRef<MapView>(null)
+    const [refresh,setRefresh]=useState(true)
     const [address, setAddress]=useState<string>('')
     const [location,setLocation]=useState<{
         latitude:number
@@ -109,12 +106,12 @@ const LocationSearch: React.FC<Props> = ({ sendDataToParent }) =>{
             }
         })
     },[])
-
-    const sendData=()=>{
-        const data={address,markerLocation}
-        sendDataToParent(data)
-        navigation.goBack()
+    
+    const goToMain=(addressChange:string,markerLocation:{latitude:number,longitude:number})=>{
+        
+        navigation.navigate('틈새시장',{addressChange,markerLocation})
     }
+    
     return (
         <View style={styles.container}>
             <View style={{zIndex:4,flex:2, paddingTop:30}}>
@@ -160,7 +157,9 @@ const LocationSearch: React.FC<Props> = ({ sendDataToParent }) =>{
             
             )}
             <View style={{paddingTop:50, alignItems:'center',marginBottom:50}}>
-                <TouchableOpacity onPress={sendData}>
+                <TouchableOpacity onPress={()=>{
+                    goToMain(address,markerLocation)
+                }}>
                     <Text style={styles.btn}>설정</Text>
                 </TouchableOpacity>
             </View>
