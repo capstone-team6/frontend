@@ -71,10 +71,9 @@ const postStackNavigator= () => {
       }}/>
       <Stack.Screen name="App" component={App}/>
 
-      <Stack.Screen name='LocationSearch' 
+      <Stack.Screen name='LocationSearch' component={LocationSearch}
       
       options={{
-        
         headerTitle:'위치 재설정',
         headerTitleStyle: {
           fontFamily: 'NanumGothic-Bold',
@@ -82,7 +81,7 @@ const postStackNavigator= () => {
         },
       }}
       
-      >{(props: any) => <LocationSearch {...props} sendDataToParent={sendDataToParent} />}</Stack.Screen>
+      ></Stack.Screen>
       
       <Stack.Screen name='PostDetailSet' component={PostDetailSet} 
       options={{
