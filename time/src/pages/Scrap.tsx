@@ -13,9 +13,12 @@ import {useState, useEffect} from 'react';
 import axios from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 interface RoomData {
   boardId: number;
   title: string;
+  itemTime: string;
+  itemPrice: number;
   createdDate: string;
   chatCount: number;
   scrapCount: number;
@@ -28,20 +31,43 @@ const Scrap = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    axios
-      .get('http://13.125.118.92:8080/api/scrap-list')
-      .then((response: any) => {
-        setPosts(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    AsyncStorage.getItem('accessToken').then(token => {
+      const accessToken = token ? JSON.parse(token) : null;
+      console.log(accessToken);
+      axios
+        .get('http://13.125.118.92:8080/api/scrap-list', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then(response => {
+          console.log(JSON.stringify(response.data.data));
+          const posts = JSON.stringify(response.data.data);
+          console.log(posts);
+
+          if (posts) {
+            const b = JSON.parse(posts);
+            setPosts(b);
+            b.forEach((posts: any) => {
+              Object.entries(posts).forEach(([key, value]) => {
+                console.log(`${key}: ${value}`);
+              });
+            });
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    });
   }, []);
 
   return (
     <View style={styles.main_container}>
       {/* 임시 */}
-      <TouchableOpacity style={styles.postContainer}>
+
+      {/* <TouchableOpacity style={styles.postContainer}>
+>>>>>>> main
         <Image
           source={require('../assets/images/post1.jpg')}
           style={styles.post_image}
@@ -64,14 +90,16 @@ const Scrap = () => {
             <Text style={styles.interactionText}>2</Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <FlatList
         data={posts}
-        keyExtractor={item => item.boardId.toString()}
+        keyExtractor={item => String(item.boardId)}
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
           <TouchableOpacity style={styles.postContainer}>
             <Image
-              source={require('../assets/images/post1.jpg')}
+              source={{
+                uri: `http:://13.125.118.92:8080/var/www/myapp/images/${item.firstImage}`,
+              }}
               style={styles.post_image}
             />
             <View style={styles.post_info}>
@@ -79,10 +107,14 @@ const Scrap = () => {
                 {item.distance} · {item.createdDate}
               </Text>
               <Text style={styles.info2}>{item.title}</Text>
-              <Text style={styles.info3}>10,000원/20분</Text>
+
+              <Text style={styles.info3}>
+                {item.itemPrice}/{item.itemTime}
+              </Text>
             </View>
             <View style={styles.appeal_icon}>
-              <AntDesign name="hearto" size={15} color={'red'} />
+              <AntDesign name="heart" size={15} color={'#E7736F'} />
+
             </View>
             <View style={styles.interactionContainer}>
               <View style={styles.interactionItem}>

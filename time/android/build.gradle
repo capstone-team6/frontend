@@ -14,7 +14,19 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        
+    }
+}
+
+allprojects{
+    repositories{
+        google()
+        jcenter()
+        mavenCentral()
+        maven{url 'https://devrepo.kakao.com/nexus/content/groups/public/'}
+        // maven { url 'https://devrepo.kakao.com/nexus/repository/kakaomap-releases/' }
+        
     }
 }
 
