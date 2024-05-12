@@ -13,6 +13,7 @@ import {useState, useEffect} from 'react';
 import axios from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 interface RoomData {
   boardId: number;
   title: string;
@@ -30,15 +31,35 @@ const Scrap = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    axios
-      .get('http://13.125.118.92:8080/api/scrap-list')
-      .then((response: any) => {
-        setPosts(response.data.data);
-        console.log(response.data.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    AsyncStorage.getItem('accessToken').then(token => {
+      const accessToken = token ? JSON.parse(token) : null;
+      console.log(accessToken);
+      axios
+        .get('http://13.125.118.92:8080/api/scrap-list', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then(response => {
+          console.log(JSON.stringify(response.data.data));
+          const posts = JSON.stringify(response.data.data);
+          console.log(posts);
+
+          if (posts) {
+            const b = JSON.parse(posts);
+            setPosts(b);
+            b.forEach((posts: any) => {
+              Object.entries(posts).forEach(([key, value]) => {
+                console.log(`${key}: ${value}`);
+              });
+            });
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    });
   }, []);
 
   return (
