@@ -12,7 +12,34 @@ interface MainParams {
   //   address: string;
   // };
 }
-
+type ImageType = {
+  firstImage: unknown;
+  uri: string;
+  type: string;
+  name: string;
+};
+interface BoardData {
+  boardId: number;
+  scrapStus: string;
+  userId: number;
+  nickname: string;
+  mannerTime: number;
+  title: string;
+  content: string;
+  createdDate: string;
+  itemTime: string;
+  itemPrice: string;
+  chatCount: number;
+  scrapCount: number;
+  address: string;
+  longitude: number;
+  latitude: number;
+  boardState: string;
+  category: string;
+  boardType: string;
+  images: ImageType[];
+  who: string;
+}
 export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
@@ -37,7 +64,8 @@ export type RootStackParamList = {
   App: undefined;
   Main: undefined;
   PostDetail: {boardId: number};
-  틈새시장: MainParams;
+  // 틈새시장: MainParams;
+  틈새시장: undefined;
   MapSearchSet: undefined;
   Posting: undefined;
   ChargePay: undefined;
@@ -47,4 +75,7 @@ export type RootStackParamList = {
   AccountEnter: undefined;
   ChatScreeen: undefined;
   chatScreenNavigator: {roomId: number; userName: string};
+  postNavigatoer: undefined;
+  PostDetailSet: {boardId: number};
+  PostingChange: {boardData: BoardData};
 };

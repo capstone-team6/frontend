@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -18,12 +19,20 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Carousel,{Pagination} from 'react-native-snap-carousel';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
+import { StackNavigationProp } from '@react-navigation/stack';
+import Geocoder from 'react-native-geocoding';
 
+type SetNav=StackNavigationProp<RootStackParamList,'PostDetailSet'>
 type PostDetailRouteProps = RouteProp<RootStackParamList, 'PostDetail'>;
 interface Props {
   route: PostDetailRouteProps;
 }
-
+type ImageType={
+  uri:string;
+  type:string;
+  name:string;
+  }
 interface BoardData {
   boardId: number;
   scrapStus: string;
@@ -34,7 +43,7 @@ interface BoardData {
   content: string;
   createdDate: string;
   itemTime: string;
-  itemPrice: number;
+  itemPrice: string;
   chatCount: number;
   scrapCount: number;
   address: string;
@@ -43,7 +52,8 @@ interface BoardData {
   boardState: string;
   category: string;
   boardType: string;
-  images: string[];
+  images: ImageType[];
+  who:string;
 }
 
 const convertToKorean = (category: string) => {
@@ -66,12 +76,17 @@ const convertToKorean = (category: string) => {
       return category;
   }
 };
-
+Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
 const PostDetail: React.FC<Props> = ({route}) => {
+  const navigation=useNavigation<SetNav>()
   const {boardId} = route.params;
   console.log(boardId)
   const [isScrap, setIsScrap] = useState(false);
   const [boardData, setBoardData] = useState<BoardData|null>(null);
+
+  const goToSet=(boardId:number)=>{
+    navigation.navigate('PostDetailSet',{boardId})
+  }
 
   const handleHeartPress = async () => {
     const newScrapValue = !isScrap;
@@ -132,7 +147,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
   }
 
   
-  const renderItem = ({ item, index }: { item: string, index: number }) => {
+  const renderItem = ({ item, index }: { item: ImageType, index: number }) => {
     return (
       <View>
         <Image
@@ -161,21 +176,51 @@ const PostDetail: React.FC<Props> = ({route}) => {
       />
     );
   };
+
+  const [showOptions, setShowOptions]=useState(false)
+  const toggleOptions=()=>{
+    setShowOptions(!showOptions)
+  }
+
+  const handleOptionSelect=(option: any)=>{
+    Alert.alert(`${option}`)
+    setShowOptions(false)
+  }
+
   return (
     <ScrollView>
       <View style={styles.PostDetail_container}>
       <View style={styles.postingImg}>
+      {boardData?.who=='writer'?
+            <SimpleLineIcons name='options-vertical'
+            size={20}
+            style={{left:Dimensions.get('screen').width/2.5, marginTop:10}}
+            onPress={()=>{goToSet(boardData.boardId)}}
+            />
+            
+          
+          :''}
 
-      <Carousel
-        data={boardData?.images ?? []}
-        renderItem={renderItem}
-        sliderWidth={300}
-        itemWidth={300}
-        layout="default"
-        style={{alignContent:'center', alignItems:'center'}}
-        onSnapToItem={(index) => setActiveSlide(index)}
-      />
-      {renderPagination()}
+{boardData?.images && boardData.images.length > 0 ? (
+  <Carousel
+    data={boardData?.images?? []}
+    renderItem={renderItem}
+    sliderWidth={300}
+    itemWidth={300}
+    layout="default"
+    style={{alignContent: 'center', alignItems: 'center'}}
+    onSnapToItem={(index) => setActiveSlide(index)}
+  >
+    {renderPagination()}
+  </Carousel>
+) : (
+  <Image
+    source={require('../assets/images/logo.png')}
+    style={{marginVertical:50}}
+  />
+)}
+
+      
       </View>
 
       <View style={styles.user}>
@@ -242,35 +287,37 @@ const PostDetail: React.FC<Props> = ({route}) => {
           {/* <TouchableOpacity style={styles.mapBtn}>
             <Text style={styles.mapBtn_text}>지도보기</Text>
           </TouchableOpacity> */}
-          <View style={{flex:1}}>
+         
+          {boardData?.latitude&&boardData.longitude&&
           <MapView
-                style={styles.mapContainer}
-                
-                provider={PROVIDER_GOOGLE}
-                initialRegion={{
-                latitude:boardData?.latitude||0,
-                longitude:boardData?.longitude||0,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-                }}  
-              >
-              {boardData?.latitude && boardData?.longitude && (
-                <Marker
-                  coordinate={{
-                    latitude: boardData.latitude,
-                    longitude: boardData.longitude,
-                  }}
-                />
-              )}
-            </MapView>
-          </View>
+          style={styles.mapContainer}
+          provider={PROVIDER_GOOGLE}
+          initialRegion={{
+          latitude:boardData?.latitude||0,
+          longitude:boardData?.longitude||0,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+          }}  
+        >
+        {boardData?.latitude && boardData?.longitude && (
+          <Marker
+            coordinate={{ 
+              latitude: boardData.latitude,
+              longitude: boardData.longitude,
+            }}
+          />
+        )}
+      </MapView>}
+        
         {/* </View> */}
       {/* </View> */}
 
       <View style={styles.btnContainer}>
-        <TouchableOpacity style={styles.chatBtn}>
-          <Text style={styles.chatBtn_text}> 채팅하기</Text>
-        </TouchableOpacity>
+        {boardData?.who=='writer'?'':
+          <TouchableOpacity style={styles.chatBtn}>
+            <Text style={styles.chatBtn_text}> 채팅하기</Text>
+          </TouchableOpacity>
+        }
       </View>
     </View>
     </ScrollView>
@@ -287,7 +334,6 @@ const styles = StyleSheet.create({
     width: Dimensions.get('screen').width,
     height: 300,
     backgroundColor: '#C9BAE5',
-
     justifyContent: 'center',
     alignItems: 'center',
   },

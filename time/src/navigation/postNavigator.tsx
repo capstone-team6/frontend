@@ -1,4 +1,4 @@
-import {useNavigation} from '@react-navigation/native';
+import {RouteProp, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import Chatting from '../pages/Chatting';
 import ChatScreen from '../pages/ChatScreen';
@@ -15,10 +15,15 @@ import BottmTabNavigation from './BottmTabNavigation';
 import SignIn from '../pages/SignIn';
 import App from '../../App';
 import LocationSearch from '../pages/LocationSearch';
-
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
+import PostDetailSet from '../pages/PostDetailSet';
+import PostingChange from '../pages/PostingChange';
 const Stack = createStackNavigator<RootStackParamList>();
 
-const postStackNavigator = () => {
+
+
+const postStackNavigator= () => {
+  
   const [dataToMain, setDataToMain]=useState<any>()
   const sendDataToParent=(data:any)=>{
     console.log(data)
@@ -31,9 +36,9 @@ const postStackNavigator = () => {
         name="틈새시장"
         component={Main}
         // initialParams={{dataFromParent:dataToMain}}
-        initialParams={{
-          dataFromParent: dataToMain
-        }}
+        // initialParams={{
+        //   dataFromParent: dataToMain
+        // }}
         options={{
           headerTitleStyle: {
             color: '#352456',
@@ -62,7 +67,7 @@ const postStackNavigator = () => {
       ></Stack.Screen>
       <Stack.Screen name="PostDetail" component={PostDetail} options={{
         headerTransparent:true,
-        headerTitle:''
+        headerTitle:'',
       }}/>
       <Stack.Screen name="App" component={App}/>
 
@@ -79,6 +84,18 @@ const postStackNavigator = () => {
       
       >{(props: any) => <LocationSearch {...props} sendDataToParent={sendDataToParent} />}</Stack.Screen>
       
+      <Stack.Screen name='PostDetailSet' component={PostDetailSet} 
+      options={{
+        headerTitle:''
+      }}/>
+      <Stack.Screen name='PostingChange' component={PostingChange} 
+      options={{
+        headerTitle:'글 작성',
+        headerTitleStyle: {
+          fontFamily: 'NanumGothic-Bold',
+          fontSize: 28,
+        },
+      }}/>
     </Stack.Navigator>
   );
 };
