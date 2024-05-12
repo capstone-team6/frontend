@@ -74,4 +74,5 @@ export type RootStackParamList = {
   postNavigatoer:undefined
   PostDetailSet:{boardId:number};
   PostingChange:{boardData:BoardData}
+  Scrap:undefined
 };
