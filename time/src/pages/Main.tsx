@@ -69,7 +69,7 @@ type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
 
 const Main:React.FC<Props>=({route})=>{
   console.log(route.params)
-  const {addressChange,markerLocation}=route.params
+  const {addressChange,markerLocation}=route.params||{}
   console.log(addressChange)
   // console.log(markerLocation)
   const navigation = useNavigation<MainNavigationProp>();
