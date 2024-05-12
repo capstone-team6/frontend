@@ -18,6 +18,8 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import chatScreenNavigator from '../navigation/chatScreenNavigator';
+
 interface RoomData {
   roomId: number;
   name: string;
@@ -30,49 +32,38 @@ type ChatNavigationProp = StackNavigationProp<RootStackParamList, 'Chatting'>;
 
 const Chatting = () => {
   const [chatRoomDetails, setChatRoomDetails] = useState([]);
+  const [roomId, setRoomId] = useState();
   const navigation = useNavigation<ChatNavigationProp>();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const kakaoId = await getKakaoId();
-        if (kakaoId) {
-          const response = await axios.get(
-            'http://13.125.118.92:8080/my-page/chat',
-            {
-              headers: {'Content-Type': 'application/json'},
-              params: {kakaoId: kakaoId},
-            },
-          );
-          console.log('Server response:', response.data);
-          setChatRoomDetails(response.data.data.chatRoomDetails);
-        } else {
-          console.log('kakaoId not found in AsyncStorage');
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const getKakaoId = async () => {
-    try {
-      const kakaoId = await AsyncStorage.getItem('kakaoId');
-      return kakaoId;
-    } catch (error) {
-      console.error('Error getting kakaoId from AsyncStorage:', error);
-      return null;
-    }
-  };
-
   const handleChatRoomPress = (roomId: number, userName: string) => {
-    navigation.navigate('ChatScreen', {
-      roomId,
-      userName,
-    });
+    navigation.navigate('chatScreenNavigator', {roomId, userName});
   };
+
+  useEffect(() => {
+    AsyncStorage.getItem('accessToken').then(token => {
+      const accessToken = token ? JSON.parse(token) : null;
+      console.log(accessToken);
+      axios
+        .get('http://13.125.118.92:8080/my-page/chat', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then(response => {
+          console.log(JSON.stringify(response.data.data.chatRoomDetails));
+          const chatRooms = JSON.stringify(response.data.data.chatRoomDetails);
+          console.log(chatRooms);
+          if (chatRooms) {
+            const chat = JSON.parse(response.data.data.chatRoomDetails);
+            setChatRoomDetails(chat);
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    });
+  }, []);
 
   const chatData = [
     {
