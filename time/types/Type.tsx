@@ -75,4 +75,6 @@ export type RootStackParamList = {
   PostDetailSet:{boardId:number};
   PostingChange:{boardData:BoardData}
   Scrap:undefined
+  Search:undefined
+  SearchList:{key:string}
 };
