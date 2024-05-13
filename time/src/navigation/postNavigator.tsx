@@ -20,14 +20,20 @@ import PostDetailSet from '../pages/PostDetailSet';
 import PostingChange from '../pages/PostingChange';
 import Search from '../pages/Search';
 import SearchList from '../pages/SearchList'
+import Notify from '../pages/Notify';
+import KeywordSet from '../pages/KeywordSet';
 const Stack = createStackNavigator<RootStackParamList>();
 
 type SearchProps=StackNavigationProp<RootStackParamList,'postNavigatoer'>
 
 const postStackNavigator= () => {
   const searchNavigation=useNavigation<SearchProps>()
+  const noticeNavigation=useNavigation<SearchProps>()
   const goToSearch=()=>{
     searchNavigation.navigate('Search')
+  }
+  const goToNotify=()=>{
+    noticeNavigation.navigate('Notify')
   }
   return (
     <Stack.Navigator>
@@ -60,6 +66,7 @@ const postStackNavigator= () => {
                 name="notifications-outline"
                 size={25}
                 style={{marginRight: 30, color: 'black'}}
+                onPress={()=>goToNotify()}
               />
             </View>
           ),
@@ -108,6 +115,23 @@ const postStackNavigator= () => {
         headerTransparent:true,
       }}
       />
+      <Stack.Screen name='Notify' component={Notify}
+      options={{
+        headerTitle:'알림',
+        headerTitleStyle: {
+          fontFamily: 'NanumGothic-Bold',
+          fontSize: 28,
+        },
+      }}
+      />
+      <Stack.Screen name='KeywordSet' component={KeywordSet}
+      options={{
+        headerTitle:'키워드 알림 설정',
+        headerTitleStyle: {
+          fontFamily: 'NanumGothic-Bold',
+          fontSize: 28,
+        },
+      }}/>
     </Stack.Navigator>
   );
 };

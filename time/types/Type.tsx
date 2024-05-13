@@ -77,4 +77,5 @@ export type RootStackParamList = {
   Scrap:undefined
   Search:undefined
   SearchList:{key:string}
+  KeywordSet:undefined
 };
