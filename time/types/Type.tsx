@@ -61,7 +61,7 @@ export type RootStackParamList = {
   App: undefined;
   Main: undefined;
   PostDetail: {boardId: number};
-  틈새시장:LocationSet,
+  틈새시장:LocationSet|undefined,
   MapSearchSet:undefined;
   Posting:undefined
   ChargePay:undefined
