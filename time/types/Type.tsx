@@ -40,6 +40,14 @@ interface BoardData {
   images: ImageType[];
   who: string;
 }
+
+interface LocationSet {
+  addressChange: string;
+  markerLocation: {
+    latitude: number;
+    longitude: number;
+  };
+}
 export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
@@ -77,26 +85,24 @@ export type RootStackParamList = {
   Main: undefined;
   PostDetail: {boardId: number};
   // 틈새시장: MainParams;
-  틈새시장: undefined;
+
+  chatStackNavigator: undefined;
+
+  틈새시장: LocationSet | undefined;
   MapSearchSet: undefined;
   Posting: undefined;
   ChargePay: undefined;
   MinusPay: undefined;
   LoginStackNavigation: undefined;
   LocationSearch: undefined;
-  AccountEnter: {boardId?: number; roomId?: number};
-  AccountCheck: {boardId?: number; roomId?: number};
-  chatScreenNavigator: {
-    screen: string;
-    params: {
-      roomId: number;
-      userName: string;
-      roomName: string;
-      boardId: number;
-    };
-  };
-  chatStackNavigator: undefined;
+  AccountEnter: undefined;
+  ChatScreeen: undefined;
+  chatScreenNavigator: {roomId: number; userName: string};
   postNavigatoer: undefined;
   PostDetailSet: {boardId: number};
   PostingChange: {boardData: BoardData};
+  Scrap: undefined;
+  Search: undefined;
+  SearchList: {key: string};
+  KeywordSet: undefined;
 };

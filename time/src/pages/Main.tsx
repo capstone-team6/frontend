@@ -58,17 +58,21 @@ interface SlideableCategoryButtonsProps {
   onSelectCategory: (category: string) => void;
 }
 
-interface MainProps{
-  route:RouteProp<RootStackParamList,'틈새시장'>
+type SearchProps=RouteProp<RootStackParamList,'틈새시장'>
+interface Props{
+  route:SearchProps
 }
 
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 type LoginNav=StackNavigationProp<RootStackParamList,'LoginStackNavigation'>
 type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
-const Main:React.FC<MainProps>=({route})=>{
-  // const {dataToMain}=route.params||{}
-  // const { dataFromParent }= route.params || {};
-  // console.log(dataFromParent)
+
+
+const Main:React.FC<Props>=({route})=>{
+  console.log(route.params)
+  const {addressChange,markerLocation}=route.params||{}
+  console.log(addressChange)
+  // console.log(markerLocation)
   const navigation = useNavigation<MainNavigationProp>();
   const loginNavigation=useNavigation<LoginNav>()
   const goToPostDetail = (boardId: number) => {
@@ -187,12 +191,11 @@ const Main:React.FC<MainProps>=({route})=>{
       if (result === 'granted') {
         Geolocation.getCurrentPosition(
           pos => {
-          
+            if(markerLocation){
+              setLocation(markerLocation)
+            }else{
               setLocation(pos.coords);
-            
-             
-            
-            
+            }
             const latitude=pos.coords.latitude
             const longitude=pos.coords.longitude
             Geocoder.from(pos.coords.latitude, pos.coords.longitude, 'ko')
@@ -203,11 +206,11 @@ const Main:React.FC<MainProps>=({route})=>{
                 const words = desireAddress.split(' ');
                 const lastAddress = `${words[1]} ${words[2]} ${words[3]} ${words[4]}`;
                 
-                
-                  setAddress(lastAddress)
-               
-               
-             
+                  if(addressChange){
+                    setAddress(addressChange)
+                  }else{
+                    setAddress(lastAddress)
+                  }
                 console.log(longitude,latitude,address)
 
                 if(longitude&&latitude&&address){
@@ -295,7 +298,7 @@ const Main:React.FC<MainProps>=({route})=>{
         );
       }
     });
-  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell]);
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,route.params]);
   
 
 const handleLoadMore=()=>{

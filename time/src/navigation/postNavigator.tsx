@@ -1,5 +1,8 @@
 import {RouteProp, useNavigation} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import {
+  StackNavigationProp,
+  createStackNavigator,
+} from '@react-navigation/stack';
 import Chatting from '../pages/Chatting';
 import ChatScreen from '../pages/ChatScreen';
 import {RootStackParamList} from '../../types/Type';
@@ -18,15 +21,23 @@ import LocationSearch from '../pages/LocationSearch';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import PostDetailSet from '../pages/PostDetailSet';
 import PostingChange from '../pages/PostingChange';
+import Search from '../pages/Search';
+import SearchList from '../pages/SearchList';
+import Notify from '../pages/Notify';
+import KeywordSet from '../pages/KeywordSet';
 const Stack = createStackNavigator<RootStackParamList>();
 
-const postStackNavigator = () => {
-  const [dataToMain, setDataToMain] = useState<any>();
-  const sendDataToParent = (data: any) => {
-    console.log(data);
-    setDataToMain(data);
-  };
+type SearchProps = StackNavigationProp<RootStackParamList, 'postNavigatoer'>;
 
+const postStackNavigator = () => {
+  const searchNavigation = useNavigation<SearchProps>();
+  const noticeNavigation = useNavigation<SearchProps>();
+  const goToSearch = () => {
+    searchNavigation.navigate('Search');
+  };
+  const goToNotify = () => {
+    noticeNavigation.navigate('Notify');
+  };
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -52,11 +63,13 @@ const postStackNavigator = () => {
                 name="search"
                 size={25}
                 style={{marginRight: 25, color: 'black'}}
+                onPress={() => goToSearch()}
               />
               <Ionicons
                 name="notifications-outline"
                 size={25}
                 style={{marginRight: 30, color: 'black'}}
+                onPress={() => goToNotify()}
               />
             </View>
           ),

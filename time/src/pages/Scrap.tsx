@@ -14,6 +14,10 @@ import axios from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FastImage from 'react-native-fast-image';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../types/Type';
 interface RoomData {
   boardId: number;
   title: string;
@@ -27,9 +31,14 @@ interface RoomData {
   boardState: string;
   firstImage: string;
 }
+type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Scrap'>;
 const Scrap = () => {
   const [posts, setPosts] = useState([]);
+  const navigation=useNavigation<MainNavigationProp>()
 
+  const goToPostDetail=(boardId:number)=>{
+    navigation.navigate('PostDetail',{boardId})
+  }
   useEffect(() => {
     AsyncStorage.getItem('accessToken').then(token => {
       const accessToken = token ? JSON.parse(token) : null;
@@ -62,55 +71,58 @@ const Scrap = () => {
     });
   }, []);
 
+  function timeDiffence(targetTime:Date):string{
+    const koreanTime = new Date().getTime()
+    const create=new Date(targetTime)
+    const diffInMinutes = Math.floor((new Date(koreanTime).getTime() - targetTime.getTime()) / (1000 * 60));
+    if(diffInMinutes<60){
+      return `${diffInMinutes}분 전`
+    }else if(diffInMinutes<60*24){
+      const diffInHour=Math.floor(diffInMinutes/60)
+      return `${diffInHour}시간 전`
+    }else{
+      const diffInDays=Math.floor(diffInMinutes/(60*24))
+      return `${diffInDays}일 전`
+    }
+  }
   return (
     <View style={styles.main_container}>
-      {/* 임시 */}
-      {/* <TouchableOpacity style={styles.postContainer}>
-        <Image
-          source={require('../assets/images/post1.jpg')}
-          style={styles.post_image}
-        />
-        <View style={styles.post_info}>
-          <Text style={styles.info1}>3km · 5분 전</Text>
-          <Text style={styles.info2}>강아지 산책 부탁드려요</Text>
-          <Text style={styles.info3}>10,000원/20분</Text>
-        </View>
-        <View style={styles.appeal_icon}>
-          <AntDesign name="heart" size={15} color={'#E7736F'} />
-        </View>
-        <View style={styles.interactionContainer}>
-          <View style={styles.interactionItem}>
-            <Feather name="message-circle" size={15} />
-            <Text style={styles.interactionText}>2</Text>
-          </View>
-          <View style={styles.interactionItem}>
-            <AntDesign name="hearto" size={15} />
-            <Text style={styles.interactionText}>2</Text>
-          </View>
-        </View>
-      </TouchableOpacity> */}
       <FlatList
         data={posts}
         keyExtractor={item => String(item.boardId)}
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
-          <TouchableOpacity style={styles.postContainer}>
-            <Image
-              source={{
-                uri: `http:://13.125.118.92:8080/var/www/myapp/images/${item.firstImage}`,
-              }}
-              style={styles.post_image}
+          <TouchableOpacity style={styles.postContainer}
+          onPress={() => {
+            goToPostDetail(item.boardId);
+            // postStackNavigator(item.boardId)
+          }}>
+            {item.firstImage?
+            <FastImage
+            source={{
+              uri: `http://13.125.118.92:8080/images/jpg/${item.firstImage}`
+            }}
+            style={styles.post_image}
+            // resizeMethod='resize'
+            // onError={(error) => console.error("이미지 로딩 오류:", error)}
+          />:
+            <Image source={require('../assets/images/postingImage.png')}
+            style={styles.post_image}
+            
             />
+            }
             <View style={styles.post_info}>
               <Text style={styles.info1}>
-                {item.distance} · {item.createdDate}
+                {item.distance+"km"} · {timeDiffence(new Date(item.createdDate))}
               </Text>
               <Text style={styles.info2}>{item.title}</Text>
+
               <Text style={styles.info3}>
-                {item.itemPrice}/{item.itemTime}
+                {item.itemPrice+"원"}/{item.itemTime}
               </Text>
             </View>
             <View style={styles.appeal_icon}>
               <AntDesign name="heart" size={15} color={'#E7736F'} />
+
             </View>
             <View style={styles.interactionContainer}>
               <View style={styles.interactionItem}>
@@ -133,6 +145,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get('screen').height,
     backgroundColor: 'white',
     flex: 1,
+    
   },
   location: {
     flexDirection: 'row',
@@ -176,6 +189,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderWidth: 0.1,
     borderColor: 'black',
+    marginTop:20
   },
   post_image: {
     width: 95,
@@ -187,6 +201,7 @@ const styles = StyleSheet.create({
   },
   post_info: {
     flexDirection: 'column',
+    left:-35
   },
   info1: {
     fontFamily: 'NanumGothic',
