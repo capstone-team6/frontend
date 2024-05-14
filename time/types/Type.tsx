@@ -52,7 +52,19 @@ export type RootStackParamList = {
   AppealWrite: undefined;
   StackNavigator: undefined;
   SignUp: undefined;
-  ChatScreen: {roomId: number; userName: string};
+  ChatScreen: {
+    roomId?: number;
+    userName?: string;
+    holder?: string;
+    bank?: string;
+    accountNumber?: string;
+    roomName?: string;
+    boardId?: number;
+    newMessage?: {
+      message: string;
+      type: string;
+    };
+  };
   Chatting: undefined;
   SignIn: undefined;
   BottmTabNavigation: undefined;
@@ -72,9 +84,18 @@ export type RootStackParamList = {
   MinusPay: undefined;
   LoginStackNavigation: undefined;
   LocationSearch: undefined;
-  AccountEnter: undefined;
-  ChatScreeen: undefined;
-  chatScreenNavigator: {roomId: number; userName: string};
+  AccountEnter: {boardId?: number; roomId?: number};
+  AccountCheck: {boardId?: number; roomId?: number};
+  chatScreenNavigator: {
+    screen: string;
+    params: {
+      roomId: number;
+      userName: string;
+      roomName: string;
+      boardId: number;
+    };
+  };
+  chatStackNavigator: undefined;
   postNavigatoer: undefined;
   PostDetailSet: {boardId: number};
   PostingChange: {boardData: BoardData};

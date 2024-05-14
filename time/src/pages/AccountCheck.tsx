@@ -5,62 +5,54 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../../types/Type';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-type AccountEnterRouteProp = RouteProp<RootStackParamList, 'AccountEnter'>;
 
-type AccountEnterScreenNavigationProp = StackNavigationProp<
+type AccountCheckRouteProp = RouteProp<RootStackParamList, 'AccountCheck'>;
+
+type AccountCheckScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  'AccountEnter'
+  'AccountCheck'
 >;
 
 interface Props {
-  route: AccountEnterRouteProp;
-  navigation: AccountEnterScreenNavigationProp;
+  route: AccountCheckRouteProp;
+  navigation: AccountCheckScreenNavigationProp;
 }
 
-const AccountEnter: React.FC<Props> = ({route, navigation}) => {
-  const {boardId, roomId} = route.params ?? {};
+const AccountCheck: React.FC<Props> = ({route, navigation}) => {
   const [holder, setHolder] = useState('');
   const [bank, setBank] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const {boardId, roomId} = route.params;
 
-  const goToChatScreen = async () => {
-    try {
-      const store = await AsyncStorage.getItem('accessToken');
-      const token = store ? JSON.parse(store) : null;
-
-      console.log(token);
-
-      const res = await axios.post(
-        `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/pay`,
-        {
-          payMeth: 'PAY',
-          holder: holder,
-          bank: bank,
-          accountNumber: accountNumber,
-        },
+  useEffect(() => {
+    axios
+      .get(
+        `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/account`,
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
           },
         },
-      );
-      if (res.status === 200) {
-        console.log(res.data);
-        navigation.navigate('ChatScreen', {
-          newMessage: {message: '계좌정보를 보냈어요.', type: 'ACCOUNT'},
-        });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+      )
+      .then(response => {
+        console.log(JSON.stringify(response.data.data));
+        const data = JSON.stringify(response.data.data);
+        console.log(data);
+
+        if (data) {
+          const d = JSON.parse(data);
+          setHolder(d.holder);
+          setBank(d.bank);
+          setAccountNumber(d.accountNumber);
+        }
+      });
+  }, [boardId, roomId]);
 
   return (
     <View
@@ -86,20 +78,6 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
           }}>
           은행선택
         </Text>
-        <TextInput
-          placeholder="은행선택"
-          value={bank}
-          onChangeText={setBank}
-          style={{
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 5,
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            fontSize: 16,
-            width: '80%',
-            marginLeft: 10,
-          }}></TextInput>
       </View>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <Text
@@ -110,21 +88,6 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
           }}>
           계좌번호
         </Text>
-        <TextInput
-          placeholder="-없이 숫자만 입력"
-          value={accountNumber}
-          onChangeText={setAccountNumber}
-          style={{
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 5,
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            fontSize: 16,
-            width: '80%',
-            marginLeft: 10,
-            marginBottom: 10,
-          }}></TextInput>
       </View>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <Text
@@ -135,20 +98,6 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
           }}>
           예금주명
         </Text>
-        <TextInput
-          placeholder="예금주명 입력"
-          value={holder}
-          onChangeText={setHolder}
-          style={{
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 5,
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            fontSize: 16,
-            width: '80%',
-            marginLeft: 10,
-          }}></TextInput>
       </View>
       <View style={{flexDirection: 'row', marginTop: 40}}>
         <TouchableOpacity
@@ -177,8 +126,7 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
             height: 35,
             borderRadius: 10,
             justifyContent: 'center',
-          }}
-          onPress={goToChatScreen}>
+          }}>
           <Text
             style={{
               color: 'black',
@@ -193,4 +141,4 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
     </View>
   );
 };
-export default AccountEnter;
+export default AccountCheck;

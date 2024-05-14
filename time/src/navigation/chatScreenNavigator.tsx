@@ -4,6 +4,8 @@ import React from 'react';
 import ChatScreen from '../pages/ChatScreen';
 import Profile from '../pages/Profile';
 import AccountEnter from '../pages/AccountEnter';
+import AppealWrite from '../pages/AppealWrite';
+import AccountCheck from '../pages/AccountCheck';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const chatScreenNavigator = () => {
@@ -31,7 +33,29 @@ const chatScreenNavigator = () => {
         name="AccountEnter"
         component={AccountEnter}
         options={{
+          headerTitle: '계좌 입력',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AccountCheck"
+        component={AccountCheck}
+        options={{
           headerTitle: '계좌 정보',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AppealWrite"
+        component={AppealWrite}
+        options={{
+          headerTitle: 'AppealWrite',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
