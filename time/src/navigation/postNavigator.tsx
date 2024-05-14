@@ -4,7 +4,7 @@ import Chatting from '../pages/Chatting';
 import ChatScreen from '../pages/ChatScreen';
 import {RootStackParamList} from '../../types/Type';
 import {RotationGestureHandlerStateChangeEvent} from 'react-native-gesture-handler';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Main from '../pages/Main';
 import PostDetail from '../pages/PostDetail';
 import {View} from 'react-native';
@@ -15,20 +15,17 @@ import BottmTabNavigation from './BottmTabNavigation';
 import SignIn from '../pages/SignIn';
 import App from '../../App';
 import LocationSearch from '../pages/LocationSearch';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import PostDetailSet from '../pages/PostDetailSet';
 import PostingChange from '../pages/PostingChange';
 const Stack = createStackNavigator<RootStackParamList>();
 
-
-
-const postStackNavigator= () => {
-  
-  const [dataToMain, setDataToMain]=useState<any>()
-  const sendDataToParent=(data:any)=>{
-    console.log(data)
-    setDataToMain(data)
-}
+const postStackNavigator = () => {
+  const [dataToMain, setDataToMain] = useState<any>();
+  const sendDataToParent = (data: any) => {
+    console.log(data);
+    setDataToMain(data);
+  };
 
   return (
     <Stack.Navigator>
@@ -63,39 +60,56 @@ const postStackNavigator= () => {
               />
             </View>
           ),
+        }}></Stack.Screen>
+      <Stack.Screen
+        name="PostDetail"
+        component={PostDetail}
+        options={{
+          headerTransparent: true,
+          headerTitle: '',
         }}
-      ></Stack.Screen>
-      <Stack.Screen name="PostDetail" component={PostDetail} options={{
-        headerTransparent:true,
-        headerTitle:'',
-      }}/>
-      <Stack.Screen name="App" component={App}/>
+      />
+      <Stack.Screen name="App" component={App} />
 
-      <Stack.Screen name='LocationSearch' 
-      
-      options={{
-        
-        headerTitle:'위치 재설정',
-        headerTitleStyle: {
-          fontFamily: 'NanumGothic-Bold',
-          fontSize: 28,
-        },
-      }}
-      
-      >{(props: any) => <LocationSearch {...props} sendDataToParent={sendDataToParent} />}</Stack.Screen>
-      
-      <Stack.Screen name='PostDetailSet' component={PostDetailSet} 
-      options={{
-        headerTitle:''
-      }}/>
-      <Stack.Screen name='PostingChange' component={PostingChange} 
-      options={{
-        headerTitle:'글 작성',
-        headerTitleStyle: {
-          fontFamily: 'NanumGothic-Bold',
-          fontSize: 28,
-        },
-      }}/>
+      <Stack.Screen
+        name="LocationSearch"
+        options={{
+          headerTitle: '위치 재설정',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}>
+        {(props: any) => (
+          <LocationSearch {...props} sendDataToParent={sendDataToParent} />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="PostDetailSet"
+        component={PostDetailSet}
+        options={{
+          headerTitle: '',
+        }}
+      />
+      <Stack.Screen
+        name="PostingChange"
+        component={PostingChange}
+        options={{
+          headerTitle: '글 작성',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ChatScreen"
+        component={ChatScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   );
 };

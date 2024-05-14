@@ -17,22 +17,25 @@ import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../types/Type';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Carousel,{Pagination} from 'react-native-snap-carousel';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
-import { StackNavigationProp } from '@react-navigation/stack';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import {StackNavigationProp} from '@react-navigation/stack';
 import Geocoder from 'react-native-geocoding';
 
-type SetNav=StackNavigationProp<RootStackParamList,'PostDetailSet'>
+type SetNav =
+  | StackNavigationProp<RootStackParamList, 'PostDetailSet'>
+  | StackNavigationProp<RootStackParamList, 'ChatScreen'>;
+
 type PostDetailRouteProps = RouteProp<RootStackParamList, 'PostDetail'>;
 interface Props {
   route: PostDetailRouteProps;
 }
-type ImageType={
-  uri:string;
-  type:string;
-  name:string;
-  }
+type ImageType = {
+  uri: string;
+  type: string;
+  name: string;
+};
 interface BoardData {
   boardId: number;
   scrapStus: string;
@@ -53,7 +56,7 @@ interface BoardData {
   category: string;
   boardType: string;
   images: ImageType[];
-  who:string;
+  who: string;
 }
 
 const convertToKorean = (category: string) => {
@@ -76,29 +79,42 @@ const convertToKorean = (category: string) => {
       return category;
   }
 };
-Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
-const PostDetail: React.FC<Props> = ({route}) => {
-  const navigation=useNavigation<SetNav>()
-  const {boardId} = route.params;
-  console.log(boardId)
-  const [isScrap, setIsScrap] = useState(false);
-  const [boardData, setBoardData] = useState<BoardData|null>(null);
 
-  const goToSet=(boardId:number)=>{
-    navigation.navigate('PostDetailSet',{boardId})
-  }
+Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {
+  language: 'ko',
+  region: 'KR',
+});
+const PostDetail: React.FC<Props> = ({route}) => {
+  const navigation = useNavigation<SetNav>();
+  const {boardId} = route.params;
+  console.log(boardId);
+  const [isScrap, setIsScrap] = useState(false);
+  const [boardData, setBoardData] = useState<BoardData | null>(null);
+  const [roomName, setRoomName] = useState('');
+
+  const goToSet = (boardId: number) => {
+    navigation.navigate('PostDetailSet', {boardId});
+  };
+
+  const goToChatScreen = (boardId: number, roomName: string) => {
+    console.log(`PostDetailToChatScreen${boardId}${roomName}`);
+    navigation.navigate('ChatScreen', {boardId, roomName});
+  };
 
   const handleHeartPress = async () => {
     const newScrapValue = !isScrap;
-    AsyncStorage.getItem('accessToken').then(async item=>{
-      const token=item?JSON.parse(item):null
+    AsyncStorage.getItem('accessToken').then(async item => {
+      const token = item ? JSON.parse(item) : null;
       try {
         setIsScrap(newScrapValue);
         const res = await axios.post(
-          `http://13.125.118.92:8080/api/board/${boardId}/scrap`,{},
-          {headers:{
-          Authorization:`Bearer ${token}`
-          }}
+          `http://13.125.118.92:8080/api/board/${boardId}/scrap`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
         if (res.status === 200) {
           console.log(res.data);
@@ -106,70 +122,71 @@ const PostDetail: React.FC<Props> = ({route}) => {
       } catch (err) {
         console.log(err);
       }
-    })
-    
+    });
   };
 
-  useEffect(()=>{
-    AsyncStorage.getItem('accessToken').then(item=>{
-      const token=item ? JSON.parse(item) : null;
-      console.log(token)
+  useEffect(() => {
+    AsyncStorage.getItem('accessToken').then(item => {
+      const token = item ? JSON.parse(item) : null;
+      console.log(token);
       axios
-      .get(`http://13.125.118.92:8080/api/board/${boardId}`,{
-        headers:{
-          Authorization:`Bearer ${token}`
-        }
-      })
-      .then(response => {
-        console.log('Data received:', response.data);
-        console.log(response.data.data.images)
-        setBoardData(response.data.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-    })
-  },[])
+        .get(`http://13.125.118.92:8080/api/board/${boardId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(response => {
+          console.log('Data received:', response.data);
+          console.log(response.data.data.images);
+          setBoardData(response.data.data);
+          setRoomName(response.data.data.roomName);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    });
+  }, []);
 
-  function timeDiffence(targetTime:Date):string{
-    const koreanTime = new Date().getTime()
-    const create=new Date(targetTime)
-    const diffInMinutes = Math.floor((new Date(koreanTime).getTime() - targetTime.getTime()) / (1000 * 60));
-    if(diffInMinutes<60){
-      return `${diffInMinutes}분 전`
-    }else if(diffInMinutes<60*24){
-      const diffInHour=Math.floor(diffInMinutes/60)
-      return `${diffInHour}시간 전`
-    }else{
-      const diffInDays=Math.floor(diffInMinutes/(60*24))
-      return `${diffInDays}일 전`
+  function timeDiffence(targetTime: Date): string {
+    const koreanTime = new Date().getTime();
+    const create = new Date(targetTime);
+    const diffInMinutes = Math.floor(
+      (new Date(koreanTime).getTime() - targetTime.getTime()) / (1000 * 60),
+    );
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}분 전`;
+    } else if (diffInMinutes < 60 * 24) {
+      const diffInHour = Math.floor(diffInMinutes / 60);
+      return `${diffInHour}시간 전`;
+    } else {
+      const diffInDays = Math.floor(diffInMinutes / (60 * 24));
+      return `${diffInDays}일 전`;
     }
   }
 
-  
-  const renderItem = ({ item, index }: { item: ImageType, index: number }) => {
+  const renderItem = ({item, index}: {item: ImageType; index: number}) => {
     return (
       <View>
         <Image
-          source={{ uri: `http://13.125.118.92:8080/images/jpg/${item}` }}
-          style={{ height: 300, width: 300 }}
-          resizeMode='contain'
+          source={{uri: `http://13.125.118.92:8080/images/jpg/${item}`}}
+          style={{height: 300, width: 300}}
+          resizeMode="contain"
         />
       </View>
     );
   };
-  const [activeSlide, setActiveSlide]=useState(0)
+  const [activeSlide, setActiveSlide] = useState(0);
   const renderPagination = () => {
     return (
       <Pagination
         dotsLength={boardData?.images.length ?? 0}
         activeDotIndex={activeSlide}
-        containerStyle={{ paddingVertical: 10 }}
+        containerStyle={{paddingVertical: 10}}
         dotStyle={{
           width: 10,
           height: 10,
           borderRadius: 5,
-          backgroundColor: 'rgba(255, 255, 255, 0.92)'
+          backgroundColor: 'rgba(255, 255, 255, 0.92)',
         }}
         inactiveDotOpacity={0.4}
         inactiveDotScale={0.6}
@@ -177,149 +194,162 @@ const PostDetail: React.FC<Props> = ({route}) => {
     );
   };
 
-  const [showOptions, setShowOptions]=useState(false)
-  const toggleOptions=()=>{
-    setShowOptions(!showOptions)
-  }
+  const [showOptions, setShowOptions] = useState(false);
+  const toggleOptions = () => {
+    setShowOptions(!showOptions);
+  };
 
-  const handleOptionSelect=(option: any)=>{
-    Alert.alert(`${option}`)
-    setShowOptions(false)
-  }
+  const handleOptionSelect = (option: any) => {
+    Alert.alert(`${option}`);
+    setShowOptions(false);
+  };
 
   return (
     <ScrollView>
       <View style={styles.PostDetail_container}>
-      <View style={styles.postingImg}>
-      {boardData?.who=='writer'?
-            <SimpleLineIcons name='options-vertical'
-            size={20}
-            style={{left:Dimensions.get('screen').width/2.5, marginTop:10}}
-            onPress={()=>{goToSet(boardData.boardId)}}
+        <View style={styles.postingImg}>
+          {boardData?.who == 'writer' ? (
+            <SimpleLineIcons
+              name="options-vertical"
+              size={20}
+              style={{
+                left: Dimensions.get('screen').width / 2.5,
+                marginTop: 10,
+              }}
+              onPress={() => {
+                goToSet(boardData.boardId);
+              }}
             />
-            
-          
-          :''}
+          ) : (
+            ''
+          )}
 
-{boardData?.images && boardData.images.length > 0 ? (
-  <Carousel
-    data={boardData?.images?? []}
-    renderItem={renderItem}
-    sliderWidth={300}
-    itemWidth={300}
-    layout="default"
-    style={{alignContent: 'center', alignItems: 'center'}}
-    onSnapToItem={(index) => setActiveSlide(index)}
-  >
-    {renderPagination()}
-  </Carousel>
-) : (
-  <Image
-    source={require('../assets/images/logo.png')}
-    style={{marginVertical:50}}
-  />
-)}
+          {boardData?.images && boardData.images.length > 0 ? (
+            <Carousel
+              data={boardData?.images ?? []}
+              renderItem={renderItem}
+              sliderWidth={300}
+              itemWidth={300}
+              layout="default"
+              style={{alignContent: 'center', alignItems: 'center'}}
+              onSnapToItem={index => setActiveSlide(index)}>
+              {renderPagination()}
+            </Carousel>
+          ) : (
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={{marginVertical: 50}}
+            />
+          )}
+        </View>
 
-      
-      </View>
-
-      <View style={styles.user}>
-        <View style={styles.user_info}>
-          <Image
-            style={styles.user_profile}
-            source={require('../assets/images/profile.png')}
-          />
-          <View style={{flexDirection: 'row'}}>
-            <Text style={styles.user_name}>{boardData?.nickname}  </Text>
-            <View style={styles.icon_container}>
-              <AntDesign name="message1" size={13} color="black" />
-              <Text> {boardData?.chatCount} </Text>
+        <View style={styles.user}>
+          <View style={styles.user_info}>
+            <Image
+              style={styles.user_profile}
+              source={require('../assets/images/profile.png')}
+            />
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.user_name}>{boardData?.nickname} </Text>
+              <View style={styles.icon_container}>
+                <AntDesign name="message1" size={13} color="black" />
+                <Text> {boardData?.chatCount} </Text>
+              </View>
+              <View style={styles.icon_container}>
+                <AntDesign name="hearto" size={13} color="black" />
+                <Text> {boardData?.scrapCount}</Text>
+              </View>
             </View>
-            <View style={styles.icon_container}>
-              <AntDesign name="hearto" size={13} color="black" />
-              <Text> {boardData?.scrapCount}</Text>
+            <View style={styles.appeal_icon}>
+              <TouchableOpacity onPress={() => handleHeartPress()}>
+                <Ionicons
+                  name={isScrap ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={isScrap ? 'red' : 'gray'}
+                />
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.appeal_icon}>
-            <TouchableOpacity onPress={() => handleHeartPress()}>
-              <Ionicons
-                name={isScrap ? 'heart' : 'heart-outline'}
-                size={24}
-                color={isScrap ? 'red' : 'gray'}
-              />
-            </TouchableOpacity>
+        </View>
+
+        <View style={styles.title}>
+          <TouchableOpacity style={styles.categoryBtn}>
+            <Text style={styles.categoryBtn_text}>
+              {convertToKorean(boardData?.category ?? '')}
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.title_text}>{boardData?.title}</Text>
+          <View style={styles.title_location}>
+            <Text style={styles.title_time}>{boardData?.address} </Text>
+            <Text style={styles.title_time}>
+              {timeDiffence(new Date(boardData?.createdDate ?? ''))}
+            </Text>
           </View>
+          <View style={{height: 5}} />
+          <Text style={styles.title_content}>{boardData?.content}</Text>
         </View>
-      </View>
 
-      <View style={styles.title}>
-        <TouchableOpacity style={styles.categoryBtn}>
-          <Text style={styles.categoryBtn_text}>{convertToKorean(boardData?.category??'')}</Text>
-        </TouchableOpacity>
-        <Text style={styles.title_text}>{boardData?.title}</Text>
-        <View style={styles.title_location}>
-          <Text style={styles.title_time}>{boardData?.address}   </Text>
-          <Text style={styles.title_time}>{timeDiffence(new Date(boardData?.createdDate??''))}</Text>
+        <View style={styles.info_detail}>
+          <Text style={styles.text}>시간</Text>
+          <View style={{width: 15}} />
+          <Text style={styles.text}>{boardData?.itemTime}</Text>
         </View>
-        <View style={{height: 5}} />
-        <Text style={styles.title_content}>{boardData?.content}</Text>
-      </View>
+        <View style={{height: 10}} />
+        <View style={styles.info_detail}>
+          <Text style={styles.text}>가격</Text>
+          <View style={{width: 28}} />
+          <Text style={styles.text}>{boardData?.itemPrice + '원'}</Text>
+        </View>
 
-      <View style={styles.info_detail}>
-        <Text style={styles.text}>시간</Text>
-        <View style={{width: 15}} />
-        <Text style={styles.text}>{boardData?.itemTime}</Text>
-      </View>
-      <View style={{height: 10}} />
-      <View style={styles.info_detail}>
-        <Text style={styles.text}>가격</Text>
-        <View style={{width: 28}} />
-        <Text style={styles.text}>{boardData?.itemPrice+"원"}</Text>
-      </View>
+        <View style={styles.location}>
+          <Text style={styles.location_text}>틈새위치</Text>
+        </View>
 
-      <View style={styles.location}>
-        <Text style={styles.location_text}>틈새위치</Text>
-      </View>
-
-      {/* <View style={styles.mapContainer}> */}
+        {/* <View style={styles.mapContainer}> */}
         {/* <AntDesign name="location-pin" size={13} color="black" /> */}
         {/* <View style={styles.map}> */}
-          {/* <TouchableOpacity style={styles.mapBtn}>
+        {/* <TouchableOpacity style={styles.mapBtn}>
             <Text style={styles.mapBtn_text}>지도보기</Text>
           </TouchableOpacity> */}
-         
-          {boardData?.latitude&&boardData.longitude&&
-          <MapView
-          style={styles.mapContainer}
-          provider={PROVIDER_GOOGLE}
-          initialRegion={{
-          latitude:boardData?.latitude||0,
-          longitude:boardData?.longitude||0,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-          }}  
-        >
-        {boardData?.latitude && boardData?.longitude && (
-          <Marker
-            coordinate={{ 
-              latitude: boardData.latitude,
-              longitude: boardData.longitude,
-            }}
-          />
-        )}
-      </MapView>}
-        
-        {/* </View> */}
-      {/* </View> */}
 
-      <View style={styles.btnContainer}>
-        {boardData?.who=='writer'?'':
-          <TouchableOpacity style={styles.chatBtn}>
-            <Text style={styles.chatBtn_text}> 채팅하기</Text>
-          </TouchableOpacity>
-        }
+        {boardData?.latitude && boardData.longitude && (
+          <MapView
+            style={styles.mapContainer}
+            provider={PROVIDER_GOOGLE}
+            initialRegion={{
+              latitude: boardData?.latitude || 0,
+              longitude: boardData?.longitude || 0,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}>
+            {boardData?.latitude && boardData?.longitude && (
+              <Marker
+                coordinate={{
+                  latitude: boardData.latitude,
+                  longitude: boardData.longitude,
+                }}
+              />
+            )}
+          </MapView>
+        )}
+
+        {/* </View> */}
+        {/* </View> */}
+
+        <View style={styles.btnContainer}>
+          {boardData?.who == 'writer' ? (
+            ''
+          ) : (
+            <TouchableOpacity
+              style={styles.chatBtn}
+              onPress={() => {
+                goToChatScreen(boardId, roomName);
+              }}>
+              <Text style={styles.chatBtn_text}> 채팅하기</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
     </ScrollView>
   );
 };
@@ -425,10 +455,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'flex-end',
     justifyContent: 'center',
-    
   },
   mapContainer: {
-    flex:1,
+    flex: 1,
     width: Dimensions.get('screen').width - 40,
     height: 100,
     marginHorizontal: 20,
@@ -439,7 +468,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     marginBottom: 20,
     alignSelf: 'center',
-    paddingTop:10
+    paddingTop: 10,
   },
   chatBtn: {
     width: 200,
