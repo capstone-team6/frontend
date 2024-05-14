@@ -3,40 +3,44 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   StyleSheet,
   Dimensions,
   FlatList,
   ListRenderItemInfo,
-  ListRenderItem,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import ChatScreen from './ChatScreen';
 import {RootStackParamList} from '../../types/Type';
-import {NavigationProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import chatScreenNavigator from '../navigation/chatScreenNavigator';
 
 interface RoomData {
   roomId: number;
   name: string;
   message: string;
   time: string;
+  boardId: number;
+  roomName: string;
   // chatCount: any;
 }
 
 type ChatNavigationProp = StackNavigationProp<RootStackParamList, 'Chatting'>;
 
 const Chatting = () => {
-  const [chatRoomDetails, setChatRoomDetails] = useState([]);
-  const [roomId, setRoomId] = useState();
   const navigation = useNavigation<ChatNavigationProp>();
+  const [chatRoomDetails, setChatRoomDetails] = useState([]);
 
-  const handleChatRoomPress = (roomId: number, userName: string) => {
-    navigation.navigate('chatScreenNavigator', {roomId, userName});
+  const handleChatRoomPress = (
+    roomId: number,
+    userName: string,
+    roomName: string,
+    boardId: number,
+  ) => {
+    navigation.navigate('chatScreenNavigator', {
+      screen: 'ChatScreen',
+      params: {roomId, userName, roomName, boardId},
+    });
   };
 
   useEffect(() => {
@@ -71,6 +75,8 @@ const Chatting = () => {
       name: '홍길동',
       message: '안녕하세요!',
       time: '30분전',
+      roomName: 'A1',
+      boardId: 1,
 
       // chatCount: '1',
     },
@@ -79,12 +85,16 @@ const Chatting = () => {
       name: '틈새2',
       message: '감사합니다!! 조심히가세요!',
       time: '1일 전',
+      roomName: 'A1',
+      boardId: 1,
     },
     {
       roomId: 3,
       name: '틈새3',
       message: '시간 구매하고 싶어요',
       time: '1일 전',
+      roomName: 'A1',
+      boardId: 1,
 
       // chatCount: '3',
     },
@@ -93,6 +103,8 @@ const Chatting = () => {
       name: '틈새4',
       message: '감사합니다!! 조심히 가세요!',
       time: '1주일 전',
+      roomName: 'A1',
+      boardId: 1,
 
       // chatCount: '1',
     },
@@ -105,7 +117,14 @@ const Chatting = () => {
         keyExtractor={item => item.roomId.toString()}
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
           <TouchableOpacity
-            onPress={() => handleChatRoomPress(item.roomId, item.name)}>
+            onPress={() =>
+              handleChatRoomPress(
+                item.roomId,
+                item.name,
+                item.roomName,
+                item.boardId,
+              )
+            }>
             <View style={styles.chatItemContainer}>
               <Ionicons name="person-circle" size={80} color={'#352456'} />
               <View style={styles.chatTextContainer}>

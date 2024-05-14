@@ -2,29 +2,32 @@ import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
-  FlatList,
   TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Button,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  Image,
   Dimensions,
   Modal,
   Alert,
 } from 'react-native';
-import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
+import {RouteProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
-import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
-import {Client, Message} from '@stomp/stompjs';
+import {Client} from '@stomp/stompjs';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
-import AccountEnter from './AccountEnter';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  launchCamera,
+  launchImageLibrary,
+  ImagePickerResponse,
+  CameraOptions,
+  ImageLibraryOptions,
+} from 'react-native-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -37,33 +40,79 @@ interface Props {
 }
 
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
-  const {roomId, userName} = route.params || {};
+  const {roomId, userName, roomName, boardId, holder, bank, accountNumber} =
+    route.params;
+
   const [role, setRole] = useState('BUYER');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [stompClient, setStompClient] = useState<Stomp.Client | null>(null);
-  const [client, changeClient] = useState<Client | null>(null);
   const [messageInput, setMessageInput] = useState('');
   const [chatList, setChatList] = useState<
     {
       roomId: number;
-      writer: string;
       message: string;
       type: string;
     }[]
   >([]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (route.params?.newMessage) {
+      const {message, type} = route.params.newMessage;
+      const roomIdNumber = roomId as number;
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {roomId: roomIdNumber, message, type},
+      ]);
+    }
+  }, [route.params]);
 
   const goBack = () => {
     navigation.goBack();
   };
 
+  const goToProfile = () => {
+    navigation.navigate('Profile');
+  };
+
+  const goToAccountEnter = () => {
+    navigation.navigate('AccountEnter', {boardId, roomId});
+  };
+
+  const goToAccountCheck = () => {
+    navigation.navigate('AccountCheck', {boardId, roomId});
+  };
+
+  const goToPay = () => {};
+
+  const handleImagePickerResponse = (response: ImagePickerResponse) => {
+    if (response.didCancel) {
+      console.log('User cancelled image picker');
+    } else if (response.errorCode) {
+      console.log('ImagePicker Error: ', response.errorMessage);
+    } else if (response.assets) {
+      const source = {uri: response.assets[0].uri};
+      // 여기에 이미지를 처리하는 로직
+      console.log(source);
+    }
+  };
+
   const onCameraPress = () => {
-    // 카메라 접근 코드 작성
     setModalVisible(false);
+    const options: CameraOptions = {
+      saveToPhotos: true,
+      mediaType: 'photo',
+    };
+
+    launchCamera(options, handleImagePickerResponse);
   };
 
   const onGalleryPress = () => {
-    // 갤러리 접근 코드 작성
     setModalVisible(false);
+    const options: ImageLibraryOptions = {
+      selectionLimit: 1,
+      mediaType: 'photo',
+    };
+
+    launchImageLibrary(options, handleImagePickerResponse);
   };
 
   const addMessage = (message: any) => {
@@ -72,109 +121,136 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
   const onTransactionPress = () => {
     setModalVisible(false);
-    if (client !== null) {
-      const transactionMessage = {
-        roomId: roomId,
-        writer: userName,
-        message: '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
-        type: 'goTransaction',
+
+    if (roomId !== undefined) {
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {
+          roomId: roomId,
+          message: '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
+          type: 'goTransaction',
+        },
+      ]);
+
+      sendMessage(
+        roomId,
+        '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
+        'goTransaction',
+      );
+    } else {
+      console.error('Transaction Press ERROR');
+    }
+  };
+
+  const goTransaction = async (pay: string) => {
+    // if (pay === '틈새 페이') {
+    //   transactionMessage.message +=
+    //     '\n\n' +
+    //     '"틈새페이" 는 안전한 결제를 위하여 포인트 차감 후\n결제완료시 시간 판매자의 틈새페이로 포인트가 전달됩니다.\n또한,시간 판매자가 거래완료를 누른 뒤 시간 구매자가\n거래완료를 눌러야 거래가 최종 완료됩니다.';
+    // }
+    if (roomId !== undefined) {
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {
+          roomId: roomId,
+          message: `${pay}로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.`,
+          type: 'onTransaction',
+        },
+      ]);
+      sendMessage(
+        roomId,
+        `${pay}로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.`,
+        'onTransaction',
+      );
+      transferComplete();
+    } else {
+      console.error('goTransaction ERROR');
+    }
+
+    try {
+      const store = await AsyncStorage.getItem('accessToken');
+      const token = store ? JSON.parse(store) : null;
+      console.log(token);
+
+      const paymentData = {
+        payMeth: pay === '틈새 페이' ? 'PAY' : pay === '만나서' ? 'MEET' : null,
       };
-      addMessage(transactionMessage);
+
+      const res = await axios.post(
+        `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/pay`,
+        paymentData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (res.status === 200) {
+        console.log(res.data);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
-
-  const goTransaction = (pay: string) => {
-    const transactionMessage = {
-      roomId: roomId,
-      writer: userName,
-      message: `${pay}로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.`,
-      type: 'onTransaction',
-    };
-
-    if (pay === '틈새 페이') {
-      transactionMessage.message +=
-        '\n\n' +
-        '"틈새페이" 는 안전한 결제를 위하여 포인트 차감 후\n결제완료시 시간 판매자의 틈새페이로 포인트가 전달됩니다.\n또한,시간 판매자가 거래완료를 누른 뒤 시간 구매자가\n거래완료를 눌러야 거래가 최종 완료됩니다.';
-    }
-    setChatList(prevMessages => [...prevMessages, transactionMessage]);
-
-    if (pay === '계좌이체') {
-      transferInfo();
-    }
-
-    transferComplete();
-    client?.publish({
-      destination: '/pub/chat/send/1',
-      body: JSON.stringify({
-        transactionMessage,
-      }),
-    });
-  };
-
-  // const onMeet = () => {
-  //   const meetMessage = {
-  //     roomId: roomId,
-  //     writer: 'System',
-  //     message:
-  //       '"만나서 결제"로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.',
-  //     type: 'System',
-  //   };
-  //   setChatList(prevMessages => [...prevMessages, meetMessage]);
-  //   transferComplete();
-  // };
-
-  // const onTransfer = () => {
-  //   const transferMessage = {
-  //     roomId: roomId,
-  //     writer: 'System',
-  //     message:
-  //       '"계좌이체"로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.',
-  //     type: 'System',
-  //   };
-  //   setChatList(prevMessages => [...prevMessages, transferMessage]);
-  //   transferComplete();
-  // };
-
-  // const onPay = () => {
-  //   const payMessage = {
-  //     roomId: roomId,
-  //     writer: 'System',
-  //     message:
-  //       '"틈새페이"로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.',
-  //     type: 'System',
-  //   };
-  //   setChatList(prevMessages => [...prevMessages, payMessage]);
-  //   transferComplete();
-  // };
 
   const transferComplete = () => {
-    const meetComplete = {
-      roomId: roomId,
-      writer: userName,
-      message:
+    if (roomId !== undefined) {
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {
+          roomId: roomId,
+          message:
+            '거래를 완료했다면 "거래 완료"를 눌러주세요.\n3일 후에 자동으로 "거래완료"상태로 변경됩니다.',
+          type: 'completeTransaction',
+        },
+      ]);
+      sendMessage(
+        roomId,
         '거래를 완료했다면 "거래 완료"를 눌러주세요.\n3일 후에 자동으로 "거래완료"상태로 변경됩니다.',
-      type: 'completeTransaction',
-    };
-    setChatList(prevMessages => [...prevMessages, meetComplete]);
+        'completeTransaction',
+      );
+    } else {
+      console.error('transferComplete ERROR');
+    }
   };
 
   const completeMessage = async () => {
-    const completeMessage = {
-      roomId: roomId,
-      writer: 'System',
-      message: '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
-      type: 'review',
-    };
-    setChatList(prevMessages => [...prevMessages, completeMessage]);
-    try {
-      const response = await axios.put(
-        'http://13.125.118.92:8080/api/board/3/chat/2/complete',
+    if (roomId !== undefined) {
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {
+          roomId: roomId,
+          message:
+            '거래를 완료했다면 "거래 완료"를 눌러주세요.\n3일 후에 자동으로 "거래완료"상태로 변경됩니다.',
+          type: 'review',
+        },
+      ]);
+      sendMessage(
+        roomId,
+        '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
+        'review',
       );
-      if (response.status === 200) {
-        console.log(response.data);
-      } else {
-        console.error('Unexpected response status:', response.status);
-      }
+    } else {
+      console.error('transferComplete ERROR');
+    }
+
+    try {
+      axios
+        .put(
+          `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/complete`,
+        )
+        .then(res => {
+          const result = res.data.data;
+          console.log(result);
+          if (result.status == 200) {
+            console.log(result.data);
+          }
+        })
+        .catch(err => {
+          const result = err.response.data.data;
+          console.log(result);
+        });
     } catch (error) {
       console.error('Request failed:', error);
     }
@@ -182,243 +258,129 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
   const cancelMessage = async () => {
     try {
-      const response = await axios.put(
-        'http://13.125.118.92:8080/api/board/2/chat/1/cancel',
-      );
-      if (response.status === 200) {
-        console.log(response.data);
-      } else {
-        console.error('Unexpected response status:', response.status);
-      }
+      axios
+        .put(
+          `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/cancel`,
+        )
+        .then(res => {
+          const result = res.data.data;
+          console.log(result);
+          if (result.status == 200) {
+            console.log(result.data);
+          }
+        })
+        .catch(err => {
+          const result = err.response.data.data;
+          console.log(result);
+        });
     } catch (error) {
       console.error('Request failed:', error);
     }
   };
 
-  const goToProfile = () => {
-    navigation.navigate('Profile');
-  };
-
-  const goToAccountEnter = () => {
-    navigation.navigate('AccountEnter');
-  };
-
-  const goToPay = () => {};
-
   const transferInfo = () => {
-    const transferInfo = {
-      roomId: roomId,
-      writer: userName,
-      message: '계좌 정보를 보냈어요.',
-      type: 'transferInfo',
-    };
-    setChatList(prevMessages => [...prevMessages, transferInfo]);
+    if (roomId !== undefined) {
+      sendMessage(roomId, '계좌 정보를 보냈어요.', 'transferInfo');
+    } else {
+      console.error('transferComplete ERROR');
+    }
   };
 
   const onPay = () => {
-    const transferInfo = {
-      roomId: roomId,
-      writer: 'System',
-      message: '틈새페이가 차감되었어요.\n현재 잔고 : 0원',
-      type: 'pay',
-    };
-    setChatList(prevMessages => [...prevMessages, transferInfo]);
-  };
-
-  // const sendMessage = () => {
-  //   if (stompClient !== null) {
-  //     const message = {
-  //       roomId: roomId,
-  //       writer: userName,
-  //       message: messageInput,
-  //       type: 'text',
-  //     };
-  //     // stompClient.send(`/pub/chat/send/`, {}, JSON.stringify({message}));
-  //     setChatList(prevMessages => [...prevMessages, message]);
-  //     setMessageInput('');
-  //   }
-  // };
-
-  const sendChat = () => {
-    client?.publish({
-      destination: `/pub/chat/send/1`,
-      body: JSON.stringify({
-        roomId: 1,
-        writer: 'SUMIN',
-        message: 'HI',
-        type: 'MESSAGE',
-      }),
-    });
-  };
-
-  const sendMessage = () => {
-    if (client?.connected) {
-      client?.publish({
-        destination: '/pub/chat/send/1',
-        body: JSON.stringify({
-          roomId: 1,
-          writer: 'SUMIN',
-          message: 'HI',
-          type: 'MESSAGE',
-        }),
-      });
+    if (roomId !== undefined) {
+      sendMessage(roomId, '틈새페이가 차감되었어요.\n현재 잔고 : 0원', 'pay');
     } else {
-      console.log('STOMP client is not connected.');
+      console.error('transferComplete ERROR');
     }
   };
 
-  //@stompjs/stomp
-  // useEffect(() => {
-  //   console.log('시작');
-  //   const stomp = new Client({
-  //     connectHeaders: {},
-  //     brokerURL: 'ws://13.125.118.92:8080/ws',
-  //     debug: function (str: any) {
-  //       console.log(str);
-  //     },
-  //     reconnectDelay: 200,
-  //     heartbeatIncoming: 4000,
-  //     heartbeatOutgoing: 4000,
-  //     forceBinaryWSFrames: true,
-  //     appendMissingNULLonIncoming: true,
-  //   });
+  function useInterval(callback: () => void, delay: number | null) {
+    const savedCallback = useRef<() => void>();
+    useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
 
-  //   stomp.onConnect = function (frame: any) {
-  //     console.log('connected');
-  //     stomp?.subscribe('/sub/chat/room/1', function (message) {
-  //       console.log(JSON.parse(message.body));
-  //     });
-  //   };
+    useEffect(() => {
+      function tick() {
+        if (savedCallback.current) {
+          savedCallback.current();
+        }
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
 
-  //   stomp.onStompError = function (frame) {
-  //     console.log('Broker reported error: ' + frame.headers['message']);
-  //     console.log('Additional details: ' + frame.body);
-  //   };
+  async function fetchToken() {
+    const item = await AsyncStorage.getItem('accessToken');
+    return item ? JSON.parse(item) : null;
+  }
 
-  //   const cleanup = () => {
-  //     if (stomp && stomp.connected) {
-  //       stomp.deactivate();
-  //     }
-  //   };
-  //   return cleanup;
-  // }, []);
-
-  // const stompConfig = {
-  //   connectHeaders: {},
-  //   brokerURL: 'ws://13.125.118.92:8080/ws',
-  //   debug: function (str: any) {
-  //     console.log('STOMP: ' + str);
-  //   },
-  //   reconnectDelay: 5000,
-  //   forceBinaryWSFrames: true,
-  //   appendMissingNULLonIncoming: true,
-  //   onConnect: function (frame: any) {
-  //     console.log('connected');
-  //     const subscription = stompClient?.subscribe(
-  //       '/sub/chat/room/1',
-  //       function (message) {
-  //         console.log(JSON.parse(message.body));
-  //       },
-  //     );
-  //   },
-  //   onStompError: (frame: any) => {
-  //     console.log('Broker reported error: ' + frame.headers['message']);
-  //     console.log('Additional details: ' + frame.body);
-  //   },
-  // };
-
-  // const stompClient = new Client(stompConfig);
-
-  // useEffect(() => {
-  //   stompClient.activate();
-  // }, []);
-
-  //@stompjs/stomp
-  const connect = () => {
+  const fetchMessages = async () => {
     try {
-      const clientdata = new Client({
-        brokerURL: 'ws://13.125.118.92:8080/ws',
-        connectHeaders: {},
-        debug: function (str: any) {
-          console.log('STOMP:' + str);
+      const token = await fetchToken();
+      console.log(token);
+      const response = await axios.get('http://13.125.118.92:8080/chat/room', {
+        params: {
+          roomName: roomName,
+          boardId: boardId,
         },
-        reconnectDelay: 5000,
-        forceBinaryWSFrames: true,
-        appendMissingNULLonIncoming: true,
+        headers: {
+          'Content-Type': 'application/json', // 필요한 경우 추가
+          Authorization: `Bearer ${token}`,
+        },
       });
-
-      changeClient(clientdata);
-      clientdata.onConnect = function () {
-        clientdata.subscribe(`/sub/chat/room/1`, (message: any) => {
-          if (message.body) {
-            let msg = JSON.parse(message.body);
-            setChatList(chats => [...chats, msg]);
-          }
-        });
-        sendMessage();
-      };
-      clientdata.onStompError = function (frame) {
-        console.log('Broker reported error: ' + frame.headers['message']);
-        console.log('Additional details: ' + frame.body);
-      };
-      clientdata.activate();
-    } catch (err) {
-      console.log(err);
+      console.log('Data received:', response.data);
+      console.log(response.data.roleType);
+      setRole(response.data.roleType);
+      // setChatList(response.data.chatlist);
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
   };
 
-  const disConnect = () => {
-    if (client === null) {
-      return;
+  // useEffect(() => {
+  //   fetchMessages();
+  // }, []);
+
+  // useInterval(() => {
+  //   console.log('useinterval');
+  //   fetchMessages();
+  // }, 1000);
+
+  const sendMessage = async (
+    roomId: number,
+    message: string,
+    messageType: string,
+  ) => {
+    try {
+      const token = await fetchToken();
+      const response = await axios.post('http://13.125.118.92:8080/chat/send', {
+        params: {
+          roomId: roomId,
+          message: message,
+          type: messageType,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log('Message sent successfully:', response.data);
+    } catch (error) {
+      console.error('Failed to send message:', error);
     }
-    client.deactivate();
   };
 
-  useEffect(() => {
-    // 판매자, 구매자
-    // const fetchData = async () => {
-    //   try {
-    //     const response = await axios.get(
-    //       'http://13.125.118.92:8080/api/board/3/chat/2/who',
-    //     );
-    //     setRole(response.data.role);
-    //   } catch (error) {
-    //     console.error('Error fetching chat data:', error);
-    //   }
-    // };
-    // fetchData();
-    //WebSocket 연결
-    // const socket = new WebSocket('ws://13.125.118.92:8080/ws');
-    // const client = Stomp.over(socket);
-    // setStompClient(client);
-    // client.heartbeat.outgoing = 90000;
-    // client.connect({}, () => {
-    //   console.log('Connected to WebSocket');
-    //   client.subscribe(`/sub/chat/room/1`, (message: any) => {
-    //     const newMessage = JSON.parse(message.body);
-    //     console.log(newMessage);
-    //     addMessage(newMessage);
-    //   });
-    //   const sendMessage = (content: any) => {
-    //     client.send('/pub/chat/send/1', {}, JSON.stringify({message: content}));
-    //   };
-    //   sendMessage('안녕하세요!');
-    // });
-    // const disconnectCallback = () => {
-    //   console.log('Disconnected from server');
-    // };
-    // return () => {
-    //   if (stompClient !== null) {
-    //     stompClient.disconnect(disconnectCallback);
-    //   }
-    // };
-    console.log('시작');
-    connect();
-
-    return () => {
-      disConnect();
-    };
-  }, []);
+  const handleSendMessage = () => {
+    if (roomId !== undefined) {
+      sendMessage(roomId, messageInput, 'MESSAGE');
+    } else {
+      console.error('roomId is undefined');
+    }
+  };
 
   return (
     <View
@@ -440,10 +402,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             flexDirection: 'column',
             alignItems: 'center',
           }}>
-          <Image
-            source={require('../assets/images/profile.png')}
-            style={{height: 133, width: 124}}
-          />
+          <Ionicons name="person-circle" size={80} color={'#352456'} />
           <Text
             style={{
               fontFamily: 'NanumGothic-Bold',
@@ -472,7 +431,8 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 (msg.type === 'goTransaction' && role === 'BUYER') ||
                 msg.type === 'message' ||
                 msg.type === 'completeTransaction' ||
-                msg.type === 'transferInfo'
+                msg.type === 'transferInfo' ||
+                msg.type === 'ACCOUNT'
                   ? 'flex-end'
                   : msg.type === 'onTransaction' || msg.type === 'review'
                   ? 'center'
@@ -631,7 +591,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : msg.type === 'transferInfo' ? (
+            ) : msg.type === 'ACCOUNT' ? (
               <View
                 style={{
                   backgroundColor: '#F1F1F1',
@@ -745,28 +705,25 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
           style={styles.plusButton}>
-          <AntDesign name="plus" size={13} />
+          <AntDesign name="plus" size={13} color={'#352456'} />
         </TouchableOpacity>
         <TextInput
           value={messageInput}
           onChangeText={setMessageInput}
-          // onSubmitEditing={sendMessage}
+          onSubmitEditing={handleSendMessage}
           placeholder="Type your message..."
           style={{
             flex: 1,
             marginRight: 35,
             padding: 10,
             borderWidth: 1,
-            borderColor: '#ccc',
+            borderColor: '#352456',
             borderRadius: 8,
           }}
         />
 
         <TouchableOpacity style={styles.iconContainer}>
-          <Image
-            source={require('../assets/images/send.png')}
-            style={{height: 20, width: 20}}
-          />
+          <Ionicons name="send" size={20} color={'#352456'} />
         </TouchableOpacity>
       </View>
       <Modal
@@ -778,9 +735,21 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Button title="Camera" onPress={onCameraPress} />
-            <Button title="Gallery" onPress={onGalleryPress} />
-            <Button title="Transaction" onPress={onTransactionPress} />
+            <TouchableOpacity
+              style={styles.categoryBtn}
+              onPress={onCameraPress}>
+              <Text style={styles.categoryBtn_text}>카메라</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.categoryBtn}
+              onPress={onGalleryPress}>
+              <Text style={styles.categoryBtn_text}>갤러리</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.categoryBtn}
+              onPress={onTransactionPress}>
+              <Text style={styles.categoryBtn_text}>거래 시작</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -819,7 +788,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     position: 'absolute',
-    right: 10,
+    right: 15,
   },
   centeredView: {
     flex: 1,
@@ -849,6 +818,18 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 10,
+  },
+  categoryBtn: {
+    backgroundColor: '#E8EAEC',
+    width: 80,
+    height: 35,
+    borderRadius: 10,
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  categoryBtn_text: {
+    color: 'black',
+    textAlign: 'center',
   },
 });
 
