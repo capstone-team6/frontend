@@ -86,17 +86,15 @@ const postStackNavigator = () => {
 
       <Stack.Screen
         name="LocationSearch"
+        component={LocationSearch}
         options={{
           headerTitle: '위치 재설정',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
           },
-        }}>
-        {(props: any) => (
-          <LocationSearch {...props} sendDataToParent={sendDataToParent} />
-        )}
-      </Stack.Screen>
+        }}/>
+      
 
       <Stack.Screen
         name="PostDetailSet"
@@ -122,6 +120,19 @@ const postStackNavigator = () => {
         options={{
           headerShown: false,
         }}
+      />
+
+      <Stack.Screen name='Search' component={Search}
+      options={{
+        headerTransparent: true,
+        headerTitle: '',
+      }}
+      />
+      <Stack.Screen name='SearchList' component={SearchList}
+      options={{
+        headerTransparent: true,
+        headerTitle: '',
+      }}
       />
     </Stack.Navigator>
   );
