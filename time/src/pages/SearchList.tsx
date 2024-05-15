@@ -34,7 +34,7 @@ interface RoomData {
 const SearchList:React.FC<Props> = ({route}) => {
     const {key}=route.params||null
     console.log(key)
-    const [keyword,setKeyword]=useState<string>('')
+    const [keyword,setKeyword]=useState<string>(key)
     const [posts, setPosts] = useState<RoomData[]>([]);
     const [pageNum, setPageNum]=useState<number>(0)
     const categories = [
@@ -107,13 +107,20 @@ const SearchList:React.FC<Props> = ({route}) => {
             setScrollEnabled(true);
             }
         };
+        const handleCategoryPress = (category: string) => {
+            setScrollEnabled(false); // 버튼을 누를 때 스크롤을 막습니다.
+            onSelectCategory(category);
+        };
         return (
             <ScrollView
             horizontal={true}
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.container}
+            // contentContainerStyle={styles.container}
             style={styles.scrollView}
-            onScroll={handleScroll}>
+            onScroll={handleScroll}
+            scrollEnabled={scrollEnabled}
+            >
+            
             {categories.map((category, index) => (
                 <TouchableOpacity
                 key={index}
@@ -121,7 +128,7 @@ const SearchList:React.FC<Props> = ({route}) => {
                     styles.button,
                     category === selectedCategory ? styles.selectedButton : null,
                 ]}
-                onPress={() => onSelectCategory(category)}>
+                onPress={() => handleCategoryPress(category)}>
                 <Text style={styles.buttonText}>{category}</Text>
                 </TouchableOpacity>
             ))}
@@ -150,6 +157,7 @@ const SearchList:React.FC<Props> = ({route}) => {
                     category:  selectedTab === 'BUY'
                     ? convertToEnglish(selectedCategoryForBuy)
                     : convertToEnglish(selectedCategoryForSell),
+                    
                 },
                 headers: {
                     'Content-Type': 'application/json',
@@ -158,21 +166,22 @@ const SearchList:React.FC<Props> = ({route}) => {
             }
                 )
                 .then((response) => {
-                    console.log(response)
+                    console.log(response.data.data.boards)
                     const boards=JSON.stringify(response.data.data.boards)
-                    // if(boards && boards.length > 0){
-                    //     const b=JSON.parse(boards)
-                    //     setPosts(b)
-                    // }else{
-                    //     setPosts([])
-                    // }
+                    console.log(boards)
+                    if(boards && boards.length > 0){
+                        const b=JSON.parse(boards)
+                        setPosts(b)
+                    }else{
+                        setPosts([])
+                    }
                 })
                 .catch(error=>{
                     console.log(error)
                     setPosts([])
                 })
                 })
-    },[key, selectedTab, selectedCategoryForBuy, selectedCategoryForSell])
+    },[ selectedTab, selectedCategoryForBuy, selectedCategoryForSell])
 
 
     function timeDiffence(targetTime:Date):string{
