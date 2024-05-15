@@ -24,12 +24,11 @@ async function requestPermission() {
     }
 }
 
-
 type MainNav=StackNavigationProp<RootStackParamList,'Main'>
 const LocationSearch= () =>{
+
     const navigation=useNavigation<MainNav>()
     const mapRef=useRef<MapView>(null)
-    const [refresh,setRefresh]=useState(true)
     const [address, setAddress]=useState<string>('')
     const [location,setLocation]=useState<{
         latitude:number
@@ -108,7 +107,6 @@ const LocationSearch= () =>{
     },[])
     
     const goToMain=(addressChange:string,markerLocation:{latitude:number,longitude:number})=>{
-        
         navigation.navigate('틈새시장',{addressChange,markerLocation})
     }
     
