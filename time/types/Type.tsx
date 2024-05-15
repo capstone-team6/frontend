@@ -95,7 +95,8 @@ export type RootStackParamList = {
   MinusPay: undefined;
   LoginStackNavigation: undefined;
   LocationSearch: undefined;
-  AccountEnter: undefined;
+  AccountEnter: {boardId?: number; roomId?: number};
+  AccountCheck: {boardId?: number; roomId?: number};
   ChatScreeen: undefined;
   chatScreenNavigator: {roomId: number; userName: string};
   postNavigatoer: undefined;
