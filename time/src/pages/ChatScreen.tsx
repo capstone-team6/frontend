@@ -37,11 +37,12 @@ interface Props {
 }
 
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
-  const {userName, roomName, boardId, holder, bank, accountNumber, userId} =
+  const {userName, roomName, boardId, holder, bank, accountNumber} =
     route.params;
   console.log(userName, roomName, boardId);
   const [role, setRole] = useState('BUYER');
   const [roomId, setRoomId] = useState(1);
+  const [userId, setuserId] = useState(1);
   const [messageInput, setMessageInput] = useState('');
   const [chatList, setChatList] = useState<
     {
@@ -74,7 +75,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const goToProfile = () => {
-    navigation.navigate('Profile');
+    navigation.navigate('Profile', {boardId: boardId, userId: userId});
   };
 
   const goToAccountEnter = () => {
@@ -336,9 +337,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         },
       });
       console.log('FECTCH MESSAGES RECEIVED:', response.data);
-      setRole(response.data.roleType);
-      setChatList(response.data.chatlist);
-      setRoomId(response.data.roomId);
+      console.log(JSON.stringify(response.data));
+      const data = JSON.stringify(response.data);
+      console.log(data);
+
+      if (data) {
+        const d = JSON.parse(data);
+        setRole(d.roleType);
+        setChatList(d.chatlist);
+        // setRoomId(d.roomId);
+        setuserId(d.userId);
+      }
     } catch (error) {
       console.error('FETCH MESSAGES ERROR: ', error);
     }

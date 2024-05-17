@@ -19,24 +19,34 @@ import {RouteProp} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-type ChangeNavigation = StackNavigationProp<RootStackParamList, 'NameChange'>;
-type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Profile'>;
+type ChangeNavigation =
+  | StackNavigationProp<RootStackParamList, 'NameChange'>
+  | StackNavigationProp<RootStackParamList, 'ServiceEvaluationScreen'>;
+
+type ProfileRouteProp = RouteProp<RootStackParamList, 'Profile'>;
 
 interface Props {
-  route: ChatScreenRouteProp;
-  navigation: ChatScreenRouteProp;
+  route: ProfileRouteProp;
 }
 
 const Profile: React.FC<Props> = ({route}) => {
   const userId = route.params?.userId;
+  const boardId = route.params?.boardId;
+  // console.log('USERID', userId);
   const [nickname, setNickname] = useState<string | undefined>('닉네임');
   // console.log('NickName', nickname);
   const [mannerTime, setMannerTime] = useState<number | undefined>();
   const [totalTime, setTotalTime] = useState<number | undefined>();
-  // console.log(userId);
   const navigation = useNavigation<ChangeNavigation>();
   const goToChange = () => {
     navigation.navigate('NameChange');
+  };
+
+  const goToManner = () => {
+    navigation.navigate('ServiceEvaluationScreen', {
+      boardId: boardId,
+      userId: userId,
+    });
   };
 
   useEffect(() => {
@@ -67,7 +77,7 @@ const Profile: React.FC<Props> = ({route}) => {
           console.error('Error fetching data:', error);
         });
     });
-  }, [userId]);
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -91,15 +101,9 @@ const Profile: React.FC<Props> = ({route}) => {
             {nickname}
           </Text>
           {userId ? (
-            <Text
-              style={{
-                fontSize: 15,
-                marginTop: 15,
-                color: 'black',
-                fontFamily: 'NanumGothic-Bold',
-              }}>
-              총 거래한 시간: {totalTime}
-            </Text>
+            <TouchableOpacity onPress={goToManner}>
+              <Text style={styles.profile_but}>매너 평가하기</Text>
+            </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={goToChange}>
               <Text style={styles.profile_but}>프로필 수정</Text>

@@ -6,7 +6,8 @@ import Profile from '../pages/Profile';
 import AccountEnter from '../pages/AccountEnter';
 import AppealWrite from '../pages/AppealWrite';
 import AccountCheck from '../pages/AccountCheck';
-
+import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
+import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
 const Stack = createStackNavigator<RootStackParamList>();
 const chatScreenNavigator = () => {
   return (
@@ -59,6 +60,30 @@ const chatScreenNavigator = () => {
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ServiceEvaluationScreen"
+        component={ServiceEvaluationScreen}
+        options={{
+          headerTitle: '서비스 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="MannerEvaluationScreen"
+        component={MannerEvaluationScreen}
+        options={{
+          headerTitle: '매너 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
           },
         }}
       />

@@ -1,4 +1,3 @@
-
 type ImageType = {
   firstImage: unknown;
   uri: string;
@@ -38,7 +37,7 @@ interface LocationSet {
 
 export type RootStackParamList = {
   Home: undefined;
-  Profile: {userId?: number} | undefined;
+  Profile: {userId?: number; boardId?: number} | undefined;
   Mypage: undefined;
   MyBuyTime: undefined;
   Notify: undefined;
@@ -103,6 +102,8 @@ export type RootStackParamList = {
   Search: undefined;
   SearchList: {key: string};
   KeywordSet: undefined;
-  ServiceEvaluationScreen: undefined;
-  MannerEvaluationScreen: {selectedServiceEvaluation: string[]};
+  ServiceEvaluationScreen: {userId?: number; boardId?: number} | undefined;
+  MannerEvaluationScreen:
+    | {selectedServiceEvaluation: string[]; userId?: number; boardId?: number}
+    | undefined;
 };
