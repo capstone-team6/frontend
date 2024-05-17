@@ -26,6 +26,8 @@ import FastImage from 'react-native-fast-image'
 import { NativeSyntheticEvent } from 'react-native';
 import { NativeScrollEvent } from 'react-native';
 import postStackNavigator from '../navigation/postNavigator';
+import { RefreshControl } from 'react-native-gesture-handler';
+
 
 Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
 async function requestPermission() {
@@ -69,8 +71,9 @@ type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
 
 
 const Main:React.FC<Props>=({route})=>{
-  console.log(route.params)
+  console.log("재설정 위치: "+route.params)
   const {addressChange,markerLocation}=route.params||{}
+
   console.log(addressChange)
   // console.log(markerLocation)
   const navigation = useNavigation<MainNavigationProp>();
@@ -83,6 +86,15 @@ const Main:React.FC<Props>=({route})=>{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh=()=>{
+    setRefreshing(true)
+
+    setTimeout(()=>{
+      setRefreshing(false)
+      setRefreshing(false)
+    },2000)
+  }
   const [posts, setPosts] = useState<RoomData[]>([]);
   const [address, setAddress] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState('BUY');
@@ -264,7 +276,7 @@ const Main:React.FC<Props>=({route})=>{
                           },
                         })
                         .then((response) => {
-                          console.log(JSON.stringify(response.data.data.boards))
+                          // console.log(JSON.stringify(response.data.data.boards))
                           const boards=JSON.stringify(response.data.data.boards)
                           // console.log(boards)
 
@@ -292,7 +304,7 @@ const Main:React.FC<Props>=({route})=>{
           },
           {
             enableHighAccuracy: false,
-            timeout: 5000,
+            timeout: 10000,
             maximumAge: 10000,
           },
         );
@@ -308,10 +320,6 @@ const goToLocationSearch=()=>{
   goToSearch.navigate('LocationSearch')
 }
 
-// useEffect(()=>{
-//   const {updatedAddress}=newAddress.params
-//   setAddress(updatedAddress)
-// },[])
 
 function timeDiffence(targetTime:Date):string{
   const koreanTime = new Date().getTime()
@@ -328,7 +336,24 @@ function timeDiffence(targetTime:Date):string{
   }
 }
   return (
-    <View style={styles.main_container}>
+    <ScrollView 
+    refreshControl={
+      <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      />
+    }
+
+    onScroll={(event)=>{
+      const scrollPosition = event.nativeEvent.contentOffset.y;
+      const scrollOffset = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+      if (scrollPosition === 0 && !refreshing) {
+        onRefresh();
+      }
+    }}
+    scrollEventThrottle={16} 
+    >
+      <View style={styles.main_container}>
       <TouchableOpacity onPress={goToLocationSearch}>
         <View style={styles.location}>
           <Text style={styles.location_text}>
@@ -390,33 +415,6 @@ function timeDiffence(targetTime:Date):string{
         </View>
       </View>
 
-      {/* 임시 데이터 */}
-      {/* <TouchableOpacity
-        style={styles.postContainer}
-        onPress={() => {
-          goToPostDetail(0);
-        }}>
-        <Image
-          source={require('../assets/images/post1.jpg')}
-          style={styles.post_image}
-        />
-        <View style={styles.post_info}>
-          <Text style={styles.info1}>3km · 5분 전</Text>
-          <Text style={styles.info2}>강아지 산책 부탁드려요</Text>
-          <Text style={styles.info3}>10,000원/20분</Text>
-        </View>
-        <View style={styles.interactionContainer}>
-          <View style={styles.interactionItem}>
-            <Feather name="message-circle" size={15} />
-            <Text style={styles.interactionText}>2</Text>
-          </View>
-          <View style={styles.interactionItem}>
-            <AntDesign name="hearto" size={15} />
-            <Text style={styles.interactionText}>2</Text>
-          </View>
-        </View>
-      </TouchableOpacity> */}
-
       <FlatList
         data={posts}
         keyExtractor={item => item.boardId.toString()}
@@ -468,6 +466,7 @@ function timeDiffence(targetTime:Date):string{
         onEndReachedThreshold={0.1}
       />
     </View>
+    </ScrollView>
   );
 }
 

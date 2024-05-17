@@ -1,17 +1,4 @@
-interface MainParams {
-  dataFromParent:
-    | {
-        latitude: number;
-        longitude: number;
-        address: string;
-      }
-    | any;
-  // dataToMain?: {
-  //   latitude: number;
-  //   longitude: number;
-  //   address: string;
-  // };
-}
+
 type ImageType = {
   firstImage: unknown;
   uri: string;
@@ -48,6 +35,7 @@ interface LocationSet {
     longitude: number;
   };
 }
+
 export type RootStackParamList = {
   Home: undefined;
   Profile: {userId?: number} | undefined;
