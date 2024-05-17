@@ -50,7 +50,7 @@ interface LocationSet {
 }
 export type RootStackParamList = {
   Home: undefined;
-  Profile: undefined;
+  Profile: {userId?: number} | undefined;
   Mypage: undefined;
   MyBuyTime: undefined;
   Notify: undefined;
@@ -72,6 +72,7 @@ export type RootStackParamList = {
       message: string;
       type: string;
     };
+    userId?: number;
   };
   Chatting: undefined;
   SignIn: undefined;
@@ -97,8 +98,16 @@ export type RootStackParamList = {
   LocationSearch: undefined;
   AccountEnter: {boardId?: number; roomId?: number};
   AccountCheck: {boardId?: number; roomId?: number};
-  ChatScreeen: undefined;
-  chatScreenNavigator: {roomId: number; userName: string};
+
+  chatScreenNavigator: {
+    screen: string;
+    params: {
+      boardId: number;
+      userName: string;
+      roomName: string;
+    };
+  };
+
   postNavigatoer: undefined;
   PostDetailSet: {boardId: number};
   PostingChange: {boardData: BoardData};
@@ -106,4 +115,6 @@ export type RootStackParamList = {
   Search: undefined;
   SearchList: {key: string};
   KeywordSet: undefined;
+  ServiceEvaluationScreen: undefined;
+  MannerEvaluationScreen: {selectedServiceEvaluation: string[]};
 };

@@ -25,10 +25,11 @@ interface Props {
 }
 
 const AccountCheck: React.FC<Props> = ({route, navigation}) => {
+  const {boardId, roomId} = route.params;
+  // console.log(boardId, roomId);
   const [holder, setHolder] = useState('');
   const [bank, setBank] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  const {boardId, roomId} = route.params;
 
   useEffect(() => {
     axios
@@ -61,45 +62,47 @@ const AccountCheck: React.FC<Props> = ({route, navigation}) => {
         height: Dimensions.get('screen').height,
         backgroundColor: 'white',
         flex: 1,
-        alignItems: 'center',
+
+        paddingLeft: 40,
       }}>
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           marginTop: 20,
           marginBottom: 10,
         }}>
-        <Text
-          style={{
-            fontFamily: 'NanumGothic-Bold',
-            fontSize: 15,
-            color: 'black',
-          }}>
-          은행선택
-        </Text>
+        <View style={{marginLeft: 10}}>
+          <Text
+            style={{
+              fontFamily: 'NanumGothic',
+              fontSize: 20,
+              color: 'black',
+              marginBottom: 10,
+            }}>
+            예금주: {holder}
+          </Text>
+          <Text
+            style={{
+              fontFamily: 'NanumGothic',
+              fontSize: 20,
+              color: 'black',
+              marginBottom: 10,
+            }}>
+            은행명: {bank}
+          </Text>
+          <Text
+            style={{fontFamily: 'NanumGothic', fontSize: 20, color: 'black'}}>
+            계좌번호: {accountNumber}
+          </Text>
+        </View>
       </View>
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <Text
-          style={{
-            fontFamily: 'NanumGothic-Bold',
-            fontSize: 15,
-            color: 'black',
-          }}>
-          계좌번호
-        </Text>
-      </View>
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <Text
-          style={{
-            fontFamily: 'NanumGothic-Bold',
-            fontSize: 15,
-            color: 'black',
-          }}>
-          예금주명
-        </Text>
-      </View>
-      <View style={{flexDirection: 'row', marginTop: 40}}>
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 40,
+        }}>
         <TouchableOpacity
           style={{
             backgroundColor: '#E8EAEC',
@@ -108,7 +111,8 @@ const AccountCheck: React.FC<Props> = ({route, navigation}) => {
             borderRadius: 10,
             justifyContent: 'center',
             marginRight: 40,
-          }}>
+          }}
+          onPress={() => navigation.goBack()}>
           <Text
             style={{
               color: 'black',
@@ -116,25 +120,7 @@ const AccountCheck: React.FC<Props> = ({route, navigation}) => {
               fontFamily: 'NanumGothic-Bold',
               fontSize: 15,
             }}>
-            취소
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#E8EAEC',
-            width: 80,
-            height: 35,
-            borderRadius: 10,
-            justifyContent: 'center',
-          }}>
-          <Text
-            style={{
-              color: 'black',
-              textAlign: 'center',
-              fontFamily: 'NanumGothic-Bold',
-              fontSize: 15,
-            }}>
-            전송
+            확인
           </Text>
         </TouchableOpacity>
       </View>

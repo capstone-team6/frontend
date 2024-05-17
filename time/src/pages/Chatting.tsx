@@ -14,32 +14,39 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import chatScreenNavigator from '../navigation/chatScreenNavigator';
 
 interface RoomData {
   roomId: number;
   name: string;
   message: string;
   time: string;
-  boardId: number;
   roomName: string;
+  boardId: number;
   // chatCount: any;
 }
 
-type ChatNavigationProp = StackNavigationProp<RootStackParamList, 'Chatting'>;
+type ChatNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'chatScreenNavigator'
+>;
 
 const Chatting = () => {
   const navigation = useNavigation<ChatNavigationProp>();
-  const [chatRoomDetails, setChatRoomDetails] = useState([]);
+  const [chatRoomDetails, setChatRoomDetails] = useState<RoomData[]>([]);
 
   const handleChatRoomPress = (
-    roomId: number,
     userName: string,
     roomName: string,
     boardId: number,
   ) => {
     navigation.navigate('chatScreenNavigator', {
       screen: 'ChatScreen',
-      params: {roomId, userName, roomName, boardId},
+      params: {
+        userName: userName,
+        roomName: roomName,
+        boardId: boardId,
+      },
     });
   };
 
@@ -57,7 +64,6 @@ const Chatting = () => {
         .then(response => {
           console.log(JSON.stringify(response.data.data.chatRoomDetails));
           const chatRooms = JSON.stringify(response.data.data.chatRoomDetails);
-          console.log(chatRooms);
           if (chatRooms) {
             const chat = JSON.parse(response.data.data.chatRoomDetails);
             setChatRoomDetails(chat);
@@ -77,7 +83,6 @@ const Chatting = () => {
       time: '30분전',
       roomName: 'A1',
       boardId: 1,
-
       // chatCount: '1',
     },
     {
@@ -95,7 +100,6 @@ const Chatting = () => {
       time: '1일 전',
       roomName: 'A1',
       boardId: 1,
-
       // chatCount: '3',
     },
     {
@@ -105,7 +109,6 @@ const Chatting = () => {
       time: '1주일 전',
       roomName: 'A1',
       boardId: 1,
-
       // chatCount: '1',
     },
   ];
@@ -118,12 +121,7 @@ const Chatting = () => {
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
           <TouchableOpacity
             onPress={() =>
-              handleChatRoomPress(
-                item.roomId,
-                item.name,
-                item.roomName,
-                item.boardId,
-              )
+              handleChatRoomPress(item.name, item.roomName, item.boardId)
             }>
             <View style={styles.chatItemContainer}>
               <Ionicons name="person-circle" size={80} color={'#352456'} />

@@ -8,13 +8,10 @@ import {
   ScrollView,
   Dimensions,
   Modal,
-  Alert,
 } from 'react-native';
 import {RouteProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
-import Stomp from 'stompjs';
-import {Client} from '@stomp/stompjs';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
@@ -29,10 +26,10 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
-type ChatScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'ChatScreen'
->;
+type ChatScreenNavigationProp =
+  | StackNavigationProp<RootStackParamList, 'AccountEnter'>
+  | StackNavigationProp<RootStackParamList, 'AccountCheck'>
+  | StackNavigationProp<RootStackParamList, 'Profile'>;
 
 interface Props {
   route: ChatScreenRouteProp;
@@ -40,14 +37,16 @@ interface Props {
 }
 
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
-  const {roomId, userName, roomName, boardId, holder, bank, accountNumber} =
+  const {userName, roomName, boardId, holder, bank, accountNumber, userId} =
     route.params;
-
+  console.log(userName, roomName, boardId);
   const [role, setRole] = useState('BUYER');
+  const [roomId, setRoomId] = useState(1);
   const [messageInput, setMessageInput] = useState('');
   const [chatList, setChatList] = useState<
     {
       roomId: number;
+      writer?: string;
       message: string;
       type: string;
     }[]
@@ -57,11 +56,16 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   useEffect(() => {
     if (route.params?.newMessage) {
       const {message, type} = route.params.newMessage;
-      const roomIdNumber = roomId as number;
-      setChatList(currentChatList => [
-        ...currentChatList,
-        {roomId: roomIdNumber, message, type},
-      ]);
+      // console.log(message, type);
+      if (typeof roomId === 'number') {
+        setChatList(currentChatList => [
+          ...currentChatList,
+          {roomId, message, type},
+        ]);
+        sendMessage(roomId, message, type);
+      } else {
+        console.error('roomId is missing or invalid');
+      }
     }
   }, [route.params]);
 
@@ -74,11 +78,11 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const goToAccountEnter = () => {
-    navigation.navigate('AccountEnter', {boardId, roomId});
+    navigation.navigate('AccountEnter', {boardId: boardId, roomId: roomId});
   };
 
   const goToAccountCheck = () => {
-    navigation.navigate('AccountCheck', {boardId, roomId});
+    navigation.navigate('AccountCheck', {boardId: boardId, roomId: roomId});
   };
 
   const goToPay = () => {};
@@ -115,27 +119,23 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     launchImageLibrary(options, handleImagePickerResponse);
   };
 
-  const addMessage = (message: any) => {
-    setChatList(prev => [...prev, message]);
-  };
-
   const onTransactionPress = () => {
     setModalVisible(false);
-
+    console.log(roomId);
     if (roomId !== undefined) {
       setChatList(currentChatList => [
         ...currentChatList,
         {
           roomId: roomId,
           message: '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
-          type: 'goTransaction',
+          type: 'GOTRANSACTION',
         },
       ]);
 
       sendMessage(
         roomId,
         '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
-        'goTransaction',
+        'GOTRANSACTION',
       );
     } else {
       console.error('Transaction Press ERROR');
@@ -143,34 +143,30 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const goTransaction = async (pay: string) => {
-    // if (pay === '틈새 페이') {
-    //   transactionMessage.message +=
-    //     '\n\n' +
-    //     '"틈새페이" 는 안전한 결제를 위하여 포인트 차감 후\n결제완료시 시간 판매자의 틈새페이로 포인트가 전달됩니다.\n또한,시간 판매자가 거래완료를 누른 뒤 시간 구매자가\n거래완료를 눌러야 거래가 최종 완료됩니다.';
-    // }
     if (roomId !== undefined) {
       setChatList(currentChatList => [
         ...currentChatList,
         {
           roomId: roomId,
           message: `${pay}로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.`,
-          type: 'onTransaction',
+          type: 'ONTRANSACTION',
         },
       ]);
       sendMessage(
         roomId,
         `${pay}로 거래가 진행될 예정이에요.\n해당 글이 거래중 상태로 변경되었어요.`,
-        'onTransaction',
+        'ONTRANSACTION',
       );
+      if (pay === '계좌이체') {
+        Account();
+      }
       transferComplete();
     } else {
       console.error('goTransaction ERROR');
     }
 
     try {
-      const store = await AsyncStorage.getItem('accessToken');
-      const token = store ? JSON.parse(store) : null;
-      console.log(token);
+      const token = await fetchToken();
 
       const paymentData = {
         payMeth: pay === '틈새 페이' ? 'PAY' : pay === '만나서' ? 'MEET' : null,
@@ -202,13 +198,13 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           roomId: roomId,
           message:
             '거래를 완료했다면 "거래 완료"를 눌러주세요.\n3일 후에 자동으로 "거래완료"상태로 변경됩니다.',
-          type: 'completeTransaction',
+          type: 'COMPLETETRANSACTION',
         },
       ]);
       sendMessage(
         roomId,
         '거래를 완료했다면 "거래 완료"를 눌러주세요.\n3일 후에 자동으로 "거래완료"상태로 변경됩니다.',
-        'completeTransaction',
+        'COMPLETETRANSACTION',
       );
     } else {
       console.error('transferComplete ERROR');
@@ -221,18 +217,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         ...currentChatList,
         {
           roomId: roomId,
-          message:
-            '거래를 완료했다면 "거래 완료"를 눌러주세요.\n3일 후에 자동으로 "거래완료"상태로 변경됩니다.',
-          type: 'review',
+          message: '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
+          type: 'REVIEW',
         },
       ]);
       sendMessage(
         roomId,
         '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
-        'review',
+        'REVIEW',
       );
     } else {
-      console.error('transferComplete ERROR');
+      console.error('COMPLETEMESSAGE ERROR');
     }
 
     try {
@@ -278,9 +273,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
   };
 
-  const transferInfo = () => {
+  const Account = () => {
     if (roomId !== undefined) {
-      sendMessage(roomId, '계좌 정보를 보냈어요.', 'transferInfo');
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {
+          roomId: roomId,
+          message: '계좌 정보를 보냈어요.',
+          type: 'ACCOUNT',
+        },
+      ]);
+      sendMessage(roomId, '계좌 정보를 보냈어요.', 'ACCOUNT');
     } else {
       console.error('transferComplete ERROR');
     }
@@ -328,16 +331,16 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           boardId: boardId,
         },
         headers: {
-          'Content-Type': 'application/json', // 필요한 경우 추가
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Data received:', response.data);
-      console.log(response.data.roleType);
+      console.log('FECTCH MESSAGES RECEIVED:', response.data);
       setRole(response.data.roleType);
-      // setChatList(response.data.chatlist);
+      setChatList(response.data.chatlist);
+      setRoomId(response.data.roomId);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('FETCH MESSAGES ERROR: ', error);
     }
   };
 
@@ -357,20 +360,23 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   ) => {
     try {
       const token = await fetchToken();
-      const response = await axios.post('http://13.125.118.92:8080/chat/send', {
-        params: {
+      const response = await axios.post(
+        'http://13.125.118.92:8080/chat/send',
+        {
           roomId: roomId,
           message: message,
           type: messageType,
         },
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      console.log('Message sent successfully:', response.data);
+      );
+      console.log('SENDMESSAGE SUCCESSFULLY:', response.data);
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('FALIED TO SENDMESSAGE:', error);
     }
   };
 
@@ -378,7 +384,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     if (roomId !== undefined) {
       sendMessage(roomId, messageInput, 'MESSAGE');
     } else {
-      console.error('roomId is undefined');
+      console.error('HANDLESENDMESSAGE: roomId is undefined');
     }
   };
 
@@ -428,22 +434,22 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             key={index}
             style={{
               alignSelf:
-                (msg.type === 'goTransaction' && role === 'BUYER') ||
-                msg.type === 'message' ||
-                msg.type === 'completeTransaction' ||
+                (msg.type === 'GOTRANSACTION' && role === 'BUYER') ||
+                msg.type === 'MESSAGE' ||
+                (msg.type === 'COMPLETETRANSACTION' && role === 'BUYER') ||
                 msg.type === 'transferInfo' ||
                 msg.type === 'ACCOUNT'
                   ? 'flex-end'
-                  : msg.type === 'onTransaction' || msg.type === 'review'
+                  : msg.type === 'ONTRANSACTION' || msg.type === 'REVIEW'
                   ? 'center'
                   : 'flex-start',
               margin: 10,
               width:
-                msg.type === 'onTransaction' || msg.type === 'review'
+                msg.type === 'ONTRANSACTION' || msg.type === 'REVIEW'
                   ? '100%'
                   : 'auto',
             }}>
-            {msg.type === 'goTransaction' && role === 'BUYER' ? (
+            {msg.type === 'GOTRANSACTION' && role === 'BUYER' ? (
               <View
                 style={{
                   backgroundColor: '#F1F1F1',
@@ -530,7 +536,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : msg.type == 'completeTransaction' && role === 'BUYER' ? (
+            ) : msg.type == 'COMPLETETRANSACTION' && role === 'BUYER' ? (
               <View
                 style={{
                   backgroundColor: '#F1F1F1',
@@ -616,7 +622,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                       justifyContent: 'center',
                       marginVertical: 8,
                     }}
-                    onPress={goToAccountEnter}>
+                    onPress={goToAccountCheck}>
                     <Text
                       style={{
                         fontFamily: 'NanumGothic',
@@ -630,7 +636,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : msg.type === 'onTransaction' || msg.type === 'review' ? (
+            ) : msg.type === 'ONTRANSACTION' || msg.type === 'REVIEW' ? (
               <View
                 style={{
                   padding: 10,
@@ -657,7 +663,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                       style={{
                         color: 'black',
                         textAlign:
-                          msg.type === 'onTransaction' || msg.type === 'review'
+                          msg.type === 'ONTRANSACTION' || msg.type === 'REVIEW'
                             ? 'center'
                             : 'auto',
                         marginLeft: 5,
@@ -666,7 +672,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                     </Text>
                   </View>
                   <View>
-                    {msg.type === 'review' ? (
+                    {msg.type === 'REVIEW' ? (
                       <TouchableOpacity
                         style={{
                           backgroundColor: '#66636C',
