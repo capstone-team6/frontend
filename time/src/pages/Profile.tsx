@@ -102,7 +102,7 @@ const Profile: React.FC<Props> = ({route}) => {
           </Text>
           {userId ? (
             <TouchableOpacity onPress={goToManner}>
-              <Text style={styles.profile_but}>매너 평가하기</Text>
+              <Text style={styles.profile_but}>매너 평가</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={goToChange}>

@@ -31,41 +31,56 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
   const [bank, setBank] = useState('');
   // console.log(bank);
   const [accountNumber, setAccountNumber] = useState('');
+  const [isPressed, setIsPressed] = useState(false);
 
   const onSubmit = async () => {
     if (!holder || bank === '' || !accountNumber) {
       Alert.alert('모든 항목을 입력해주세요.');
       return;
     }
-    try {
-      const store = await AsyncStorage.getItem('accessToken');
-      const token = store ? JSON.parse(store) : null;
+    if (!isPressed) {
+      try {
+        const store = await AsyncStorage.getItem('accessToken');
+        const token = store ? JSON.parse(store) : null;
 
-      console.log(token);
+        console.log(token);
 
-      const res = await axios.post(
-        `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/pay`,
-        {
-          payMeth: 'ACCOUNT',
-          holder: holder,
-          bank: bank,
-          accountNumber: accountNumber,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+        const res = await axios.post(
+          `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/pay`,
+          {
+            payMeth: 'ACCOUNT',
+            holder: holder,
+            bank: bank,
+            accountNumber: accountNumber,
           },
-        },
-      );
-      if (res.status === 200) {
-        console.log(res.data);
-        navigation.navigate('ChatScreen', {
-          newMessage: {message: '계좌정보를 보냈어요.', type: 'ACCOUNT'},
-        });
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (res.status === 200) {
+          console.log(res.data);
+          navigation.navigate('ChatScreen', {
+            newMessage: {message: '계좌정보를 보냈어요.', type: 'ACCOUNT'},
+          });
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
+      console.log(isPressed);
+      setIsPressed(true);
+    }
+  };
+
+  const handleAccountNumberChange = (text: string) => {
+    const isValid = /^\d+$/.test(text);
+
+    if (!isValid && text !== '') {
+      Alert.alert('알림', '-없이 숫자만 입력해주세요.', [{text: '확인'}]);
+    } else {
+      setAccountNumber(text);
     }
   };
 
@@ -78,70 +93,6 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
         flex: 1,
         alignItems: 'center',
       }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginTop: 20,
-          marginBottom: 10,
-        }}>
-        <Text
-          style={{
-            fontFamily: 'NanumGothic-Bold',
-            fontSize: 15,
-            color: 'black',
-          }}>
-          은행선택
-        </Text>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 5,
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            width: '80%',
-            height: 50,
-            marginLeft: 10,
-            justifyContent: 'center', // 수직 정렬을 위해 추가
-          }}>
-          <Picker
-            selectedValue={bank}
-            onValueChange={(itemValue, itemIndex) => setBank(itemValue)}>
-            <Picker.Item label="은행 선택" value="none" />
-            <Picker.Item label="국민은행" value="국민은행" />
-            <Picker.Item label="우리은행" value="우리은행" />
-            <Picker.Item label="신한은행" value="신한은행" />
-            <Picker.Item label="하나은행" value="하나은행" />
-          </Picker>
-        </View>
-      </View>
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <Text
-          style={{
-            fontFamily: 'NanumGothic-Bold',
-            fontSize: 15,
-            color: 'black',
-          }}>
-          계좌번호
-        </Text>
-        <TextInput
-          placeholder="-없이 숫자만 입력"
-          value={accountNumber}
-          onChangeText={setAccountNumber}
-          style={{
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 5,
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            fontSize: 16,
-            width: '80%',
-            marginLeft: 10,
-            marginBottom: 10,
-            height: 50,
-          }}></TextInput>
-      </View>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <Text
           style={{
@@ -167,28 +118,74 @@ const AccountEnter: React.FC<Props> = ({route, navigation}) => {
             height: 50,
           }}></TextInput>
       </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginTop: 20,
+          marginBottom: 10,
+        }}>
+        <Text
+          style={{
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 15,
+            color: 'black',
+          }}>
+          은행선택
+        </Text>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            paddingHorizontal: 10,
+            paddingVertical: 8,
+            width: '80%',
+            height: 50,
+            marginLeft: 10,
+            justifyContent: 'center',
+          }}>
+          <Picker
+            selectedValue={bank}
+            onValueChange={(itemValue, itemIndex) => setBank(itemValue)}>
+            <Picker.Item label="은행 선택" value="none" />
+            <Picker.Item label="국민은행" value="국민은행" />
+            <Picker.Item label="우리은행" value="우리은행" />
+            <Picker.Item label="신한은행" value="신한은행" />
+            <Picker.Item label="하나은행" value="하나은행" />
+          </Picker>
+        </View>
+      </View>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <Text
+          style={{
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 15,
+            color: 'black',
+          }}>
+          계좌번호
+        </Text>
+        <TextInput
+          placeholder="-없이 숫자만 입력"
+          value={accountNumber}
+          onChangeText={handleAccountNumberChange}
+          style={{
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            paddingHorizontal: 10,
+            paddingVertical: 8,
+            fontSize: 16,
+            width: '80%',
+            marginLeft: 10,
+            marginBottom: 10,
+            height: 50,
+          }}></TextInput>
+      </View>
+
       <View style={{flexDirection: 'row', marginTop: 40}}>
         <TouchableOpacity
-          style={{
-            backgroundColor: '#E8EAEC',
-            width: 80,
-            height: 35,
-            borderRadius: 10,
-            justifyContent: 'center',
-            marginRight: 40,
-          }}
-          onPress={() => navigation.goBack()}>
-          <Text
-            style={{
-              color: 'black',
-              textAlign: 'center',
-              fontFamily: 'NanumGothic-Bold',
-              fontSize: 15,
-            }}>
-            취소
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+          disabled={isPressed}
           style={{
             backgroundColor: '#E8EAEC',
             width: 80,

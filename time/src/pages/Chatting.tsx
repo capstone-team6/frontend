@@ -14,7 +14,6 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import chatScreenNavigator from '../navigation/chatScreenNavigator';
 
 interface RoomData {
   roomId: number;
@@ -22,8 +21,8 @@ interface RoomData {
   message: string;
   time: string;
   roomName: string;
+  noReadChat: number;
   boardId: number;
-  // chatCount: any;
 }
 
 type ChatNavigationProp = StackNavigationProp<
@@ -62,11 +61,11 @@ const Chatting = () => {
           },
         })
         .then(response => {
-          console.log(JSON.stringify(response.data.data.chatRoomDetails));
-          const chatRooms = JSON.stringify(response.data.data.chatRoomDetails);
-          if (chatRooms) {
-            const chat = JSON.parse(response.data.data.chatRoomDetails);
-            setChatRoomDetails(chat);
+          console.log(JSON.stringify(response.data.data));
+          const d = JSON.stringify(response.data.data);
+          if (d) {
+            const chat = JSON.parse(d);
+            setChatRoomDetails(chat.chatRoomDetails);
           }
         })
         .catch(error => {
@@ -78,38 +77,39 @@ const Chatting = () => {
   const chatData = [
     {
       roomId: 1,
+      roomName: 'A1',
       name: '홍길동',
       message: '안녕하세요!',
       time: '30분전',
-      roomName: 'A1',
+      noReadChat: 2,
       boardId: 1,
-      // chatCount: '1',
     },
     {
       roomId: 2,
+      roomName: 'A1',
       name: '틈새2',
       message: '감사합니다!! 조심히가세요!',
       time: '1일 전',
-      roomName: 'A1',
+      noReadChat: 2,
       boardId: 1,
     },
     {
       roomId: 3,
+      roomName: 'A1',
       name: '틈새3',
       message: '시간 구매하고 싶어요',
       time: '1일 전',
-      roomName: 'A1',
+      noReadChat: 1,
       boardId: 1,
-      // chatCount: '3',
     },
     {
       roomId: 4,
+      roomName: 'A1',
       name: '틈새4',
       message: '감사합니다!! 조심히 가세요!',
       time: '1주일 전',
-      roomName: 'A1',
+      noReadChat: 1,
       boardId: 1,
-      // chatCount: '1',
     },
   ];
 
@@ -133,11 +133,10 @@ const Chatting = () => {
                 </View>
                 <Text style={styles.chatContent}>{item.message}</Text>
               </View>
-              {/* {item.contents && (
-                <View style={styles.chatCountContainer}>
-                  <Text style={styles.chatCount}>{item.chatCount}</Text>
-                </View>
-              )} */}
+
+              <View style={styles.chatCountContainer}>
+                <Text style={styles.chatCount}>{item.noReadChat}</Text>
+              </View>
             </View>
           </TouchableOpacity>
         )}
@@ -194,11 +193,12 @@ const styles = StyleSheet.create({
     width: 15,
     height: 15,
     borderRadius: 25,
-    backgroundColor: '#C9BAE5',
+    backgroundColor: '#352456',
   },
   chatCount: {
     fontSize: 10,
     fontFamily: 'NanumGothic-Bold',
+    color: 'white',
   },
 });
 

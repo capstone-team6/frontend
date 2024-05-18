@@ -24,6 +24,7 @@ import {
   ImageLibraryOptions,
 } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {BooleanOptional} from 'qs';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp =
@@ -36,39 +37,51 @@ interface Props {
   navigation: ChatScreenNavigationProp;
 }
 
+type PaymentType = '만나서 결제' | '계좌이체' | '틈새 페이' | null;
+
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const {userName, roomName, boardId, holder, bank, accountNumber} =
     route.params;
   console.log(userName, roomName, boardId);
+  const [room, setRoom] = useState();
+  const [board, setBoard] = useState();
+  const [name, setName] = useState();
   const [role, setRole] = useState('BUYER');
   const [roomId, setRoomId] = useState(1);
   const [userId, setuserId] = useState(1);
   const [messageInput, setMessageInput] = useState('');
+  const [selectedPayment, setSelectedPayment] = useState<PaymentType>(null);
+  const [selectedAction, setSelectedAction] = useState<
+    null | 'complete' | 'cancel'
+  >(null);
   const [chatList, setChatList] = useState<
     {
       roomId: number;
+      messageId?: number;
       writer?: string;
       message: string;
       type: string;
+      time?: string;
+      buyerRead?: boolean;
+      sellerRead?: boolean;
     }[]
   >([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [areButtonsEnabled, setAreButtonsEnabled] = useState(true);
+  const [selectedButton, setSelectedButton] = useState(null);
 
   useEffect(() => {
     if (route.params?.newMessage) {
       const {message, type} = route.params.newMessage;
-      // console.log(message, type);
-      if (typeof roomId === 'number') {
-        setChatList(currentChatList => [
-          ...currentChatList,
-          {roomId, message, type},
-        ]);
-        sendMessage(roomId, message, type);
+      console.log(message, type);
+      if (typeof roomId === 'number' && type === 'ACCOUNT') {
+        handlePaymentSelection('계좌이체');
       } else {
         console.error('roomId is missing or invalid');
       }
     }
-  }, [route.params]);
+  }, [route.params?.newMessage]);
 
   const goBack = () => {
     navigation.goBack();
@@ -122,7 +135,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
   const onTransactionPress = () => {
     setModalVisible(false);
-    console.log(roomId);
+    // console.log(roomId);
     if (roomId !== undefined) {
       setChatList(currentChatList => [
         ...currentChatList,
@@ -132,7 +145,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           type: 'GOTRANSACTION',
         },
       ]);
-
       sendMessage(
         roomId,
         '거래가 시작됐어요.\n결제 방법을 선택해주세요.',
@@ -140,6 +152,13 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       );
     } else {
       console.error('Transaction Press ERROR');
+    }
+  };
+
+  const handlePaymentSelection = (paymentType: PaymentType) => {
+    setSelectedPayment(paymentType);
+    if (paymentType) {
+      goTransaction(paymentType);
     }
   };
 
@@ -161,7 +180,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       if (pay === '계좌이체') {
         Account();
       }
-      transferComplete();
     } else {
       console.error('goTransaction ERROR');
     }
@@ -170,7 +188,8 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       const token = await fetchToken();
 
       const paymentData = {
-        payMeth: pay === '틈새 페이' ? 'PAY' : pay === '만나서' ? 'MEET' : null,
+        payMeth:
+          pay === '틈새 페이' ? 'PAY' : pay === '만나서 결제' ? 'MEET' : null,
       };
 
       const res = await axios.post(
@@ -183,12 +202,15 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           },
         },
       );
+      console.log(res);
       if (res.status === 200) {
-        console.log(res.data);
+        console.log('goTransaction', res.data);
       }
     } catch (error) {
       console.log(error);
     }
+
+    transferComplete();
   };
 
   const transferComplete = () => {
@@ -213,53 +235,58 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const completeMessage = async () => {
-    if (roomId !== undefined) {
-      setChatList(currentChatList => [
-        ...currentChatList,
-        {
-          roomId: roomId,
-          message: '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
-          type: 'REVIEW',
-        },
-      ]);
-      sendMessage(
-        roomId,
-        '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
-        'REVIEW',
-      );
-    } else {
-      console.error('COMPLETEMESSAGE ERROR');
-    }
+    setSelectedAction('complete');
+    if (!isCompleted) {
+      if (roomId !== undefined) {
+        setChatList(currentChatList => [
+          ...currentChatList,
+          {
+            roomId: roomId,
+            message: '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
+            type: 'REVIEW',
+          },
+        ]);
+        sendMessage(
+          roomId,
+          '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
+          'REVIEW',
+        );
+      } else {
+        console.error('COMPLETEMESSAGE ERROR');
+      }
 
-    try {
-      axios
-        .put(
-          `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/complete`,
-        )
-        .then(res => {
-          const result = res.data.data;
-          console.log(result);
-          if (result.status == 200) {
-            console.log(result.data);
-          }
-        })
-        .catch(err => {
-          const result = err.response.data.data;
-          console.log(result);
-        });
-    } catch (error) {
-      console.error('Request failed:', error);
+      try {
+        axios
+          .put(
+            `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/complete`,
+          )
+          .then(res => {
+            const result = res.data;
+            console.log(result);
+            if (result.status == 200) {
+              console.log(result.data);
+            }
+          })
+          .catch(err => {
+            const result = err.response.data.data;
+            console.log(result);
+          });
+      } catch (error) {
+        console.error('Request failed:', error);
+      }
     }
+    setIsCompleted(true);
   };
 
   const cancelMessage = async () => {
+    setSelectedAction('cancel');
     try {
       axios
         .put(
           `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/cancel`,
         )
         .then(res => {
-          const result = res.data.data;
+          const result = res.data;
           console.log(result);
           if (result.status == 200) {
             console.log(result.data);
@@ -323,10 +350,10 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   }
 
   const fetchMessages = async () => {
-    try {
-      const token = await fetchToken();
-      console.log(token);
-      const response = await axios.get('http://13.125.118.92:8080/chat/room', {
+    const token = await fetchToken();
+    console.log(token);
+    await axios
+      .get('http://13.125.118.92:8080/chat/room', {
         params: {
           roomName: roomName,
           boardId: boardId,
@@ -335,22 +362,23 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      });
-      console.log('FECTCH MESSAGES RECEIVED:', response.data);
-      console.log(JSON.stringify(response.data));
-      const data = JSON.stringify(response.data);
-      console.log(data);
-
-      if (data) {
-        const d = JSON.parse(data);
-        setRole(d.roleType);
-        setChatList(d.chatlist);
-        // setRoomId(d.roomId);
-        setuserId(d.userId);
-      }
-    } catch (error) {
-      console.error('FETCH MESSAGES ERROR: ', error);
-    }
+      })
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        const data = JSON.stringify(response.data);
+        console.log(data);
+        if (data) {
+          const d = JSON.parse(data);
+          setRoom(d.roomName);
+          setBoard(d.boardId);
+          setName(d.userName);
+          setRole(d.roleType);
+          setChatList(d.chatlist);
+          // setRoomId(d.roomId);
+          setuserId(d.userId);
+        }
+      })
+      .catch(error => console.error('FETCH MESSAGES ERROR: ', error));
   };
 
   // useEffect(() => {
@@ -438,7 +466,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           </Text>
         </View>
 
-        {chatList.map((msg, index) => (
+        {chatList?.map((msg, index) => (
           <View
             key={index}
             style={{
@@ -447,7 +475,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 msg.type === 'MESSAGE' ||
                 (msg.type === 'COMPLETETRANSACTION' && role === 'BUYER') ||
                 msg.type === 'transferInfo' ||
-                msg.type === 'ACCOUNT'
+                (msg.type === 'ACCOUNT' && role == 'BUYER')
                   ? 'flex-end'
                   : msg.type === 'ONTRANSACTION' || msg.type === 'REVIEW'
                   ? 'center'
@@ -475,16 +503,26 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 </Text>
                 <View>
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: '#C9BAE5',
-                      width: '100%',
-                      height: 35,
-                      borderRadius: 10,
-                      justifyContent: 'center',
-                      marginVertical: 8,
-                    }}
+                    disabled={selectedPayment !== null}
+                    style={[
+                      {
+                        backgroundColor: '#C9BAE5',
+                        width: '100%',
+                        height: 35,
+                        borderRadius: 10,
+                        justifyContent: 'center',
+                        marginVertical: 8,
+                      },
+                      {
+                        opacity:
+                          selectedPayment !== null &&
+                          selectedPayment !== '만나서 결제'
+                            ? 0.5
+                            : 1,
+                      },
+                    ]}
                     onPress={() => {
-                      goTransaction('만나서 결제');
+                      handlePaymentSelection('만나서 결제');
                     }}>
                     <Text
                       style={{
@@ -498,17 +536,26 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: '#C9BAE5',
-                      width: '100%',
-                      height: 35,
-                      borderRadius: 10,
-                      justifyContent: 'center',
-                      marginBottom: 8,
-                    }}
+                    disabled={selectedPayment !== null}
+                    style={[
+                      {
+                        backgroundColor: '#C9BAE5',
+                        width: '100%',
+                        height: 35,
+                        borderRadius: 10,
+                        justifyContent: 'center',
+                        marginVertical: 8,
+                      },
+                      {
+                        opacity:
+                          selectedPayment !== null &&
+                          selectedPayment !== '계좌이체'
+                            ? 0.5
+                            : 1,
+                      },
+                    ]}
                     onPress={() => {
                       goToAccountEnter();
-                      goTransaction('계좌이체');
                     }}>
                     <Text
                       style={{
@@ -522,15 +569,26 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: '#C9BAE5',
-                      width: '100%',
-                      height: 35,
-                      borderRadius: 10,
-                      justifyContent: 'center',
-                    }}
+                    disabled={selectedPayment !== null}
+                    style={[
+                      {
+                        backgroundColor: '#C9BAE5',
+                        width: '100%',
+                        height: 35,
+                        borderRadius: 10,
+                        justifyContent: 'center',
+                        marginVertical: 8,
+                      },
+                      {
+                        opacity:
+                          selectedPayment !== null &&
+                          selectedPayment !== '틈새 페이'
+                            ? 0.5
+                            : 1,
+                      },
+                    ]}
                     onPress={() => {
-                      goTransaction('틈새 페이');
+                      handlePaymentSelection('틈새 페이');
                     }}>
                     <Text
                       style={{
@@ -563,6 +621,10 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 </Text>
                 <View>
                   <TouchableOpacity
+                    disabled={
+                      isCompleted ||
+                      (selectedAction !== null && selectedAction !== 'complete')
+                    }
                     style={{
                       backgroundColor: '#C9BAE5',
                       width: '100%',
@@ -584,23 +646,44 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: '#C9BAE5',
-                      width: '100%',
-                      height: 35,
-                      borderRadius: 10,
-                      justifyContent: 'center',
-                      marginVertical: 8,
-                    }}
+                    style={[
+                      {
+                        backgroundColor: '#C9BAE5',
+                        width: '100%',
+                        height: 35,
+                        borderRadius: 10,
+                        justifyContent: 'center',
+                        marginVertical: 8,
+                      },
+                      {
+                        opacity:
+                          selectedAction !== null &&
+                          selectedAction !== 'complete'
+                            ? 0.5
+                            : 1,
+                      },
+                    ]}
                     onPress={cancelMessage}>
                     <Text
-                      style={{
-                        fontFamily: 'NanumGothic',
-                        fontSize: 15,
-                        textAlign: 'center',
-                        color: 'black',
-                        fontWeight: 'bold',
-                      }}>
+                      disabled={
+                        selectedAction !== null && selectedAction !== 'cancel'
+                      }
+                      style={[
+                        {
+                          fontFamily: 'NanumGothic',
+                          fontSize: 15,
+                          textAlign: 'center',
+                          color: 'black',
+                          fontWeight: 'bold',
+                        },
+                        {
+                          opacity:
+                            selectedAction !== null &&
+                            selectedAction !== 'cancel'
+                              ? 0.5
+                              : 1,
+                        },
+                      ]}>
                       거래 취소
                     </Text>
                   </TouchableOpacity>

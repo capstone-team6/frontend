@@ -60,6 +60,7 @@ export type RootStackParamList = {
       type: string;
     };
     userId?: number;
+    isCancelled?: boolean;
   };
   Chatting: undefined;
   SignIn: undefined;
