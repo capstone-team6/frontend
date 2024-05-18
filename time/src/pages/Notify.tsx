@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableNativeFeedback, TouchableOpacity, View } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import Delete from 'react-native-vector-icons/MaterialIcons'
@@ -6,7 +6,15 @@ import Setting from 'react-native-vector-icons/AntDesign'
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
+interface KeywordData{
+    keywordId:number
+    title:string
+    keyword:string
+
+}
 type SetNav=StackNavigationProp<RootStackParamList,'Notify'>
 const Notify = () => {
     const [selectedTab, setSelectedTab] = useState('Activity');
@@ -14,6 +22,41 @@ const Notify = () => {
     const goToNav=()=>{
         navigation.navigate('KeywordSet')
     }
+
+    const [scrapNotify, setScrapNotify]=useState()
+    
+
+    useEffect(()=>{
+        AsyncStorage.getItem('accessToken').then(token=>{
+            const accessToken=token?JSON.parse(token):null
+            axios.get('http://13.125.118.92:8080/notification/keyword',{
+                headers:{
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+            .then(res=>{
+                console.log(res.data)
+            })
+        })
+    },[selectedTab])
+
+    useEffect(()=>{
+        AsyncStorage.getItem('accessToken').then(token=>{
+            const accessToken=token?JSON.parse(token):null
+            axios.get('http://13.125.118.92:8080/notification/activity',{
+                headers:{
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+            .then(res=>{
+                console.log(res.data.activityNotificatoinListDtoList)
+                const data=res.data.activityNotificatoinListDtoList
+                if(data){
+                    
+                }
+            })
+        })
+    },[selectedTab])
     return (
         <View style={styles.container}>
             <View style={styles.options}>
