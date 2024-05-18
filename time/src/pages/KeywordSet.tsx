@@ -1,21 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StackNavigationProp } from '@react-navigation/stack';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import Trash from 'react-native-vector-icons/EvilIcons'
+import { RootStackParamList } from '../../types/Type';
+import { useNavigation } from '@react-navigation/native';
 
-
+type Nav=StackNavigationProp<RootStackParamList,'KeywordSet'>
 const KeywordSet = () => {
+    const navigation=useNavigation<Nav>()
     const [keyword,setKeyword]=useState<string>('')
+    const [keywordList, setKeywordList]=useState<{ id: string, keyword: string }[]>([])
     const [resKeyword,setResKeyword]=useState<string[]>([])
     const onKeywordChange=(text:string)=>{
         setKeyword(text)
     }
 
-    const deleteAlert=()=>{
+    const deleteAlert=(keywordToDelete: { id: string, keyword: string })=>{
     
-        Alert.alert('','\'산책\' 키워드를 삭제하시겠습니까?',
+        Alert.alert('', `'${keywordToDelete.keyword}' 키워드를 삭제하시겠습니까?`,
         [
             {
                 text: '취소',
@@ -23,29 +28,57 @@ const KeywordSet = () => {
             },
             {
                 text: '확인',
-                // onPress: () => {
-                //     AsyncStorage.getItem('accessToken').then(item=>{
-                //         const token=item?JSON.parse(item):null
-                //         axios.delete(`http://13.125.118.92:8080/api/auth/board/${boardId}`,{
-                //             headers:{
-                //                 Authorization:`Bearer ${token}`
-                //             }
-                //         })
-                //     .then(res=>{
-                //         console.log(res)
-                //         console.log('게시글 삭제됨');
-                //         navigation.navigate('틈새시장')
-                //     })
-                //     .catch(err=>{
-                //         console.log(err)
-                //     })
-                //     })
-                // },
+                onPress: () => handleDelete(keywordToDelete.id)
             },
         ],
         { cancelable: false })
     }
 
+    const handleDelete = (idToDelete: string) => {
+        AsyncStorage.getItem('accessToken').then(token => {
+            const accessToken = token ? JSON.parse(token) : null;
+            axios.delete(`http://13.125.118.92:8080/keyword/${idToDelete}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            })
+            .then(() => {
+                // If deletion is successful, update the keyword list
+                setKeywordList(prevKeywords => prevKeywords.filter(keywordObj => keywordObj.id !== idToDelete));
+                Alert.alert('', '키워드가 삭제되었습니다.');
+            })
+            .catch(error => {
+                console.log(error);
+                Alert.alert('', '키워드 삭제에 실패했습니다.');
+            });
+        });
+    };
+
+
+    useEffect(()=>{
+        AsyncStorage.getItem('accessToken').then(token=>{
+            const accessToken=token?JSON.parse(token):null
+            axios.get('http://13.125.118.92:8080/keyword',{
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            })
+            .then((res)=>{
+                // console.log(res.data.keywordResponses)
+                // const responseKeywords = res.data.keywordResponses.map((keywordResponse: any) => keywordResponse.keyword);
+                const responseKeywords = res.data.keywordResponses.map((keywordResponse: any) => {
+                    return { id: keywordResponse.id, keyword: keywordResponse.keyword };
+                });
+                setKeywordList(responseKeywords);
+
+            })
+            .catch((error)=>{
+                console.log(error)
+            })
+        })
+    },[resKeyword])
     const onSubmit=()=>{
         AsyncStorage.getItem('accessToken').then(token=>{
             const accessToken=token?JSON.parse(token):null
@@ -63,13 +96,14 @@ const KeywordSet = () => {
                 const response=JSON.parse(res.config.data)
                 setResKeyword(prevKeywords => [...prevKeywords, response.keyword])
                 setKeyword('')
-
             })
             .catch((error)=>{
                 console.log(error)
             })
         })
     }
+
+    
     const isButtonDisabled = keyword.trim() === '';
     return (
         <ScrollView>
@@ -80,12 +114,12 @@ const KeywordSet = () => {
                 </View>
                 <View style={styles.line}/>
                 <View style={{flexDirection:'column', alignItems: 'center', alignSelf: 'center'}}>
-                {resKeyword.map((keyword, index) => (
+                {keywordList.map((keywordObj, index) => (
                     <View style={{flexDirection: 'row', alignItems: 'center'}} key={index}>
                         <View style={styles.keywordBox}>
-                            <Text style={styles.keyword}>{keyword}</Text>
+                            <Text style={styles.keyword}>{keywordObj.keyword}</Text>
                         </View>
-                        <Trash name='trash' size={30} onPress={()=>deleteAlert()}/>
+                        <Trash name='trash' size={30} onPress={()=>deleteAlert(keywordObj)}/>
                     </View>
                 ))}
             </View>

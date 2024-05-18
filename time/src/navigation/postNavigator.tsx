@@ -134,6 +134,27 @@ const postStackNavigator = () => {
         headerTitle: '',
       }}
       />
+      <Stack.Screen name='Notify' component={Notify}
+      options={{
+        headerTitle:'알림',
+        headerTitleStyle: {
+          fontFamily: 'NanumGothic-Bold',
+          fontSize: 28,
+        },
+      }}
+      />
+      <Stack.Screen
+        name="KeywordSet"
+        component={KeywordSet}
+        options={{
+          headerTitle: '키워드 알림 설정',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}/>
+
+
     </Stack.Navigator>
   );
 };
