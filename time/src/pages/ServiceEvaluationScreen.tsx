@@ -10,7 +10,7 @@ import {useNavigation} from '@react-navigation/native';
 import {RouteProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
-
+import {Alert} from 'react-native';
 type EvaluationScreenNavigationProp =
   | StackNavigationProp<RootStackParamList, 'ServiceEvaluationScreen'>
   | StackNavigationProp<RootStackParamList, 'MannerEvaluationScreen'>;
@@ -71,11 +71,20 @@ const ServiceEvaluationScreen: React.FC<Props> = ({route}) => {
   };
 
   const handleNavigate = () => {
-    navigation.navigate('MannerEvaluationScreen', {
-      selectedServiceEvaluation: selectedServiceEvaluation,
-      boardId: boardId,
-      userId: userId,
-    });
+    if (selectedServiceEvaluation.length === 0) {
+      Alert.alert(
+        '알림',
+        '최소 한 가지 옵션을 선택해주세요.',
+        [{text: '확인', onPress: () => console.log('확인 버튼이 눌렸습니다.')}],
+        {cancelable: false},
+      );
+    } else {
+      navigation.navigate('MannerEvaluationScreen', {
+        selectedServiceEvaluation: selectedServiceEvaluation,
+        boardId: boardId,
+        userId: userId,
+      });
+    }
   };
 
   return (

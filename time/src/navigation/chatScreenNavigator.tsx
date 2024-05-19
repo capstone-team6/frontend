@@ -8,6 +8,7 @@ import AppealWrite from '../pages/AppealWrite';
 import AccountCheck from '../pages/AccountCheck';
 import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
 import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
+import EvaluationScreen from '../pages/EvaluationScreen';
 const Stack = createStackNavigator<RootStackParamList>();
 const chatScreenNavigator = () => {
   return (
@@ -78,6 +79,19 @@ const chatScreenNavigator = () => {
       <Stack.Screen
         name="MannerEvaluationScreen"
         component={MannerEvaluationScreen}
+        options={{
+          headerTitle: '매너 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name="EvaluationScreen"
+        component={EvaluationScreen}
         options={{
           headerTitle: '매너 평가',
           headerTitleStyle: {

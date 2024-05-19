@@ -107,5 +107,10 @@ export type RootStackParamList = {
   MannerEvaluationScreen:
     | {selectedServiceEvaluation: string[]; userId?: number; boardId?: number}
     | undefined;
-
+  EvaluationScreen: {
+    userId?: number;
+    boardId?: number;
+    nickname?: string;
+    mannerTime?: number;
+  };
 };

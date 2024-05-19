@@ -18,10 +18,12 @@ import {useNavigation} from '@react-navigation/native';
 import {RouteProp} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type ChangeNavigation =
   | StackNavigationProp<RootStackParamList, 'NameChange'>
-  | StackNavigationProp<RootStackParamList, 'ServiceEvaluationScreen'>;
+  | StackNavigationProp<RootStackParamList, 'ServiceEvaluationScreen'>
+  | StackNavigationProp<RootStackParamList, 'EvaluationScreen'>;
 
 type ProfileRouteProp = RouteProp<RootStackParamList, 'Profile'>;
 
@@ -32,7 +34,7 @@ interface Props {
 const Profile: React.FC<Props> = ({route}) => {
   const userId = route.params?.userId;
   const boardId = route.params?.boardId;
-  // console.log('USERID', userId);
+  console.log(userId, boardId);
   const [nickname, setNickname] = useState<string | undefined>('닉네임');
   // console.log('NickName', nickname);
   const [mannerTime, setMannerTime] = useState<number | undefined>();
@@ -46,6 +48,14 @@ const Profile: React.FC<Props> = ({route}) => {
     navigation.navigate('ServiceEvaluationScreen', {
       boardId: boardId,
       userId: userId,
+    });
+  };
+  const goToEvaluation = () => {
+    navigation.navigate('EvaluationScreen', {
+      userId: userId,
+      boardId: boardId,
+      nickname: nickname,
+      mannerTime: mannerTime,
     });
   };
 
@@ -82,7 +92,8 @@ const Profile: React.FC<Props> = ({route}) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topContainer}>
-        <Svg height="200" width="200">
+        <Ionicons name="person-circle" size={120} color={'#352456'} />
+        {/* <Svg height="200" width="200">
           <Circle cx="90" cy="70" r="57" fill="#303030" />
           <Path
             d="M 90,70
@@ -90,7 +101,9 @@ const Profile: React.FC<Props> = ({route}) => {
                     A 50,50 0 0,1 140,70 Z" // 0도에서 90도
             fill="#CC94E6"
           />
-        </Svg>
+          
+        </Svg> */}
+
         <View style={styles.text_container}>
           <Text
             style={{
@@ -154,7 +167,9 @@ const Profile: React.FC<Props> = ({route}) => {
             </Text>
             <AntDesign name="right" size={15} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.options_detail}>
+          <TouchableOpacity
+            style={styles.options_detail}
+            onPress={goToEvaluation}>
             <AntDesign name="smileo" size={40} color="black" />
             <Text
               style={{
@@ -182,11 +197,13 @@ const styles = StyleSheet.create({
   },
   topContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
   },
+
   text_container: {
     flexDirection: 'column',
-    paddingTop: 25,
-    marginHorizontal: -15,
+    marginLeft: 10,
   },
   profile_but: {
     width: 80,
