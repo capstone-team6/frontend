@@ -7,7 +7,7 @@ import {NavigationContainer} from '@react-navigation/native';
 // import StackNav from './src/navigation/StackNavigator'
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BottmTabNavigation from './src/navigation/BottmTabNavigation'
 // import MapSearch from './src/pages/MapSearch';
 import SignUp from './src/pages/SignUp';
@@ -26,6 +26,7 @@ function App() {
   const handleLoginSuccess=()=>{
     setIsLoggedIn(true)
   }
+
   return (
       <NavigationContainer independent={true}>    
         <SafeAreaView style={{flex:1}}>
