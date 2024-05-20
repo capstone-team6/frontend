@@ -22,7 +22,6 @@ import {RootStackParamList} from '../../types/Type';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {NavigationProp, NavigationState, RouteProp, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import FastImage from 'react-native-fast-image'
 import { NativeSyntheticEvent } from 'react-native';
 import { NativeScrollEvent } from 'react-native';
 import postStackNavigator from '../navigation/postNavigator';
@@ -307,7 +306,7 @@ const Main:React.FC<Props>=({route})=>{
         );
       }
     });
-  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,route.params]);
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,route.params,refreshing]);
   
 
 const handleLoadMore=()=>{
@@ -412,6 +411,7 @@ function timeDiffence(targetTime:Date):string{
         </View>
       </View>
 
+      <View style={{flexGrow:1}}>
       <FlatList
         data={posts}
         keyExtractor={item => item.boardId.toString()}
@@ -423,7 +423,7 @@ function timeDiffence(targetTime:Date):string{
               // postStackNavigator(item.boardId)
             }}>
             {item.firstImage?
-            <FastImage
+            <Image
             source={{
               uri: `http://13.125.118.92:8080/images/jpg/${item.firstImage}`
             }}
@@ -462,6 +462,7 @@ function timeDiffence(targetTime:Date):string{
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
       />
+      </View>
     </View>
     </ScrollView>
   );
@@ -469,9 +470,10 @@ function timeDiffence(targetTime:Date):string{
 
 const styles = StyleSheet.create({
   main_container: {
-    height: Dimensions.get('screen').height,
+    height: Dimensions.get('screen').height+70,
     backgroundColor: 'white',
     flex: 1,
+    
   },
   location: {
     flexDirection: 'row',
@@ -515,7 +517,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderWidth: 0.1,
     borderColor: 'black',
-    marginTop:10
+    marginTop:10,
   },
   post_image: {
     width: 95,
