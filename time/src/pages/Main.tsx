@@ -28,7 +28,7 @@ import { NativeScrollEvent } from 'react-native';
 import postStackNavigator from '../navigation/postNavigator';
 import { RefreshControl } from 'react-native-gesture-handler';
 
-Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
+
 async function requestPermission() {
   try {
     if (Platform.OS === 'android') {
@@ -70,6 +70,9 @@ type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
 
 
 const Main:React.FC<Props>=({route})=>{
+  useEffect(()=>{
+    Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
+  },[])
   console.log("재설정 위치: "+route.params)
   const {addressChange,markerLocation}=route.params||{}
 
