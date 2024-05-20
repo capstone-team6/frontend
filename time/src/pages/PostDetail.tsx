@@ -140,12 +140,16 @@ const PostDetail: React.FC<Props> = ({route}) => {
           console.log(response.data.data.images);
           setBoardData(response.data.data);
           setRoomName(response.data.data.roomName);
+          if(response.data.data.scrapStus==="YES"){
+            setIsScrap(true)
+          }
+          
         })
         .catch(error => {
           console.error('Error fetching data:', error);
         });
     });
-  }, []);
+  }, [isScrap,boardId]);
 
   function timeDiffence(targetTime: Date): string {
     const koreanTime = new Date().getTime();
