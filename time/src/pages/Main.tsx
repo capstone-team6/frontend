@@ -28,7 +28,6 @@ import { NativeScrollEvent } from 'react-native';
 import postStackNavigator from '../navigation/postNavigator';
 import { RefreshControl } from 'react-native-gesture-handler';
 
-
 Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
 async function requestPermission() {
   try {
@@ -283,12 +282,7 @@ const Main:React.FC<Props>=({route})=>{
                           if(boards){
                             const b=JSON.parse(boards)
                             setPosts(b)
-                            b.forEach((board:any) => {
-                              Object.entries(board).forEach(([key, value]) => {
-                                // console.log(`${key}: ${value}`);
-                            });
-  
-                            });
+                           
                           }
                         })
                         .catch(error => {

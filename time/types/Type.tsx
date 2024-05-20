@@ -116,4 +116,8 @@ export type RootStackParamList = {
         mannerTime?: number;
       }
     | undefined;
+
+  KakaoPay:{amountValue:number}
+  PayBalance:undefined
+
 };

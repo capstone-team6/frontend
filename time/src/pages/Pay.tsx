@@ -1,22 +1,25 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Antdesign from 'react-native-vector-icons/AntDesign'
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
 import ChargePay from './ChargePay';
 import { useNavigation } from '@react-navigation/native';
+import Coin from 'react-native-vector-icons/FontAwesome5'
 
-type PlusNav=StackNavigationProp<RootStackParamList,'ChargePay'>
-type Miuns=StackNavigationProp<RootStackParamList,'MinusPay'>
+type Nav=StackNavigationProp<RootStackParamList,'Pay'>
 const Pay=()=> {
-    const plusNav=useNavigation<PlusNav>()
-    const minusNav=useNavigation<Miuns>()
+    const navigation=useNavigation<Nav>()
+
     const goToPlus=()=>{
-        plusNav.navigate('ChargePay')
+        navigation.navigate('ChargePay')
     }
     const goToMinus=()=>{
-        minusNav.navigate('MinusPay')
+        Alert.alert('','앱 정식 출시 후 사용 가능합니다.')
+    }
+    const goToBalance=()=>{
+        navigation.navigate('PayBalance')
     }
     return (
         <View style={styles.container}>
@@ -30,6 +33,11 @@ const Pay=()=> {
             <TouchableOpacity style={styles.options_detail} onPress={goToMinus}>
                 <MaterialCommunityIcons name='credit-card-minus' size={40} color='black'/>
                 <Text style={{fontFamily:'NanumGothic-Bold' , color:'#313131', fontSize:16, marginRight:45}}>인출하기</Text>
+                <Antdesign name='right' size={15}/>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.options_detail} onPress={goToBalance}>
+                <Coin name='coins' size={40} color='black'/>
+                <Text style={{fontFamily:'NanumGothic-Bold' , color:'#313131', fontSize:16, marginRight:45}}>틈새 페이 잔액</Text>
                 <Antdesign name='right' size={15}/>
             </TouchableOpacity>
         </View>
