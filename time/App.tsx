@@ -27,7 +27,7 @@ function App() {
   const handleLoginSuccess=()=>{
     setIsLoggedIn(true)
   }
-
+  
   useEffect(()=>{
     if(isLoggedIn){
       try{
@@ -64,8 +64,6 @@ function App() {
             const { data } = event
             if (data === 'connected!') {
               console.log('서버로부터 연결 확인 이벤트를 수신했습니다.');
-              // 서버와의 연결이 성공적으로 확인되었으므로 이후 로직을 추가할 수 있습니다.
-              setShowPopup(true)
             }
               
           })
