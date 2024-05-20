@@ -44,7 +44,7 @@ export type RootStackParamList = {
   MySellTime: undefined;
   Pay: undefined;
   Appeal: undefined;
-  AppealWrite: undefined;
+  AppealWrite: {objectId?: number} | undefined;
   StackNavigator: undefined;
   SignUp: undefined;
   ChatScreen: {
@@ -107,10 +107,13 @@ export type RootStackParamList = {
   MannerEvaluationScreen:
     | {selectedServiceEvaluation: string[]; userId?: number; boardId?: number}
     | undefined;
-  EvaluationScreen: {
-    userId?: number;
-    boardId?: number;
-    nickname?: string;
-    mannerTime?: number;
-  };
+
+  EvaluationScreen:
+    | {
+        userId?: number;
+        boardId?: number;
+        nickname?: string;
+        mannerTime?: number;
+      }
+    | undefined;
 };

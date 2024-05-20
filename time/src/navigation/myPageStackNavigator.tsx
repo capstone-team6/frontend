@@ -32,10 +32,12 @@ import ChargePay from '../pages/ChargePay';
 import MinusPay from '../pages/MinusPay';
 import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
 import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
+import EvaluationScreen from '../pages/EvaluationScreen';
 const Stack = createStackNavigator();
 type writeNavigation = StackNavigationProp<RootStackParamList, 'Appeal'>;
 type SettingNavigationProp = StackNavigationProp<RootStackParamList, 'Setting'>;
 type MypageNavigation = StackNavigationProp<RootStackParamList, 'Mypage'>;
+import {RouteProp} from '@react-navigation/native';
 
 const StackNavigator = () => {
   const navigation = useNavigation<writeNavigation>();
@@ -286,6 +288,18 @@ const StackNavigator = () => {
         component={App}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="EvaluationScreen"
+        component={EvaluationScreen}
+        options={{
+          headerTitle: '매너평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
         }}
       />
     </Stack.Navigator>

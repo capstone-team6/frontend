@@ -51,7 +51,10 @@ const categories: Option[] = [
 ];
 
 const EvaluationScreen: React.FC<prop> = ({route}) => {
-  const {userId, boardId, nickname, mannerTime} = route.params;
+  const userId = route.params?.userId;
+  const boardId = route.params?.boardId;
+  const mannerTime = route.params?.mannerTime;
+  const nickname = route.params?.nickname;
   console.log(userId, boardId, nickname, mannerTime);
   const [mannerEvaluationList, setmannerEvaluationList] = useState<manner[]>();
   const [serviceEvaluationStarDtoList, setserviceEvaluationStarDtoList] =
