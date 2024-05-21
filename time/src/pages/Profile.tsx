@@ -35,8 +35,8 @@ interface Props {
 }
 
 const Profile: React.FC<Props> = ({route}) => {
-  // const userId = route.params?.userId;
-  const userId = 1;
+  const userId = route.params?.userId;
+  // const userId = 1;
   const boardId = route.params?.boardId;
   // const boardId = 1;
   const id = 1;
