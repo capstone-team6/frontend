@@ -119,5 +119,6 @@ export type RootStackParamList = {
 
   KakaoPay:{amountValue:number}
   PayBalance:undefined
-
+  ReportPost:{boardId: number}
+  PostSet:{boardId:number}
 };

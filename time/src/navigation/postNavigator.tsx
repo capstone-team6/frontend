@@ -25,6 +25,8 @@ import Search from '../pages/Search';
 import SearchList from '../pages/SearchList';
 import Notify from '../pages/Notify';
 import KeywordSet from '../pages/KeywordSet';
+import ReportPost from '../pages/ReportPost';
+import PostSet from '../pages/PostSet';
 const Stack = createStackNavigator<RootStackParamList>();
 
 type SearchProps = StackNavigationProp<RootStackParamList, 'postNavigatoer'>;
@@ -154,7 +156,19 @@ const postStackNavigator = () => {
           },
         }}/>
 
+        <Stack.Screen name='ReportPost' component={ReportPost}
+        options={{
+          headerTitle: '게시글 신고',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}/>
 
+        <Stack.Screen name='PostSet' component={PostSet}
+        options={{
+          headerTitle:''
+        }}/>
     </Stack.Navigator>
   );
 };
