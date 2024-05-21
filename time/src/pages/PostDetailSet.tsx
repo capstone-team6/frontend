@@ -64,7 +64,7 @@ const PostDetailSet:React.FC<Props> = ({route}) => {
                 console.error('Error fetching data:', error);
             });
         })
-        },[])
+        },[route])
     
     const deleteAlert=()=>{
         Alert.alert('','게시글을 삭제하시겠습니까?',
@@ -101,18 +101,19 @@ const PostDetailSet:React.FC<Props> = ({route}) => {
     const goToModify=()=>{
         navigation.navigate('PostingChange',{boardData})
     }
+
     return (
         <View style={styles.container}>
             <View style={styles.options}>
-                <TouchableOpacity style={styles.options_detail} onPress={deleteAlert}>
-                    <AntDesign name='delete' size={40} color='black'/>
-                    <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16, marginRight:45}}>게시글 삭제</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.options_detail} onPress={goToModify}>
-                    <Mater name='published-with-changes' size={40} color='black'/>
-                    <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16, marginRight:45}}>게시글 수정</Text>
-                </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.options_detail} onPress={deleteAlert}>
+                <AntDesign name='delete' size={40} color='black'/>
+                <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16, marginRight:45}}>게시글 삭제</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.options_detail} onPress={goToModify}>
+                <Mater name='published-with-changes' size={40} color='black'/>
+                <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16, marginRight:45}}>게시글 수정</Text>
+            </TouchableOpacity>
+        </View>
         </View>
     );
 };

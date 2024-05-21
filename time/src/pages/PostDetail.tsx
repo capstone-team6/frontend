@@ -92,9 +92,12 @@ const PostDetail: React.FC<Props> = ({route}) => {
   const [boardData, setBoardData] = useState<BoardData | null>(null);
   const [roomName, setRoomName] = useState('');
 
-  const goToSet = (boardId: number) => {
+  const goToSet = () => {
     navigation.navigate('PostDetailSet', {boardId});
   };
+  const goToReport=()=>{
+    navigation.navigate('PostSet',{boardId})
+  }
 
   const goToChatScreen = (boardId: number, roomName: string) => {
     console.log(`PostDetailToChatScreen${boardId}${roomName}`);
@@ -212,7 +215,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
     <ScrollView>
       <View style={styles.PostDetail_container}>
         <View style={styles.postingImg}>
-          {boardData?.who == 'writer' ? (
+          {boardData?.who=='writer'? (
             <SimpleLineIcons
               name="options-vertical"
               size={20}
@@ -221,11 +224,21 @@ const PostDetail: React.FC<Props> = ({route}) => {
                 marginTop: 10,
               }}
               onPress={() => {
-                goToSet(boardData.boardId);
+                goToSet();
               }}
             />
           ) : (
-            ''
+            <SimpleLineIcons
+              name="options-vertical"
+              size={20}
+              style={{
+                left: Dimensions.get('screen').width / 2.5,
+                marginTop: 10,
+              }}
+              onPress={() => {
+                goToReport();
+              }}
+            />
           )}
 
           {boardData?.images && boardData.images.length > 0 ? (
