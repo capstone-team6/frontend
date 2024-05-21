@@ -190,21 +190,27 @@ const Profile: React.FC<Props> = ({route}) => {
             </Text>
             <AntDesign name="right" size={15} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.options_detail}
-            onPress={goToTHistory}>
-            <MaterialCommunityIcons name="clock-plus" size={40} color="black" />
-            <Text
-              style={{
-                fontFamily: 'NanumGothic-Bold',
-                color: '#313131',
-                fontSize: 16,
-                marginRight: 45,
-              }}>
-              거래한 내역
-            </Text>
-            <AntDesign name="right" size={15} />
-          </TouchableOpacity>
+          {!userId && (
+            <TouchableOpacity
+              style={styles.options_detail}
+              onPress={goToTHistory}>
+              <MaterialCommunityIcons
+                name="clock-plus"
+                size={40}
+                color="black"
+              />
+              <Text
+                style={{
+                  fontFamily: 'NanumGothic-Bold',
+                  color: '#313131',
+                  fontSize: 16,
+                  marginRight: 45,
+                }}>
+                거래한 내역
+              </Text>
+              <AntDesign name="right" size={15} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.options_detail}
             onPress={goToEvaluation}>
