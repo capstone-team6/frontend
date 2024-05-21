@@ -123,4 +123,6 @@ export type RootStackParamList = {
   PayBalance: undefined;
 
   Appealwrite: {objectId?: number | undefined};
+  WriteHistory: {userId?: number};
+  TransactionHistory: {userId?: number};
 };

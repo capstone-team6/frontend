@@ -19,10 +19,13 @@ import {RouteProp} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import TransactionHistory from './TransactionHistory';
+import WriteHistory from './WriteHistory';
 type ChangeNavigation =
   | StackNavigationProp<RootStackParamList, 'NameChange'>
   | StackNavigationProp<RootStackParamList, 'ServiceEvaluationScreen'>
+  | StackNavigationProp<RootStackParamList, 'EvaluationScreen'>
+  | StackNavigationProp<RootStackParamList, 'EvaluationScreen'>
   | StackNavigationProp<RootStackParamList, 'EvaluationScreen'>;
 
 type ProfileRouteProp = RouteProp<RootStackParamList, 'Profile'>;
@@ -32,8 +35,8 @@ interface Props {
 }
 
 const Profile: React.FC<Props> = ({route}) => {
-  const userId = route.params?.userId;
-  // const userId = 1;
+  // const userId = route.params?.userId;
+  const userId = 1;
   const boardId = route.params?.boardId;
   // const boardId = 1;
   const id = 1;
@@ -63,6 +66,14 @@ const Profile: React.FC<Props> = ({route}) => {
       nickname: nickname,
       mannerTime: mannerTime,
     });
+  };
+
+  const goToWHistory = () => {
+    navigation.navigate('WriteHistory', {userId: userId});
+  };
+
+  const goToTHistory = () => {
+    navigation.navigate('TransactionHistory', {userId: userId});
   };
 
   useEffect(() => {
@@ -164,7 +175,9 @@ const Profile: React.FC<Props> = ({route}) => {
           </Text>
         </Svg>
         <View style={{paddingBottom: 10}}>
-          <TouchableOpacity style={styles.options_detail}>
+          <TouchableOpacity
+            style={styles.options_detail}
+            onPress={goToWHistory}>
             <MaterialCommunityIcons name="clock-plus" size={40} color="black" />
             <Text
               style={{
@@ -177,7 +190,9 @@ const Profile: React.FC<Props> = ({route}) => {
             </Text>
             <AntDesign name="right" size={15} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.options_detail}>
+          <TouchableOpacity
+            style={styles.options_detail}
+            onPress={goToTHistory}>
             <MaterialCommunityIcons name="clock-plus" size={40} color="black" />
             <Text
               style={{

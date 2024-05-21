@@ -35,6 +35,8 @@ import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
 import EvaluationScreen from '../pages/EvaluationScreen';
 import KakaoPay from '../pages/KakaoPay';
 import PayBalance from '../pages/PayBalance';
+import WriteHistory from '../pages/WriteHistory';
+import TransactionHistory from '../pages/TransactionHistory';
 
 const Stack = createStackNavigator<RootStackParamList>();
 type writeNavigation = StackNavigationProp<RootStackParamList, 'Appeal'>;
@@ -299,14 +301,17 @@ const StackNavigator = () => {
         component={EvaluationScreen}
         options={{
           headerTitle: '매너평가',
-        }}/>
-
-      <Stack.Screen name='KakaoPay' component={KakaoPay}
-      options={{
-        headerTitle:''
-      }}
+        }}
       />
-      
+
+      <Stack.Screen
+        name="KakaoPay"
+        component={KakaoPay}
+        options={{
+          headerTitle: '',
+        }}
+      />
+
       <Stack.Screen
         name="PayBalance"
         component={PayBalance}
@@ -338,6 +343,30 @@ const StackNavigator = () => {
         component={MannerEvaluationScreen}
         options={{
           headerTitle: '매너평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="WriteHistory"
+        component={WriteHistory}
+        options={{
+          headerTitle: '작성내역',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="TransactionHistory"
+        component={TransactionHistory}
+        options={{
+          headerTitle: '거래내역',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
