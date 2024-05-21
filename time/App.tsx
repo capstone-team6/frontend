@@ -1,26 +1,12 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
-import SignIn from './src/pages/SignIn';
-import {Text, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
-
-// import StackNav from './src/navigation/StackNavigator'
-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import BottmTabNavigation from './src/navigation/BottmTabNavigation'
-// import MapSearch from './src/pages/MapSearch';
-import SignUp from './src/pages/SignUp';
-import MapSearch from './src/pages/MapSearch';
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { Header, createStackNavigator } from '@react-navigation/stack';
 import StackNavigator from './src/navigation/StackNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import StackNavigator from './src/navigation/StackNavigator';
 import  RNEventSource from 'react-native-event-source';
-import axios from 'axios';
-
+import PushNotification from 'react-native-push-notification';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn]=useState<boolean>(false)
@@ -28,9 +14,21 @@ function App() {
   const handleLoginSuccess=()=>{
     setIsLoggedIn(true)
   }
-  
+
   useEffect(()=>{
     if(isLoggedIn){
+      PushNotification.createChannel(
+        {
+          channelId: 'default-channel-id', 
+          channelName: 'Default Channel', 
+          channelDescription: 'A default channel for notifications', 
+          playSound: true, 
+          soundName: 'default', 
+          importance: 4, 
+          vibrate: true, 
+        },
+        (created) => console.log(`Channel created: ${created ? 'yes' : 'no'}`),
+      );
       try{
         AsyncStorage.getItem('accessToken').then(item=>{
           const token=item?JSON.parse(item):null
@@ -40,32 +38,8 @@ function App() {
             
           }
           const eventSource=new RNEventSource('http://13.125.118.92:8080/api/notification/subscribe',option)
-          console.log(eventSource)
+        
           console.log('SSE 연결을 시도합니다.');
-          eventSource.addEventListener('message', (response:any) => {
-            console.log('SSE 연결이 열렸습니다.');
-          });
-          eventSource.addEventListener('connect', (event:any) => {
-            console.log('SSE 연결이 열렸습니다.');
-          });
-      
-          eventSource.addEventListener('error', (error: any) => {
-            console.error('SSE 연결 중 오류가 발생했습니다.', error);
-            eventSource.close();
-          });
-      
-          eventSource.addEventListener('keywordNotification', (event: any) => {
-            console.log('새로운 이벤트를 받았습니다:', event.data);
-          });
-          eventSource.addEventListener('transactionComplete', (event: any) => {
-            console.log('새로운 이벤트를 받았습니다:', event.data);
-          });
-          eventSource.addEventListener('noReadChatNumber', (event: any) => {
-            console.log('새로운 이벤트를 받았습니다:', event.data);
-          });
-          eventSource.addEventListener('scrapNotification', (event: any) => {
-            console.log('새로운 이벤트를 받았습니다:', event.data);
-          });
           eventSource.addEventListener('connect', (event: any) => {
             const { data } = event
             if (data === 'connected!') {
@@ -73,6 +47,41 @@ function App() {
             }
               
           })
+          eventSource.addEventListener('error', (error: any) => {
+            console.error('SSE 연결 중 오류가 발생했습니다.', error);
+            eventSource.close();
+          });
+      
+          eventSource.addEventListener('keywordNotification', (event: any) => {
+            console.log('키워드 알림', event.data);
+            const eventData = JSON.parse(event.data)
+            PushNotification.localNotification({
+              channelId: 'default-channel-id', 
+              title: '당신이 찾던 게시글!',
+              message: `${eventData.keyword} - ${eventData.title}`,
+            });
+          });
+          eventSource.addEventListener('transactionComplete', (event: any) => {
+            console.log('거래 완료 알림', event.data);
+            const eventData = JSON.parse(event.data)
+            PushNotification.localNotification({
+              channelId: 'default-channel-id', 
+              title: '💵 틈새 시간 거래 완료 ⌛️',
+              message: `${eventData.traderName}님과의 거래가 완료되었습니다.`,
+            });
+          });
+          // eventSource.addEventListener('noReadChatNumber', (event: any) => {
+          //   console.log('새로운 이벤트를 받았습니다:', event.data);
+          // });
+          eventSource.addEventListener('scarpNotification', (event: any) => {
+            console.log('스크랩 알림', event.data);
+            const eventData = JSON.parse(event.data)
+            PushNotification.localNotification({
+              channelId: 'default-channel-id', 
+              title: '좋아해요...💗',
+              message: `${eventData.nickname}님이 '${eventData.title}' 게시글을 좋아해요`,
+            });
+          });
           return () => {
             eventSource.close();
           };
