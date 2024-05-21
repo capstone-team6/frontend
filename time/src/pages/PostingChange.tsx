@@ -11,7 +11,6 @@ import ImagePicker from 'react-native-image-crop-picker'
 import Geocoder from 'react-native-geocoding';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/Type';
-import { func } from 'prop-types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';

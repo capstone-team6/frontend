@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableNativeFeedback, TouchableOpacity, View } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { FlatList, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import Delete from 'react-native-vector-icons/MaterialIcons'
 import Setting from 'react-native-vector-icons/AntDesign'
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -8,23 +8,62 @@ import { RootStackParamList } from '../../types/Type';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { ListRenderItemInfo } from 'react-native';
 
 interface KeywordData{
     keywordId:number
     title:string
     keyword:string
+    boardId:number
+    firstImage:string
 
 }
+
+interface ActivityData{
+    nickName:string
+    activityType:string
+    time: string
+    title:string
+    traderName:string
+    activityId:number
+}
+
 type SetNav=StackNavigationProp<RootStackParamList,'Notify'>
 const Notify = () => {
     const [selectedTab, setSelectedTab] = useState('Activity');
     const navigation=useNavigation<SetNav>()
+    const [keywordPosts,setKeywordPosts]=useState<KeywordData[]>([])
+    const [keywordCount, setKeywordCount]=useState<number>(0)
+
     const goToNav=()=>{
         navigation.navigate('KeywordSet')
     }
-
-    const [scrapNotify, setScrapNotify]=useState()
+    const goToPostDetail = (boardId: number) => {
+        navigation.navigate('PostDetail', {boardId});
+    };
+    const [activityList, setActivityList]=useState<ActivityData[]>([])
     
+
+    useEffect(()=>{
+        AsyncStorage.getItem('accessToken').then(token=>{
+            const accessToken=token?JSON.parse(token):null
+            axios.get('http://13.125.118.92:8080/keyword',{
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            })
+            .then((res)=>{
+                const Data=res.data
+                const lastId=Data.keywordResponses.length > 0 ? Data.keywordResponses[Data.keywordResponses.length - 1].id : null;
+                console.log(lastId)
+                setKeywordCount(lastId)
+            })
+            .catch((error)=>{
+                console.log(error)
+            })
+        })
+    },[selectedTab])
 
     useEffect(()=>{
         AsyncStorage.getItem('accessToken').then(token=>{
@@ -35,7 +74,15 @@ const Notify = () => {
                 }
             })
             .then(res=>{
-                console.log(res.data)
+                console.log(res.data.keywordNotificationListDtos)
+                const data=JSON.stringify(res.data.keywordNotificationListDtos)
+                if(data){
+                    const d=JSON.parse(data)
+                    setKeywordPosts(d)
+                }
+            })
+            .catch(err=>{
+                console.log(err)
             })
         })
     },[selectedTab])
@@ -49,14 +96,36 @@ const Notify = () => {
                 }
             })
             .then(res=>{
-                console.log(res.data.activityNotificatoinListDtoList)
-                const data=res.data.activityNotificatoinListDtoList
+                console.log(res.data)
+                const data=JSON.stringify(res.data.activityNotificationListDtoList)
                 if(data){
-                    
+                    const d=JSON.parse(data)
+                    setActivityList(d.reverse())
                 }
+            })
+            .catch(err=>{
+                console.log(err)
             })
         })
     },[selectedTab])
+
+    const deleteActivity=(id:number)=>{
+        AsyncStorage.getItem('accessToken').then(token=>{
+            const accessToken=token?JSON.parse(token):null
+            axios.delete(`http://13.125.118.92:8080/notification/activity/${id}`,{
+                headers:{
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+            .then(res=>{
+                console.log(res.data)
+                setActivityList(prevList => prevList.filter(activity => activity.activityId !== id));
+            })
+            .catch(err=>{
+                console.log(err)
+            })
+        })
+    }
     return (
         <View style={styles.container}>
             <View style={styles.options}>
@@ -92,36 +161,66 @@ const Notify = () => {
             </View>
 
             {selectedTab === 'Activity' && (
-                <View  style={styles.textContainer}>
-                    <View style={{margin:15}}>
-                        <Delete name='close' size={20} style={{alignSelf:'flex-end'}}/>
-                        <Text style={styles.text}>하하호호님과 틈새시간 거래 완료 했어요!</Text>
-                        <Text style={styles.text}>하하호호님에게 후기를 남겨주세요 💌</Text>
-                        <Text style={styles.textTime}>10분 전</Text>
-                    </View>
-                </View>
+                <View style={{marginTop:30, flexGrow:1}}>
+                    <FlatList 
+                    data={activityList} 
+                    renderItem={({item}:ListRenderItemInfo<ActivityData>)=>(
+                        <TouchableOpacity style={styles.textContainer} >
+                            {item.activityType==="SCRAP"?
+                            <View style={{padding:15}}>
+                                    <Delete name='close' size={20} style={{alignSelf:'flex-end'}} onPress={()=>deleteActivity(item.activityId)}/>
+                                    <Text style={styles.text}>{item.nickName}님이 "{item.title}" 게시물을 좋아해요</Text>
+                                    <Text style={styles.textTime}>{item.time}</Text>
+                            </View>
+                            :
+                            <View style={{padding:15}}>
+                                    <Delete name='close' size={20} style={{alignSelf:'flex-end'}} onPress={()=>deleteActivity(item.activityId)}/>
+                                    <Text style={styles.text}>{item.traderName}님과 틈새 시간 거래를 완료 했어요!</Text>
+                                    <Text style={styles.text}>{item.traderName}님에게 후기를 남겨주세요 💌</Text>
+                                    <Text style={styles.textTime}>{item.time}</Text>
+                            </View>
+                            }
+                        </TouchableOpacity>
+                    )}>
+                    </FlatList>
+            </View>
             )}
             {selectedTab === 'Keyword' && (
                 <View>
                     <View style={{margin:15}}>
                         <View style={{flexDirection:'row',alignSelf:'center', justifyContent:'center'}}>
-                            <Text style={{textAlign:'center',color:'black', marginBottom:10,marginRight:10}}>현재 키워드 알림 1개</Text>
+                            <Text style={{textAlign:'center',color:'black', marginBottom:10,marginRight:10}}>현재 키워드 알림 {keywordCount}개</Text>
                             <Setting name='setting' size={20} style={{color:'black'}}
                             onPress={()=>goToNav()}
                             />
                         </View>
-                        <TouchableOpacity style={styles.postContainer}>
-                            <Image
-                                source={require('../assets/images/post1.jpg')}
-                                style={styles.post_image}/>
+                        <FlatList 
+                        data={keywordPosts} 
+                        contentContainerStyle={{ flexGrow: 1 }}
+                        renderItem={({item}:ListRenderItemInfo<KeywordData>)=>(
+                            <TouchableOpacity
+                            style={styles.postContainer} 
+                            onPress={()=>{
+                                goToPostDetail(item.boardId)
+                            }}>
+                                {item.firstImage?
+                                <Image
+                                    source={{
+                                    uri: `http://13.125.118.92:8080/images/jpg/${item.firstImage}`}}
+                                    style={styles.post_image}
+                                    // onError={(error) => console.error("이미지 로딩 오류:", error)}
+                                />:
+                                <Image source={require('../assets/images/postingImage.png')}
+                                style={styles.post_image}/>}
+
                             <View style={styles.post_info}>
                                 <Delete name='close' size={15} style={styles.deleteIcon}/>
-                                <Text style={styles.info1}>3km · 5분 전</Text>
-                                <Text style={styles.info2}>강아지 산책 부탁드려요</Text>
-                                <Text style={styles.info3}>10,000원/20분</Text>
+                                <Text style={styles.info2}>{item.keyword}- {item.title}</Text>
+                                <Text style={styles.info1}>10분전</Text>
                             </View>
-                            
-                        </TouchableOpacity>
+                            </TouchableOpacity>
+                        )}>
+                        </FlatList>
                     </View>
                 </View>
             )}
@@ -133,7 +232,7 @@ const styles = StyleSheet.create({
         height: Dimensions.get('screen').height,
         backgroundColor: 'white',
         flex: 1,
-        
+        paddingBottom:100
         
     },
     options: {
@@ -173,10 +272,11 @@ const styles = StyleSheet.create({
         // marginBottom: -10,
     },
     textContainer:{
-        marginTop:30,
         borderWidth:0.3,
         borderColor:'gray',
-        margin:20,
+        marginRight:20,
+        marginLeft:20,
+        marginBottom:10,
         borderRadius:7
     },
     text:{

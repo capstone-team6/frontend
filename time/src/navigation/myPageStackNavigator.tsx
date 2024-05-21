@@ -33,7 +33,10 @@ import MinusPay from '../pages/MinusPay';
 import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
 import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
 import EvaluationScreen from '../pages/EvaluationScreen';
-const Stack = createStackNavigator();
+import KakaoPay from '../pages/KakaoPay';
+import PayBalance from '../pages/PayBalance';
+
+const Stack = createStackNavigator<RootStackParamList>();
 type writeNavigation = StackNavigationProp<RootStackParamList, 'Appeal'>;
 type SettingNavigationProp = StackNavigationProp<RootStackParamList, 'Setting'>;
 type MypageNavigation = StackNavigationProp<RootStackParamList, 'Mypage'>;
@@ -290,11 +293,25 @@ const StackNavigator = () => {
           headerShown: false,
         }}
       />
+
       <Stack.Screen
         name="EvaluationScreen"
         component={EvaluationScreen}
         options={{
           headerTitle: '매너평가',
+        }}/>
+
+      <Stack.Screen name='KakaoPay' component={KakaoPay}
+      options={{
+        headerTitle:''
+      }}
+      />
+      
+      <Stack.Screen
+        name="PayBalance"
+        component={PayBalance}
+        options={{
+          headerTitle: '틈새 페이 잔액',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
