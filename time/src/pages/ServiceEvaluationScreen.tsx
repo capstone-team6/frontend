@@ -54,8 +54,8 @@ const ServiceEvaluationScreen: React.FC<Props> = ({route}) => {
   const navigation = useNavigation<EvaluationScreenNavigationProp>();
   const userId = route.params?.userId;
   const boardId = route.params?.boardId;
-  // console.log(userId, boardId);
-  // console.log(selectedServiceEvaluation);
+  console.log('userId', userId, 'boardId', boardId);
+  console.log(selectedServiceEvaluation);
   const handleSelectOption = (id: string) => {
     setServiceEvaluation(current => {
       if (current.includes(id)) {

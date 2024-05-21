@@ -59,7 +59,7 @@ export type RootStackParamList = {
       message: string;
       type: string;
     };
-    userId?: number;
+    otherUserId?: number;
     isCancelled?: boolean;
   };
   Chatting: undefined;
@@ -93,6 +93,8 @@ export type RootStackParamList = {
       boardId: number;
       userName: string;
       roomName: string;
+      otherUserId: number;
+      roomId: number;
     };
   };
 
@@ -105,7 +107,7 @@ export type RootStackParamList = {
   KeywordSet: undefined;
   ServiceEvaluationScreen: {userId?: number; boardId?: number} | undefined;
   MannerEvaluationScreen:
-    | {selectedServiceEvaluation: string[]; userId?: number; boardId?: number}
+    | {selectedServiceEvaluation?: string[]; userId?: number; boardId?: number}
     | undefined;
 
   EvaluationScreen:
@@ -116,4 +118,5 @@ export type RootStackParamList = {
         mannerTime?: number;
       }
     | undefined;
+  Appealwrite: {objectId?: number | undefined};
 };

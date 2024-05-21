@@ -60,7 +60,8 @@ const MannerEvaluationScreen: React.FC<Props> = ({route}) => {
   const navigation = useNavigation<MannerScreenNavigationProp>();
   const userId = route.params?.userId;
   const boardId = route.params?.boardId;
-  // console.log(userId, boardId);
+  console.log(selectedMannerEvaluation);
+  console.log('userId', userId, 'boardId', boardId);
 
   useEffect(() => {
     if (route.params?.selectedServiceEvaluation) {

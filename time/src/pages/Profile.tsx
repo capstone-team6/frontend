@@ -33,12 +33,17 @@ interface Props {
 
 const Profile: React.FC<Props> = ({route}) => {
   const userId = route.params?.userId;
+  // const userId = 1;
   const boardId = route.params?.boardId;
-  console.log(userId, boardId);
-  const [nickname, setNickname] = useState<string | undefined>('닉네임');
+  // const boardId = 1;
+  const id = 1;
+  console.log('userId', userId, 'boardId', boardId);
+
+  const [nickname, setNickname] = useState<string | undefined>('');
   // console.log('NickName', nickname);
   const [mannerTime, setMannerTime] = useState<number | undefined>();
-  const [totalTime, setTotalTime] = useState<number | undefined>();
+  const [timepay, setTimePay] = useState();
+  // const [id, setId] = useState();
   const navigation = useNavigation<ChangeNavigation>();
   const goToChange = () => {
     navigation.navigate('NameChange');
@@ -50,9 +55,10 @@ const Profile: React.FC<Props> = ({route}) => {
       userId: userId,
     });
   };
+
   const goToEvaluation = () => {
     navigation.navigate('EvaluationScreen', {
-      userId: userId,
+      userId: userId || id,
       boardId: boardId,
       nickname: nickname,
       mannerTime: mannerTime,
@@ -66,7 +72,7 @@ const Profile: React.FC<Props> = ({route}) => {
 
     AsyncStorage.getItem('accessToken').then(item => {
       const token = item ? JSON.parse(item) : null;
-      console.log(token);
+      console.log('token', token);
       axios
         .get(url, {
           headers: {
@@ -75,12 +81,14 @@ const Profile: React.FC<Props> = ({route}) => {
           },
         })
         .then(response => {
-          console.log(JSON.stringify(response.data.data));
           const d = JSON.stringify(response.data.data);
+          console.log('받은 데이터', d);
           if (d) {
             const data = JSON.parse(d);
             setNickname(data.nickname);
             setMannerTime(data.mannerTime);
+            // setTimePay(data?.timePay);
+            // setId(data?.id);
           }
         })
         .catch(error => {
@@ -88,6 +96,8 @@ const Profile: React.FC<Props> = ({route}) => {
         });
     });
   }, []);
+
+  console.log('nicknname', nickname, 'mannerTime', mannerTime);
 
   return (
     <ScrollView style={styles.container}>

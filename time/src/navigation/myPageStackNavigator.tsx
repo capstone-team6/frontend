@@ -302,6 +302,32 @@ const StackNavigator = () => {
           },
         }}
       />
+
+      <Stack.Screen
+        name="ServiceEvaluationScreen"
+        component={ServiceEvaluationScreen}
+        options={{
+          headerTitle: '매너평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name="MannerEvaluationScreen"
+        component={MannerEvaluationScreen}
+        options={{
+          headerTitle: '매너평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 };

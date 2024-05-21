@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -20,10 +20,38 @@ import {
 } from '@react-navigation/stack';
 import Profile from './Profile';
 import {RootStackParamList} from '../../types/Type';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 type MypageNavigationProp = StackNavigationProp<RootStackParamList, 'Mypage'>;
 
 const Mypage: React.FC = () => {
+  const [nickname, setNickname] = useState();
+  useEffect(() => {
+    const url = 'http://13.125.118.92:8080/member/profile';
+
+    AsyncStorage.getItem('accessToken').then(item => {
+      const token = item ? JSON.parse(item) : null;
+      console.log(token);
+      axios
+        .get(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(response => {
+          console.log(JSON.stringify(response.data.data));
+          const d = JSON.stringify(response.data.data);
+          if (d) {
+            const data = JSON.parse(d);
+            setNickname(data.nickname);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    });
+  }, []);
   const navigation = useNavigation<MypageNavigationProp>();
   const goToProfile = () => {
     navigation.navigate('Profile');
@@ -57,7 +85,7 @@ const Mypage: React.FC = () => {
             paddingTop: 20,
             color: 'black',
           }}>
-          홍길동
+          {nickname}
         </Text>
         <TouchableOpacity style={styles.profile_button} onPress={goToProfile}>
           <Text style={styles.buttonText}>프로필 보기</Text>
