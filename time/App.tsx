@@ -18,7 +18,8 @@ import { Header, createStackNavigator } from '@react-navigation/stack';
 import StackNavigator from './src/navigation/StackNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import StackNavigator from './src/navigation/StackNavigator';
-import   EventSource  from 'react-native-event-source';
+import  RNEventSource from 'react-native-event-source';
+import axios from 'axios';
 
 
 function App() {
@@ -33,12 +34,17 @@ function App() {
       try{
         AsyncStorage.getItem('accessToken').then(item=>{
           const token=item?JSON.parse(item):null
-          const eventSource=new  EventSource('http://13.125.118.92:8080/api/notification/subscribe',{
-            headers:{
-              Authorization: `Bearer ${token}`,
-            }
-          })
+          const option={
+            method: 'GET',
+            headers:{ Authorization: `Bearer ${token}`},
+            
+          }
+          const eventSource=new RNEventSource('http://13.125.118.92:8080/api/notification/subscribe',option)
           console.log(eventSource)
+          console.log('SSE 연결을 시도합니다.');
+          eventSource.addEventListener('message', (response:any) => {
+            console.log('SSE 연결이 열렸습니다.');
+          });
           eventSource.addEventListener('connect', (event:any) => {
             console.log('SSE 연결이 열렸습니다.');
           });
@@ -76,7 +82,7 @@ function App() {
         })
       }
       catch(error){
-        console.log(error)
+        console.log('오류 발생',error)
       }
     }
   },[isLoggedIn])
