@@ -118,11 +118,12 @@ export type RootStackParamList = {
         mannerTime?: number;
       }
     | undefined;
-
-  KakaoPay: {amountValue: number};
-  PayBalance: undefined;
-
   Appealwrite: {objectId?: number | undefined};
   WriteHistory: {userId?: number};
   TransactionHistory: {userId?: number};
+  KakaoPay:{amountValue:number}
+  PayBalance:undefined
+  ReportPost:{boardId: number}
+  PostSet:{boardId:number}
+
 };

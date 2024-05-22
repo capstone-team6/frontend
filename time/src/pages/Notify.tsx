@@ -16,7 +16,8 @@ interface KeywordData{
     keyword:string
     boardId:number
     firstImage:string
-
+    image:string
+    time:string
 }
 
 interface ActivityData{
@@ -26,6 +27,7 @@ interface ActivityData{
     title:string
     traderName:string
     activityId:number
+    
 }
 
 type SetNav=StackNavigationProp<RootStackParamList,'Notify'>
@@ -55,11 +57,17 @@ const Notify = () => {
             })
             .then((res)=>{
                 const Data=res.data
-                const lastId=Data.keywordResponses.length > 0 ? Data.keywordResponses[Data.keywordResponses.length - 1].id : null;
-                console.log(lastId)
-                setKeywordCount(lastId)
-            })
-            .catch((error)=>{
+                console.log(Data)
+                // const lastId=Data.keywordResponses.length > 0 ? Data.keywordResponses[Data.keywordResponses.length - 1].id : null;
+                let count=0
+                Data.keywordResponses.forEach((response: { id: any; keyword: any; memberId: any; }) => {
+                    if (response.id && response.keyword && response.memberId) {
+                        count++;
+                    }
+                })
+                setKeywordCount(count)
+            }) 
+            .catch((error: any)=>{
                 console.log(error)
             })
         })
@@ -96,7 +104,6 @@ const Notify = () => {
                 }
             })
             .then(res=>{
-                console.log(res.data)
                 const data=JSON.stringify(res.data.activityNotificationListDtoList)
                 if(data){
                     const d=JSON.parse(data)
@@ -118,7 +125,6 @@ const Notify = () => {
                 }
             })
             .then(res=>{
-                console.log(res.data)
                 setActivityList(prevList => prevList.filter(activity => activity.activityId !== id));
             })
             .catch(err=>{
@@ -203,10 +209,10 @@ const Notify = () => {
                             onPress={()=>{
                                 goToPostDetail(item.boardId)
                             }}>
-                                {item.firstImage?
+                                {item.image?
                                 <Image
                                     source={{
-                                    uri: `http://13.125.118.92:8080/images/jpg/${item.firstImage}`}}
+                                    uri: `http://13.125.118.92:8080/images/jpg/${item.image}`}}
                                     style={styles.post_image}
                                     // onError={(error) => console.error("이미지 로딩 오류:", error)}
                                 />:
@@ -216,7 +222,7 @@ const Notify = () => {
                             <View style={styles.post_info}>
                                 <Delete name='close' size={15} style={styles.deleteIcon}/>
                                 <Text style={styles.info2}>{item.keyword}- {item.title}</Text>
-                                <Text style={styles.info1}>10분전</Text>
+                                <Text style={styles.info1}>{item.time}</Text>
                             </View>
                             </TouchableOpacity>
                         )}>
