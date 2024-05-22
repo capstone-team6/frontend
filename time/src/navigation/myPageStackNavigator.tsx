@@ -173,7 +173,7 @@ const StackNavigator = () => {
         name="Appeal"
         component={Appeal}
         options={{
-          headerTitle: '이의신청',
+          headerTitle: '이의신청 내역',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,

@@ -91,6 +91,8 @@ const PostDetail: React.FC<Props> = ({route}) => {
   const [isScrap, setIsScrap] = useState(false);
   const [boardData, setBoardData] = useState<BoardData | null>(null);
   const [roomName, setRoomName] = useState('');
+  const [userName, setName] = useState();
+  const [otherUserId, setUserId] = useState();
 
   const goToSet = () => {
     navigation.navigate('PostDetailSet', {boardId});
@@ -101,7 +103,12 @@ const PostDetail: React.FC<Props> = ({route}) => {
 
   const goToChatScreen = (boardId: number, roomName: string) => {
     console.log(`PostDetailToChatScreen${boardId}${roomName}`);
-    navigation.navigate('ChatScreen', {boardId, roomName});
+    navigation.navigate('ChatScreen', {
+      boardId,
+      roomName,
+      userName,
+      otherUserId,
+    });
   };
 
   const handleHeartPress = async () => {
@@ -146,6 +153,8 @@ const PostDetail: React.FC<Props> = ({route}) => {
           if (response.data.data.scrapStus === 'YES') {
             setIsScrap(true);
           }
+          setName(response.data.data.nickname);
+          setUserId(response.data.data.userId);
         })
         .catch(error => {
           console.error('Error fetching data:', error);
