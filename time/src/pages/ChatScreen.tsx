@@ -41,6 +41,12 @@ interface Props {
 
 type PaymentType = '만나서 결제' | '계좌이체' | '틈새 페이' | null;
 
+type ImageType = {
+  uri: string;
+  type: string;
+  name: string;
+};
+
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const {
     userName,
@@ -107,6 +113,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [areButtonsEnabled, setAreButtonsEnabled] = useState(true);
   const [selectedButton, setSelectedButton] = useState(null);
+  const [images, setImages] = useState<ImageType[]>([]);
 
   useEffect(() => {
     if (route.params?.newMessage) {
@@ -167,8 +174,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   //   navigation.navigate('AppealWrite', {objectId: otherUserId});
   // };
 
-  const goToPay = () => {};
-
   const handleImagePickerResponse = (response: ImagePickerResponse) => {
     if (response.didCancel) {
       console.log('User cancelled image picker');
@@ -176,7 +181,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       console.log('ImagePicker Error: ', response.errorMessage);
     } else if (response.assets) {
       const source = {uri: response.assets[0].uri};
-      // 여기에 이미지를 처리하는 로직
       console.log(source);
     }
   };
@@ -199,6 +203,46 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     };
 
     launchImageLibrary(options, handleImagePickerResponse);
+  };
+
+  const sendImages = async () => {
+    const body = new FormData();
+    const type = 'IMAGE';
+
+    body.append('roomId', roomId);
+    body.append('type', type);
+
+    images.forEach(image => {
+      body.append('images', {
+        uri: image.uri,
+        type: image.type,
+        name: image.name,
+      });
+    });
+
+    try {
+      const store = await AsyncStorage.getItem('accessToken');
+      const token = store ? JSON.parse(store) : null;
+      console.log(token);
+
+      const res = await axios.post(
+        'http://13.125.118.92:8080/chat/send',
+        body,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+          transformRequest: [data => data],
+        },
+      );
+
+      if (res.status === 200) {
+        console.log(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const sellerPress = () => {
@@ -557,14 +601,14 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       .catch(error => console.error('FETCH MESSAGES ERROR: ', error));
   };
 
-  // useEffect(() => {
-  //   fetchMessages();
-  // }, []);
+  useEffect(() => {
+    fetchMessages();
+  }, []);
 
-  // useInterval(() => {
-  //   console.log('useinterval');
-  //   fetchMessages();
-  // }, 1000);
+  useInterval(() => {
+    console.log('useinterval');
+    fetchMessages();
+  }, 1000);
 
   const sendMessage = async (
     roomId: number,
@@ -573,23 +617,26 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   ) => {
     try {
       const token = await fetchToken();
+
+      const formData = new FormData();
+      formData.append('roomId', roomId);
+      formData.append('message', message);
+      formData.append('type', messageType);
+
       const response = await axios.post(
         'http://13.125.118.92:8080/chat/send',
-        {
-          roomId: roomId,
-          message: message,
-          type: messageType,
-        },
+        formData,
         {
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
         },
       );
+
       console.log('SENDMESSAGE SUCCESSFULLY:', response.data);
     } catch (error) {
-      console.error('FALIED TO SENDMESSAGE:', error);
+      console.error('FAILED TO SENDMESSAGE:', error);
     }
   };
 
