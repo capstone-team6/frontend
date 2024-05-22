@@ -95,9 +95,9 @@ const PostDetail: React.FC<Props> = ({route}) => {
   const goToSet = () => {
     navigation.navigate('PostDetailSet', {boardId});
   };
-  const goToReport=()=>{
-    navigation.navigate('PostSet',{boardId})
-  }
+  const goToReport = () => {
+    navigation.navigate('PostSet', {boardId});
+  };
 
   const goToChatScreen = (boardId: number, roomName: string) => {
     console.log(`PostDetailToChatScreen${boardId}${roomName}`);
@@ -143,16 +143,15 @@ const PostDetail: React.FC<Props> = ({route}) => {
           console.log(response.data.data.images);
           setBoardData(response.data.data);
           setRoomName(response.data.data.roomName);
-          if(response.data.data.scrapStus==="YES"){
-            setIsScrap(true)
+          if (response.data.data.scrapStus === 'YES') {
+            setIsScrap(true);
           }
-          
         })
         .catch(error => {
           console.error('Error fetching data:', error);
         });
     });
-  }, [isScrap,boardId]);
+  }, [isScrap, boardId]);
 
   function timeDiffence(targetTime: Date): string {
     const koreanTime = new Date().getTime();
@@ -215,7 +214,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
     <ScrollView>
       <View style={styles.PostDetail_container}>
         <View style={styles.postingImg}>
-          {boardData?.who=='writer'? (
+          {boardData?.who == 'writer' ? (
             <SimpleLineIcons
               name="options-vertical"
               size={20}
@@ -354,17 +353,13 @@ const PostDetail: React.FC<Props> = ({route}) => {
         {/* </View> */}
 
         <View style={styles.btnContainer}>
-          {boardData?.who == 'writer' ? (
-            ''
-          ) : (
-            <TouchableOpacity
-              style={styles.chatBtn}
-              onPress={() => {
-                goToChatScreen(boardId, roomName);
-              }}>
-              <Text style={styles.chatBtn_text}> 채팅하기</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={styles.chatBtn}
+            onPress={() => {
+              goToChatScreen(boardId, roomName);
+            }}>
+            <Text style={styles.chatBtn_text}> 채팅하기</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
