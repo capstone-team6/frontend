@@ -179,14 +179,14 @@ const StackNavigator = () => {
             fontSize: 28,
             color: 'black',
           },
-          headerRight: () => (
-            <AppealWriteIcon
-              name="pencil-square-o"
-              size={35}
-              style={{marginRight: 20, paddingTop: 10}}
-              onPress={goToWrite}
-            />
-          ),
+          // headerRight: () => (
+          //   <AppealWriteIcon
+          //     name="pencil-square-o"
+          //     size={35}
+          //     style={{marginRight: 20, paddingTop: 10}}
+          //     onPress={goToWrite}
+          //   />
+          // ),
         }}
       />
       <Stack.Screen
