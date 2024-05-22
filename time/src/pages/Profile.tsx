@@ -69,11 +69,11 @@ const Profile: React.FC<Props> = ({route}) => {
   };
 
   const goToWHistory = () => {
-    navigation.navigate('WriteHistory', {userId: userId});
+    navigation.navigate('WriteHistory', {userId: userId || id});
   };
 
   const goToTHistory = () => {
-    navigation.navigate('TransactionHistory', {userId: userId});
+    navigation.navigate('TransactionHistory', {userId: userId || id});
   };
 
   useEffect(() => {

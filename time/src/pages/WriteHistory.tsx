@@ -19,7 +19,7 @@ import axios from 'axios';
 import {RootStackParamList} from '../../types/Type';
 import {RouteProp} from '@react-navigation/native';
 
-type tRouteProp = RouteProp<RootStackParamList, 'TransactionHistory'>;
+type tRouteProp = RouteProp<RootStackParamList, 'WriteHistory'>;
 
 interface Props {
   route: tRouteProp;
