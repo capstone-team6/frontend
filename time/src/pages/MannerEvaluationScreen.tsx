@@ -93,7 +93,7 @@ const MannerEvaluationScreen: React.FC<Props> = ({route}) => {
       const token = store ? JSON.parse(store) : null;
 
       const response = await axios.post(
-        `http://localhost:8080/member/${userId}/board/${boardId}/evaluation`,
+        `http://13.125.118.92:8080/member/${userId}/board/${boardId}/evaluation`,
         {
           mannerEvaluationDtoList: selectedMannerEvaluation,
           serviceEvaluationDtoList: selectedServiceEvaluation,
