@@ -23,6 +23,7 @@ interface RoomData {
   roomName: string;
   noReadChat: number;
   boardId: number;
+  otherUserId: number;
 }
 
 type ChatNavigationProp = StackNavigationProp<
@@ -38,6 +39,8 @@ const Chatting = () => {
     userName: string,
     roomName: string,
     boardId: number,
+    otherUserId: number,
+    roomId: number,
   ) => {
     navigation.navigate('chatScreenNavigator', {
       screen: 'ChatScreen',
@@ -45,6 +48,8 @@ const Chatting = () => {
         userName: userName,
         roomName: roomName,
         boardId: boardId,
+        otherUserId: otherUserId,
+        roomId: roomId,
       },
     });
   };
@@ -74,54 +79,64 @@ const Chatting = () => {
     });
   }, []);
 
-  const chatData = [
-    {
-      roomId: 1,
-      roomName: 'A1',
-      name: '홍길동',
-      message: '안녕하세요!',
-      time: '30분전',
-      noReadChat: 2,
-      boardId: 1,
-    },
-    {
-      roomId: 2,
-      roomName: 'A1',
-      name: '틈새2',
-      message: '감사합니다!! 조심히가세요!',
-      time: '1일 전',
-      noReadChat: 2,
-      boardId: 1,
-    },
-    {
-      roomId: 3,
-      roomName: 'A1',
-      name: '틈새3',
-      message: '시간 구매하고 싶어요',
-      time: '1일 전',
-      noReadChat: 1,
-      boardId: 1,
-    },
-    {
-      roomId: 4,
-      roomName: 'A1',
-      name: '틈새4',
-      message: '감사합니다!! 조심히 가세요!',
-      time: '1주일 전',
-      noReadChat: 1,
-      boardId: 1,
-    },
-  ];
+  // const chatData = [
+  //   {
+  //     roomId: 1,
+  //     roomName: 'A1',
+  //     name: '홍길동',
+  //     message: '안녕하세요!',
+  //     time: '30분전',
+  //     noReadChat: 2,
+  //     boardId: 1,
+  //     otherUserId: 1,
+  //   },
+  //   {
+  //     roomId: 2,
+  //     roomName: 'A1',
+  //     name: '틈새2',
+  //     message: '감사합니다!! 조심히가세요!',
+  //     time: '1일 전',
+  //     noReadChat: 2,
+  //     boardId: 1,
+  //     otherUserId: 1,
+  //   },
+  //   {
+  //     roomId: 3,
+  //     roomName: 'A1',
+  //     name: '틈새3',
+  //     message: '시간 구매하고 싶어요',
+  //     time: '1일 전',
+  //     noReadChat: 1,
+  //     boardId: 1,
+  //     otherUserId: 1,
+  //   },
+  //   {
+  //     roomId: 4,
+  //     roomName: 'A1',
+  //     name: '틈새4',
+  //     message: '감사합니다!! 조심히 가세요!',
+  //     time: '1주일 전',
+  //     noReadChat: 1,
+  //     boardId: 1,
+  //     otherUserId: 1,
+  //   },
+  // ];
 
   return (
     <View style={styles.chatListContainer}>
       <FlatList
-        data={chatData}
+        data={chatRoomDetails}
         keyExtractor={item => item.roomId.toString()}
         renderItem={({item}: ListRenderItemInfo<RoomData>) => (
           <TouchableOpacity
             onPress={() =>
-              handleChatRoomPress(item.name, item.roomName, item.boardId)
+              handleChatRoomPress(
+                item.name,
+                item.roomName,
+                item.boardId,
+                item.otherUserId,
+                item.roomId,
+              )
             }>
             <View style={styles.chatItemContainer}>
               <Ionicons name="person-circle" size={80} color={'#352456'} />

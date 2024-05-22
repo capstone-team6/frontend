@@ -57,7 +57,7 @@ const chatScreenNavigator = () => {
         name="AppealWrite"
         component={AppealWrite}
         options={{
-          headerTitle: 'AppealWrite',
+          headerTitle: '이의신청 작성',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
