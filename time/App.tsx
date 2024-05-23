@@ -70,7 +70,7 @@ function App() {
               message: `${eventData.traderName}님과의 거래가 완료되었습니다.`,
             });
           });
-          eventSource.addEventListener('noReadChatNumberNotification', (event: any) => {
+          eventSource.addEventListener('notReadChatNumberNotification', (event: any) => {
             console.log('채팅 알림:', event.data);
             const eventData = JSON.parse(event.data)
             PushNotification.localNotification({
