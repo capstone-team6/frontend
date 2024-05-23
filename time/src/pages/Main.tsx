@@ -101,9 +101,9 @@ const Main:React.FC<Props>=({route})=>{
   const [address, setAddress] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState('BUY');
   const [selectedCategoryForBuy, setSelectedCategoryForBuy] =
-    useState('TALENT');
+    useState('');
   const [selectedCategoryForSell, setSelectedCategoryForSell] =
-    useState('TALENT');
+    useState('');
   
   const categories = [
     '재능기부',
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   },
   post_info: {
     flexDirection: 'column',
-    left:-20
+    
     
   },
   info1: {

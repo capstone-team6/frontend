@@ -352,15 +352,16 @@ const PostDetail: React.FC<Props> = ({route}) => {
         {/* </View> */}
         {/* </View> */}
 
+        {boardData?.who=='writer'?'':
         <View style={styles.btnContainer}>
-          <TouchableOpacity
-            style={styles.chatBtn}
-            onPress={() => {
-              goToChatScreen(boardId, roomName);
-            }}>
-            <Text style={styles.chatBtn_text}> 채팅하기</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.chatBtn}
+          onPress={() => {
+            goToChatScreen(boardId, roomName);
+          }}>
+          <Text style={styles.chatBtn_text}> 채팅하기</Text>
+        </TouchableOpacity>
+      </View>}
       </View>
     </ScrollView>
   );
@@ -475,12 +476,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom:10
   },
   btnContainer: {
     bottom: 0,
     marginBottom: 20,
     alignSelf: 'center',
     paddingTop: 10,
+    
   },
   chatBtn: {
     width: 200,
