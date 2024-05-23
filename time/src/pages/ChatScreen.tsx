@@ -124,7 +124,12 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     return item ? JSON.parse(item) : null;
   }
 
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
   const fetchMessages = async () => {
+    console.log('fetchMessage');
     const token = await fetchToken();
     console.log(token);
     await axios
@@ -148,19 +153,16 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           setRole(d.roleType);
           setChatList(d.chatlist);
           setRoomId(d.roomId);
+          console.log(role, chatList, roomId);
         }
       })
       .catch(error => console.error('FETCH MESSAGES ERROR: ', error));
   };
 
-  useInterval(() => {
-    console.log('useinterval');
-    fetchMessages();
-  }, 1000);
-
-  useEffect(() => {
-    fetchMessages();
-  }, []);
+  // useInterval(() => {
+  //   console.log('useinterval');
+  //   fetchMessages();
+  // }, 1000);
 
   useEffect(() => {
     if (route.params?.newMessage) {
@@ -189,7 +191,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         })
         .then(response => {
           const d = JSON.stringify(response.data.data);
-          console.log('받은 데이터', d);
+          console.log('profile 받은 데이터', d);
           if (d) {
             const data = JSON.parse(d);
             setTimepay(data.timePay);
@@ -207,6 +209,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     messageType: string,
   ) => {
     try {
+      console.log('sendMessage');
       const token = await fetchToken();
 
       const formData = new FormData();
