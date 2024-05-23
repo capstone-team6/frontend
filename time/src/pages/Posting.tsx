@@ -35,7 +35,7 @@ type ImageType={
   name:string;
 }
 
-Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{lanuage:"ko",region:"KR"})
+
 
 async function requestPermission() {
     try{
@@ -51,7 +51,7 @@ async function requestPermission() {
 
 type Nav=StackNavigationProp<RootStackParamList,'틈새시장'>
 const Posting = () => {
-  
+
   const navigation=useNavigation<Nav>();
   const [location,setLocation]=useState<{
     latitude:number
@@ -60,7 +60,6 @@ const Posting = () => {
 }|null>(null)
 
 const [address, setAddress]=useState<string>('')
-
 const [images, setImages]=useState<ImageType[]>([])
 const [category, setCategory]=useState<string>('')
 const [previews, setPreviews] = useState<{ uri: string } | string[]>([]);
@@ -95,18 +94,22 @@ const [isType, setIsType]=useState<{[key:string]:boolean}>({
 const [showMapSearch,setShowMapSearch]=useState(false)
 
 useEffect(()=>{
+  Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{language:"ko",region:"KR"})
+},[])
+
+useEffect(()=>{
     requestPermission().then(result=>{
         console.log({result})
         if(result==="granted"){
             Geolocation.getCurrentPosition(
                 pos=>{
                     setLocation(pos.coords);
-                    Geocoder.from(pos.coords.latitude, pos.coords.longitude,"ko")
+                    Geocoder.from(pos.coords.latitude, pos.coords.longitude, "ko")
                         .then(json => {
                           console.log(json.results[0])
-                            const addressComponent = json.results[0].formatted_address;
-                            const words=addressComponent.split(" ")
-                            const lastAddress=`${words[1]} ${words[2]} ${words[3]}`
+                          const addressComponent = json.results[0].formatted_address;
+                          const words=addressComponent.split(" ")
+                          const lastAddress=`${words[1]} ${words[2]} ${words[3]}`
                             setAddress(lastAddress);
                             setMarkerLocation(pos.coords)
                             
@@ -454,6 +457,19 @@ const onSubmit = async () => {
               </Text>
               <View style={{zIndex:4,flex:2}}>
                 <GooglePlacesAutocomplete minLength={2} 
+                    textInputProps={{
+                      style: {
+                        borderWidth: 1, 
+                        borderColor: 'gray',
+                        borderRadius: 5, 
+                        padding: 10,
+                        height: 50, 
+                        fontSize: 16, 
+                        width:Dimensions.get('screen').width/1.2,
+                        marginLeft:10,
+                        marginBottom:10
+                      },
+                    }}
                     placeholder={'장소를 검색하세요'}
                     query={{
                     key:'AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ',
@@ -477,7 +493,7 @@ const onSubmit = async () => {
             </View>
               {location&&(
                 <MapView
-                style={{ flex: 1 , width:Dimensions.get('screen').width,height:250, marginBottom:20}}
+                style={{ flex: 1 , width:Dimensions.get('screen').width,height:250, marginBottom:20, alignSelf:'center',}}
                 ref={mapRef}
                 provider={PROVIDER_GOOGLE}
                 initialRegion={{
@@ -506,7 +522,6 @@ const onSubmit = async () => {
           </TouchableOpacity>
           </View>
     </ScrollView>
-    
   );
 };
 
@@ -514,6 +529,7 @@ const styles = StyleSheet.create({
   Posting_container: {
     height: Dimensions.get('screen').height,
     backgroundColor: 'white',
+    flex:1
     
   },
   container: {
@@ -644,7 +660,7 @@ const styles = StyleSheet.create({
     textAlign:'center',
     color:'black',
     borderWidth:2, width:140, borderRadius:5,
-    borderColor:'gray',fontFamily:'NanumGothic-Regular',height:30, 
+    borderColor:'#C9BAE5',fontFamily:'NanumGothic-Regular',height:30, 
     textAlignVertical:'center',backgroundColor:'#C9BAE5'
   }
 });
