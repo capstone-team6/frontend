@@ -8,6 +8,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -89,7 +90,6 @@ const LocationSearch= () =>{
                                 setAddress(lastAddress);
                                 console.log(lastAddress)
                                 setMarkerLocation(pos.coords)
-                                
                             })
                             .catch(error => console.warn(error));
                     },

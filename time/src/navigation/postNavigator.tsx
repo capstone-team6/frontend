@@ -56,7 +56,7 @@ const postStackNavigator = () => {
             fontSize: 40,
             paddingTop: 30,
             marginHorizontal: 10,
-            height: 70,
+            height: 90,
           },
 
           headerRight: () => (

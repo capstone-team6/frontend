@@ -13,6 +13,7 @@ import {
   ListRenderItemInfo,
   ScrollView,
   TouchableWithoutFeedback,
+  ScrollViewBase,
 } from 'react-native';
 import Geocoder from 'react-native-geocoding';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -332,14 +333,13 @@ function timeDiffence(targetTime:Date):string{
   }
 }
   return (
-    <ScrollView 
+    <ScrollView
     refreshControl={
       <RefreshControl
       refreshing={refreshing}
       onRefresh={onRefresh}
       />
     }
-
     onScroll={(event)=>{
       const scrollPosition = event.nativeEvent.contentOffset.y;
       const scrollOffset = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;

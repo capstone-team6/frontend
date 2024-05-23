@@ -43,6 +43,7 @@ const BottmTabNavigation = () => {
         options={{
           headerShown: false,
           unmountOnBlur:true,
+          
           // headerTitleStyle: {
           //   color: '#352456',
           //   fontFamily: 'Gugi-Regular',
