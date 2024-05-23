@@ -127,6 +127,7 @@ const BottmTabNavigation = () => {
         name="나의 틈새"
         component={myPageStack}
         options={{
+          unmountOnBlur:true,
           headerShown: false,
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',

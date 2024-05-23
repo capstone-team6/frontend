@@ -132,12 +132,13 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     console.log('fetchMessage');
     const token = await fetchToken();
     console.log(token);
-    await axios
-      .get('http://13.125.118.92:8080/chat/room', {
-        params: {
-          roomName: roomName,
+    const data={
+      roomName: roomName,
           boardId: boardId,
-        },
+    }
+    await axios
+      .post('http://13.125.118.92:8080/chat/room',data, {
+       
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -159,10 +160,10 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       .catch(error => console.error('FETCH MESSAGES ERROR: ', error));
   };
 
-  // useInterval(() => {
-  //   console.log('useinterval');
-  //   fetchMessages();
-  // }, 1000);
+  useInterval(() => {
+    console.log('useinterval');
+    fetchMessages();
+  }, 1000);
 
   useEffect(() => {
     if (route.params?.newMessage) {
