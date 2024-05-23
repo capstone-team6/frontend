@@ -49,7 +49,6 @@ const Chatting = () => {
         roomName: roomName,
         boardId: boardId,
         otherUserId: otherUserId,
-        roomId: roomId,
       },
     });
   };

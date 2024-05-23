@@ -27,6 +27,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BooleanOptional} from 'qs';
 import AppealWrite from './AppealWrite';
 import App from '../../App';
+import ImageResizer from 'react-native-image-resizer';
+import {useFocusEffect} from '@react-navigation/native';
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp =
   | StackNavigationProp<RootStackParamList, 'AccountEnter'>
@@ -53,15 +55,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     roomName,
     boardId,
     otherUserId,
-    roomId,
     holder,
     bank,
     accountNumber,
   } = route.params;
+
   // const userName = 'BH';
-  console.log(userName, roomName, boardId, otherUserId, roomId);
+  // const [roomId, setRoomId] = useState();
+  // const roomId = 1;
+  console.log(userName, roomName, boardId, otherUserId);
   const [role, setRole] = useState('BUYER');
-  // const [roomId, setRoomId] = useState(1);
+  const [roomId, setRoomId] = useState();
   const [messageInput, setMessageInput] = useState('');
   const [selectedPayment, setSelectedPayment] = useState<PaymentType>(null);
   const [selectedAction, setSelectedAction] = useState<
@@ -115,6 +119,49 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const [selectedButton, setSelectedButton] = useState(null);
   const [images, setImages] = useState<ImageType[]>([]);
 
+  async function fetchToken() {
+    const item = await AsyncStorage.getItem('accessToken');
+    return item ? JSON.parse(item) : null;
+  }
+
+  const fetchMessages = async () => {
+    const token = await fetchToken();
+    console.log(token);
+    await axios
+      .get('http://13.125.118.92:8080/chat/room', {
+        params: {
+          roomName: roomName,
+          boardId: boardId,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        const data = JSON.stringify(response.data);
+        console.log(data);
+        if (data) {
+          const d = JSON.parse(data);
+          console.log('받은 데이터', d);
+          setRole(d.roleType);
+          setChatList(d.chatlist);
+          setRoomId(d.roomId);
+        }
+      })
+      .catch(error => console.error('FETCH MESSAGES ERROR: ', error));
+  };
+
+  useInterval(() => {
+    console.log('useinterval');
+    fetchMessages();
+  }, 1000);
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
   useEffect(() => {
     if (route.params?.newMessage) {
       const {message, type} = route.params.newMessage;
@@ -154,6 +201,57 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     });
   }, []);
 
+  const sendMessage = async (
+    roomId: number,
+    message: string,
+    messageType: string,
+  ) => {
+    try {
+      const token = await fetchToken();
+
+      const formData = new FormData();
+      formData.append('roomId', roomId);
+      formData.append('message', message);
+      formData.append('type', messageType);
+
+      const response = await axios.post(
+        'http://13.125.118.92:8080/chat/send',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log('SENDMESSAGE SUCCESSFULLY:', response.data);
+    } catch (error) {
+      console.error('FAILED TO SENDMESSAGE:', error);
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (roomId !== undefined) {
+      if (messageInput.trim() !== '') {
+        setChatList(currentChatList => [
+          ...currentChatList,
+          {
+            roomId: roomId,
+            message: messageInput,
+            type: 'MESSAGE',
+          },
+        ]);
+        setMessageInput('');
+        sendMessage(roomId, messageInput, 'MESSAGE');
+      } else {
+        return;
+      }
+    } else {
+      console.error('HANDLESENDMESSAGE: roomId is undefined');
+    }
+  };
+
   const goBack = () => {
     navigation.goBack();
   };
@@ -163,133 +261,134 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const goToAccountEnter = () => {
-    navigation.navigate('AccountEnter', {boardId: boardId, roomId: roomId});
+    navigation.navigate('AccountEnter', {
+      boardId: boardId,
+      roomId: roomId,
+    });
   };
 
   const goToAccountCheck = () => {
-    navigation.navigate('AccountCheck', {boardId: boardId, roomId: roomId});
+    navigation.navigate('AccountCheck', {
+      boardId: boardId,
+      roomId: roomId,
+    });
   };
 
-  // const goToAppeal = () => {
-  //   navigation.navigate('AppealWrite', {objectId: otherUserId});
-  // };
-
-  const handleImagePickerResponse = (response: ImagePickerResponse) => {
-    if (response.didCancel) {
-      console.log('User cancelled image picker');
-    } else if (response.errorCode) {
-      console.log('ImagePicker Error: ', response.errorMessage);
-    } else if (response.assets) {
-      const source = {uri: response.assets[0].uri};
-      console.log(source);
-    }
+  const goToAppeal = () => {
+    navigation.navigate('AppealWrite', {objectId: otherUserId});
   };
 
   const onCameraPress = () => {
-    setModalVisible(false);
-    const options: CameraOptions = {
-      saveToPhotos: true,
-      mediaType: 'photo',
-    };
+    launchCamera({mediaType: 'photo'}, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      } else {
+        const uri = response.assets?.[0]?.uri;
+        const type = response.assets?.[0]?.type;
+        const name = response.assets?.[0]?.fileName;
+        if (uri && type && name) {
+          const width = response.assets?.[0]?.width ?? 100;
+          const height = response.assets?.[0]?.height ?? 100;
 
-    launchCamera(options, handleImagePickerResponse);
+          ImageResizer.createResizedImage(
+            uri,
+            width,
+            height,
+            type.includes('jpeg') ? 'JPEG' : 'PNG',
+            100,
+            0,
+          )
+            .then(res => {
+              sendImageToServer(
+                res.uri,
+                type.includes('png') ? 'image/png' : 'image/jpeg',
+                name,
+              );
+            })
+            .catch(err => {
+              console.log('Image Resizing Error: ', err);
+            });
+        } else {
+          console.log('No image selected');
+        }
+      }
+    });
   };
 
   const onGalleryPress = () => {
-    setModalVisible(false);
-    const options: ImageLibraryOptions = {
-      selectionLimit: 1,
-      mediaType: 'photo',
-    };
+    launchImageLibrary({mediaType: 'photo'}, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      } else {
+        const uri = response.assets?.[0]?.uri;
+        const type = response.assets?.[0]?.type;
+        const name = response.assets?.[0]?.fileName;
+        if (uri && type && name) {
+          const width = response.assets?.[0]?.width ?? 100;
+          const height = response.assets?.[0]?.height ?? 100;
 
-    launchImageLibrary(options, handleImagePickerResponse);
+          ImageResizer.createResizedImage(
+            uri,
+            width,
+            height,
+            type.includes('jpeg') ? 'JPEG' : 'PNG',
+            100,
+            0,
+          )
+            .then(res => {
+              sendImageToServer(
+                res.uri,
+                type.includes('png') ? 'image/png' : 'image/jpeg',
+                name,
+              );
+            })
+            .catch(err => {
+              console.log('Image Resizing Error: ', err);
+            });
+        } else {
+          console.log('No image selected');
+        }
+      }
+    });
   };
 
-  const sendImages = async () => {
-    const body = new FormData();
-    const type = 'IMAGE';
-
-    body.append('roomId', roomId);
-    body.append('type', type);
-
-    images.forEach(image => {
-      body.append('images', {
-        uri: image.uri,
-        type: image.type,
-        name: image.name,
-      });
+  const sendImageToServer = async (
+    imageUri: string,
+    type: string,
+    name: string,
+  ) => {
+    const formData = new FormData();
+    formData.append('images', {
+      uri: imageUri,
+      type: type,
+      name: name,
     });
+    formData.append('roomId', roomId);
+    formData.append('type', 'IMAGE');
 
     try {
       const store = await AsyncStorage.getItem('accessToken');
       const token = store ? JSON.parse(store) : null;
+
       console.log(token);
 
-      const res = await axios.post(
+      const response = await axios.post(
         'http://13.125.118.92:8080/chat/send',
-        body,
+        formData,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
-          transformRequest: [data => data],
         },
       );
-
-      if (res.status === 200) {
-        console.log(res.data);
-      }
+      console.log('Image uploaded successfully:', response.data);
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const sellerPress = () => {
-    if (roomId !== undefined) {
-      setChatList(currentChatList => [
-        ...currentChatList,
-        {
-          roomId: roomId,
-          message:
-            '시간 판매자가 ‘거래 완료’를 눌렀어요. 최종 거래를 완료하려면 시간 구매자도 거래 완료를 눌러주세요. 거래 완료가 되지 않았다면 이의신청을 해주세요.아무 응답이 없을 경우 3일 후에 자동으로 ‘거래 완료’ 상태로 변경됩니다.',
-          type: 'ONTRANSACTION',
-        },
-      ]);
-      sendMessage(
-        roomId,
-        '시간 판매자가 ‘거래 완료’를 눌렀어요.\n최종 거래를 완료하려면 시간 구매자도 거래 완료를 눌러주세요. 거래 완료가 되지 않았다면 이의신청을 해주세요.아무 응답이 없을 경우 3일 후에 자동으로 ‘거래 완료’ 상태로 변경됩니다.',
-        'ONTRANSACTION',
-      );
-    } else {
-      console.error('sellerComplete ERROR');
-    }
-    if (role === 'BUYER') {
-      Appeal();
-      transferComplete();
-    } else {
-      transferComplete();
-      completeMessage();
-    }
-  };
-  const sellerComplete = () => {
-    if (roomId !== undefined) {
-      setChatList(currentChatList => [
-        ...currentChatList,
-        {
-          roomId: roomId,
-          message:
-            "거래를 완료했다면 '거래 완료'를 눌러주세요.\n거짓으로 눌렀을 경우 검토 후 회원 정지 처리 됩니다.",
-          type: 'SELLERCOMPLETE',
-        },
-      ]);
-      sendMessage(
-        roomId,
-        "거래를 완료했다면 '거래 완료'를 눌러주세요.\n 거짓으로 눌렀을 경우 검토 후 회원 정지 처리 됩니다.",
-        'SELLERCOMPLETE',
-      );
-    } else {
-      console.error('sellerComplete ERROR');
+      console.error('Error uploading image:', error);
     }
   };
 
@@ -312,13 +411,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       );
     } else {
       console.error('Transaction Press ERROR');
-    }
-  };
-
-  const handlePaymentSelection = (paymentType: PaymentType) => {
-    setSelectedPayment(paymentType);
-    if (paymentType) {
-      goTransaction(paymentType);
     }
   };
 
@@ -349,7 +441,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
       const paymentData = {
         payMeth:
-          pay === '틈새 페이' ? 'PAY' : pay === '만나서 결제' ? 'MEET' : null,
+          pay === '틈새페이' ? 'PAY' : pay === '만나서 결제' ? 'MEET' : null,
       };
 
       const res = await axios.post(
@@ -377,6 +469,105 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
   };
 
+  const completeMessage = async () => {
+    setSelectedAction('complete');
+    if (!isCompleted) {
+      if (roomId !== undefined) {
+        setChatList(currentChatList => [
+          ...currentChatList,
+          {
+            roomId: roomId,
+            message: '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
+            type: 'REVIEW',
+          },
+        ]);
+        sendMessage(
+          roomId,
+          '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
+          'REVIEW',
+        );
+      } else {
+        console.error('COMPLETEMESSAGE ERROR');
+      }
+
+      try {
+        axios
+          .put(
+            `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/complete`,
+          )
+          .then(res => {
+            const result = res.data;
+            console.log(result);
+            if (result.status == 200) {
+              console.log(result.data);
+            }
+          })
+          .catch(err => {
+            const result = err.response.data.data;
+            console.log(result);
+          });
+      } catch (error) {
+        console.error('Request failed:', error);
+      }
+    }
+    setIsCompleted(true);
+  };
+
+  const sellerComplete = () => {
+    if (roomId !== undefined) {
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {
+          roomId: roomId,
+          message:
+            "거래를 완료했다면 '거래 완료'를 눌러주세요.\n거짓으로 눌렀을 경우 검토 후 회원 정지 처리 됩니다.",
+          type: 'SELLERCOMPLETE',
+        },
+      ]);
+      sendMessage(
+        roomId,
+        "거래를 완료했다면 '거래 완료'를 눌러주세요.\n 거짓으로 눌렀을 경우 검토 후 회원 정지 처리 됩니다.",
+        'SELLERCOMPLETE',
+      );
+    } else {
+      console.error('sellerComplete ERROR');
+    }
+  };
+
+  const sellerPress = () => {
+    if (roomId !== undefined) {
+      setChatList(currentChatList => [
+        ...currentChatList,
+        {
+          roomId: roomId,
+          message:
+            '시간 판매자가 ‘거래 완료’를 눌렀어요. 최종 거래를 완료하려면 시간 구매자도 거래 완료를 눌러주세요.\n거래 완료가 되지 않았다면 이의신청을 해주세요.아무 응답이 없을 경우 3일 후에 자동으로 ‘거래 완료’ 상태로 변경됩니다.',
+          type: 'ONTRANSACTION',
+        },
+      ]);
+      sendMessage(
+        roomId,
+        '시간 판매자가 ‘거래 완료’를 눌렀어요.최종 거래를 완료하려면 시간 구매자도 거래 완료를 눌러주세요.\n거래 완료가 되지 않았다면 이의신청을 해주세요.아무 응답이 없을 경우 3일 후에 자동으로 ‘거래 완료’ 상태로 변경됩니다.',
+        'ONTRANSACTION',
+      );
+    } else {
+      console.error('sellerComplete ERROR');
+    }
+    if (role === 'BUYER') {
+      Appeal();
+      completeMessage();
+    } else {
+      completeMessage();
+    }
+  };
+
+  const handlePaymentSelection = (paymentType: PaymentType) => {
+    setSelectedPayment(paymentType);
+    if (paymentType) {
+      goTransaction(paymentType);
+    }
+  };
+
   const payInfo = () => {
     if (roomId !== undefined) {
       setChatList(currentChatList => [
@@ -384,13 +575,13 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         {
           roomId: roomId,
           message:
-            '‘틈새페이’ 는 안전한 결제를 위하여 포인트 차감 후 결제완료시\n시간 판매자의 틈새페이로 포인트가 전달됩니다. 또한, 시간 판\n매자가 거래완료를 누른 뒤 시간 구매자가 거래완료를 눌러야\n거래가 최종 완료됩니다.',
+            '‘틈새페이’ 는 안전한 결제를 위하여 포인트 차감 후 결제완료시 시간판매자의 틈새페이로 포인트가 전달됩니다. 또한, 시간판매자가 거래완료를 누른 뒤 시간 구매자가 거래완료를 눌러야 거래가 최종 완료됩니다.',
           type: 'PAYINFO',
         },
       ]);
       sendMessage(
         roomId,
-        '‘틈새페이’ 는 안전한 결제를 위하여 포인트 차감 후 결제완료시\n시간 판매자의 틈새페이로 포인트가 전달됩니다. 또한, 시간 판\n매자가 거래완료를 누른 뒤 시간 구매자가 거래완료를 눌러야\n거래가 최종 완료됩니다.',
+        '‘틈새페이’ 는 안전한 결제를 위하여 포인트 차감 후 결제완료시 시간판매자의 틈새페이로 포인트가 전달됩니다. 또한, 시간판매자가 거래완료를 누른 뒤 시간 구매자가 거래완료를 눌러야 거래가 최종 완료됩니다.',
         'PAYINFO',
       );
     } else {
@@ -467,50 +658,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
   };
 
-  const completeMessage = async () => {
-    setSelectedAction('complete');
-    if (!isCompleted) {
-      if (roomId !== undefined) {
-        setChatList(currentChatList => [
-          ...currentChatList,
-          {
-            roomId: roomId,
-            message: '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
-            type: 'REVIEW',
-          },
-        ]);
-        sendMessage(
-          roomId,
-          '거래가 완료되었어요. 상대방의 후기를 남겨주세요.',
-          'REVIEW',
-        );
-      } else {
-        console.error('COMPLETEMESSAGE ERROR');
-      }
-
-      try {
-        axios
-          .put(
-            `http://13.125.118.92:8080/api/board/${boardId}/chat/${roomId}/complete`,
-          )
-          .then(res => {
-            const result = res.data;
-            console.log(result);
-            if (result.status == 200) {
-              console.log(result.data);
-            }
-          })
-          .catch(err => {
-            const result = err.response.data.data;
-            console.log(result);
-          });
-      } catch (error) {
-        console.error('Request failed:', error);
-      }
-    }
-    setIsCompleted(true);
-  };
-
   const cancelMessage = async () => {
     setSelectedAction('cancel');
     try {
@@ -545,6 +692,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         },
       ]);
       sendMessage(roomId, '계좌 정보를 보냈어요.', 'ACCOUNT');
+      transferComplete();
     } else {
       console.error('transferComplete ERROR');
     }
@@ -568,98 +716,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       }
     }, [delay]);
   }
-
-  async function fetchToken() {
-    const item = await AsyncStorage.getItem('accessToken');
-    return item ? JSON.parse(item) : null;
-  }
-
-  const fetchMessages = async () => {
-    const token = await fetchToken();
-    console.log(token);
-    await axios
-      .get('http://13.125.118.92:8080/chat/room', {
-        params: {
-          roomName: roomName,
-          boardId: boardId,
-        },
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then(response => {
-        console.log(JSON.stringify(response.data));
-        const data = JSON.stringify(response.data);
-        console.log(data);
-        if (data) {
-          const d = JSON.parse(data);
-          setRole(d.roleType);
-          setChatList(d.chatlist);
-        }
-      })
-      .catch(error => console.error('FETCH MESSAGES ERROR: ', error));
-  };
-
-  useEffect(() => {
-    fetchMessages();
-  }, []);
-
-  useInterval(() => {
-    console.log('useinterval');
-    fetchMessages();
-  }, 1000);
-
-  const sendMessage = async (
-    roomId: number,
-    message: string,
-    messageType: string,
-  ) => {
-    try {
-      const token = await fetchToken();
-
-      const formData = new FormData();
-      formData.append('roomId', roomId);
-      formData.append('message', message);
-      formData.append('type', messageType);
-
-      const response = await axios.post(
-        'http://13.125.118.92:8080/chat/send',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      console.log('SENDMESSAGE SUCCESSFULLY:', response.data);
-    } catch (error) {
-      console.error('FAILED TO SENDMESSAGE:', error);
-    }
-  };
-
-  const handleSendMessage = () => {
-    if (roomId !== undefined) {
-      if (messageInput.trim() !== '') {
-        setChatList(currentChatList => [
-          ...currentChatList,
-          {
-            roomId: roomId,
-            message: messageInput,
-            type: 'MESSAGE',
-          },
-        ]);
-        setMessageInput('');
-        sendMessage(roomId, messageInput, 'MESSAGE');
-      } else {
-        return;
-      }
-    } else {
-      console.error('HANDLESENDMESSAGE: roomId is undefined');
-    }
-  };
 
   return (
     <View
@@ -691,7 +747,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             }}>
             {userName}
           </Text>
-          <Text
+          {/* <Text
             style={{
               fontFamily: 'NanumGothic',
               fontSize: 10,
@@ -699,7 +755,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
               marginVertical: 10,
             }}>
             지금까지 5번의 시간을 거래했어요.
-          </Text>
+          </Text> */}
         </View>
 
         {chatList?.map((msg, index) => (
@@ -723,7 +779,9 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   : 'flex-start',
               margin: 10,
               width:
-                msg.type === 'ONTRANSACTION' || msg.type === 'REVIEW'
+                msg.type === 'ONTRANSACTION' ||
+                msg.type === 'REVIEW' ||
+                msg.type === 'PAYINFO'
                   ? '100%'
                   : 'auto',
             }}>
@@ -998,7 +1056,9 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                       style={{
                         color: 'black',
                         textAlign:
-                          msg.type === 'ONTRANSACTION' || msg.type === 'REVIEW'
+                          msg.type === 'ONTRANSACTION' ||
+                          msg.type === 'REVIEW' ||
+                          msg.type === 'PAYINFO'
                             ? 'center'
                             : 'auto',
                         marginLeft: 5,
@@ -1214,6 +1274,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                    onPress={goToAppeal}
                     style={[
                       {
                         backgroundColor: '#C9BAE5',
@@ -1222,13 +1283,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                         borderRadius: 10,
                         justifyContent: 'center',
                         marginVertical: 8,
-                      },
-                      {
-                        opacity:
-                          selectedAction !== null &&
-                          selectedAction !== 'complete'
-                            ? 0.5
-                            : 1,
                       },
                     ]}>
                     <Text
@@ -1242,13 +1296,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                           textAlign: 'center',
                           color: 'black',
                           fontWeight: 'bold',
-                        },
-                        {
-                          opacity:
-                            selectedAction !== null &&
-                            selectedAction !== 'cancel'
-                              ? 0.5
-                              : 1,
                         },
                       ]}>
                       이의 신청

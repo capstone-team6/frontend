@@ -138,7 +138,7 @@ const Mypage: React.FC = () => {
               fontSize: 16,
               marginRight: 45,
             }}>
-            이의 신청
+            이의신청 내역
           </Text>
           <Antdesign name="right" size={15} />
         </TouchableOpacity>

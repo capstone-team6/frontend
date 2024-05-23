@@ -42,8 +42,9 @@ const BottmTabNavigation = () => {
         component={postStackNavigator}
         options={{
           headerShown: false,
-          unmountOnBlur:true,
-          
+
+          unmountOnBlur: true,
+
           // headerTitleStyle: {
           //   color: '#352456',
           //   fontFamily: 'Gugi-Regular',
@@ -74,15 +75,14 @@ const BottmTabNavigation = () => {
               color={focused ? '#C9BAE5' : 'gray'}
             />
           ),
-        }}
-      ></Tab.Screen>
+        }}></Tab.Screen>
       <Tab.Screen
         name="관심목록"
         component={ScrapStackNavigator}
         options={{
-          headerShown:false,
+          headerShown: false,
           tabBarLabel: '관심',
-          unmountOnBlur:true,
+          unmountOnBlur: true,
           tabBarIcon: ({focused}) => (
             <AntDesign
               name="hearto"
@@ -101,7 +101,7 @@ const BottmTabNavigation = () => {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
           },
-          unmountOnBlur:true,
+          unmountOnBlur: true,
           tabBarIcon: () => (
             <AntDesign name="pluscircle" size={45} color="#C9BAE5" />
           ),
@@ -112,6 +112,7 @@ const BottmTabNavigation = () => {
         component={ChatStackNavigator}
         options={{
           tabBarLabel: '채팅',
+          tabBarStyle: {display: 'none'},
           headerShown: false,
           tabBarIcon: ({focused}) => (
             <Ionicons

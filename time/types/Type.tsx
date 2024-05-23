@@ -94,7 +94,6 @@ export type RootStackParamList = {
       userName: string;
       roomName: string;
       otherUserId: number;
-      roomId: number;
     };
   };
 
@@ -121,9 +120,8 @@ export type RootStackParamList = {
   Appealwrite: {objectId?: number | undefined};
   WriteHistory: {userId?: number};
   TransactionHistory: {userId?: number};
-  KakaoPay:{amountValue:number}
-  PayBalance:undefined
-  ReportPost:{boardId: number}
-  PostSet:{boardId:number}
-
+  KakaoPay: {amountValue: number};
+  PayBalance: undefined;
+  ReportPost: {boardId: number};
+  PostSet: {boardId: number};
 };
