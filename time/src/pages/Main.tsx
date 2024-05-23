@@ -13,6 +13,7 @@ import {
   ListRenderItemInfo,
   ScrollView,
   TouchableWithoutFeedback,
+  ScrollViewBase,
 } from 'react-native';
 import Geocoder from 'react-native-geocoding';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -100,9 +101,9 @@ const Main:React.FC<Props>=({route})=>{
   const [address, setAddress] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState('BUY');
   const [selectedCategoryForBuy, setSelectedCategoryForBuy] =
-    useState('TALENT');
+    useState('');
   const [selectedCategoryForSell, setSelectedCategoryForSell] =
-    useState('TALENT');
+    useState('');
   
   const categories = [
     '재능기부',
@@ -332,14 +333,13 @@ function timeDiffence(targetTime:Date):string{
   }
 }
   return (
-    <ScrollView 
+    <ScrollView
     refreshControl={
       <RefreshControl
       refreshing={refreshing}
       onRefresh={onRefresh}
       />
     }
-
     onScroll={(event)=>{
       const scrollPosition = event.nativeEvent.contentOffset.y;
       const scrollOffset = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   },
   post_info: {
     flexDirection: 'column',
-    left:-20
+    
     
   },
   info1: {
