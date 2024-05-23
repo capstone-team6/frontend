@@ -100,6 +100,13 @@ const Main:React.FC<Props>=({route})=>{
   const [posts, setPosts] = useState<RoomData[]>([]);
   const [address, setAddress] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState('BUY');
+  const handlerTab=(tab:string)=>{
+    setSelectedTab(tab)
+    setPosts([])
+    setPageNum(0)
+    setSelectedCategoryForBuy('')
+    setSelectedCategoryForSell('')
+  }
   const [selectedCategoryForBuy, setSelectedCategoryForBuy] =
     useState('');
   const [selectedCategoryForSell, setSelectedCategoryForSell] =
@@ -116,15 +123,6 @@ const Main:React.FC<Props>=({route})=>{
   ];
 
   const [pageNum, setPageNum]=useState<number>(0)
-  // const totalPosts=posts.length
-  // const postsPage=8 //한 페이지에 보여줄 게시물 개수
-  // const totalPage=Math.ceil(totalPosts/postsPage)
-  // const handelPageChange=(page:number)=>{
-  //   setPageNum(page)
-  // }
-  // const startIndex=pageNum*postsPage
-  // const endIndex=startIndex+postsPage
-  // const currentPosts=posts.slice(startIndex,endIndex)
 
   const convertToEnglish = (category: string) => {
     switch (category) {
@@ -147,14 +145,20 @@ const Main:React.FC<Props>=({route})=>{
     }
   };
 
-
+  const [postsForBuy, setPostsForBuy] = useState<RoomData[]>([]);
+  const [postsForSell, setPostsForSell] = useState<RoomData[]>([]);
   const handleSelectCategory = (category: string) => {
     if (selectedTab === 'BUY') {
       setSelectedCategoryForBuy(category);
+      axiosGetPosts(category)
       setPosts([])
+      setPageNum(0)
+      
     } else if (selectedTab === 'SELL') {
       setSelectedCategoryForSell(category);
+      axiosGetPosts(category)
       setPosts([])
+      setPageNum(0)
     }
   };
 
@@ -198,10 +202,22 @@ const Main:React.FC<Props>=({route})=>{
     );
   };
 
+  const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: any; }; contentOffset: { y: any; }; contentSize: { height: any; }; }; }) => {
+    // 스크롤 뷰의 높이
+    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+    // 스크롤된 위치
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+    // 콘텐츠의 전체 높이
+    const contentHeight = event.nativeEvent.contentSize.height;
   
+    // 사용자가 스크롤의 끝에 도달했을 때, 다음 페이지를 요청합니다.
+    if (scrollViewHeight + scrollOffset >= contentHeight) {
+      // 현재 페이지 번호를 증가시킵니다.
+      setPageNum(prev=>prev + 1);
+    }
+  };
   useEffect(() => {
     requestPermission().then(result => {
-      console.log({result});
       if (result === 'granted') {
         Geolocation.getCurrentPosition(
           pos => {
@@ -214,7 +230,6 @@ const Main:React.FC<Props>=({route})=>{
             const longitude=pos.coords.longitude
             Geocoder.from(pos.coords.latitude, pos.coords.longitude, 'ko')
               .then(json => {
-                console.log(json);
                 const addressComponent = json.results[0].formatted_address;
                 const desireAddress = addressComponent.split(', ')[0];
                 const words = desireAddress.split(' ');
@@ -225,8 +240,6 @@ const Main:React.FC<Props>=({route})=>{
                   }else{
                     setAddress(lastAddress)
                   }
-                console.log(longitude,latitude,address)
-
                 if(longitude&&latitude&&address){
                   AsyncStorage.getItem('kakaoId').then(id=>{
                     const kakaoId=id
@@ -237,10 +250,6 @@ const Main:React.FC<Props>=({route})=>{
                       address:address,
                       kakaoId:kakaoId
                     }
-                    
-                    console.log(location?.longitude,location?.latitude,address)
-                    console.log(kakaoId)
-  
                     axios.post('http://13.125.118.92:8080/api/auth/point',locationData,{
                       headers:{
                         'Content-Type': 'application/json',
@@ -254,45 +263,8 @@ const Main:React.FC<Props>=({route})=>{
                       console.log(error)
                     });
                   })
-
                   
                 }
-
-                
-                AsyncStorage.getItem('accessToken').then(token=>{
-                      const accessToken=token?JSON.parse(token):null
-                      console.log(accessToken)
-                      axios
-                        .get('http://13.125.118.92:8080/api/board', {
-                          params: {
-                            pageNum: 0,
-                            boardType: selectedTab,
-                            category:
-                              selectedTab === 'BUY'
-                                ? convertToEnglish(selectedCategoryForBuy)
-                                : convertToEnglish(selectedCategoryForSell),
-                          },
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${accessToken}`,
-                          },
-                        })
-                        .then((response) => {
-                          // console.log(JSON.stringify(response.data.data.boards))
-                          const boards=JSON.stringify(response.data.data.boards)
-                          // console.log(boards)
-
-                          if(boards){
-                            const b=JSON.parse(boards)
-                            setPosts(b)
-                           
-                          }
-                        })
-                        .catch(error => {
-                          console.error(error);
-                        });
-                    })
-                .catch(error => console.warn(error));
                 })
                 
           },
@@ -307,8 +279,40 @@ const Main:React.FC<Props>=({route})=>{
         );
       }
     });
-  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,route.params,refreshing]);
+  }, [refreshing]);
   
+
+  const axiosGetPosts = async (category: string) => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const accessToken = token ? JSON.parse(token) : null;
+      console.log(accessToken);
+      const response = await axios.get('http://13.125.118.92:8080/api/board', {
+        params: {
+          pageNum: pageNum,
+          boardType: selectedTab,
+          category: convertToEnglish(category), // 선택한 카테고리로 요청
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      const newPosts = response.data.data.boards; // 새로운 페이지의 게시글
+      setPosts(prev=>[...prev,...newPosts]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+useEffect(()=>{
+  
+  AsyncStorage.getItem('accessToken').then(token=>{
+    const accessToken=token?JSON.parse(token):null
+    console.log(accessToken)
+    axiosGetPosts(selectedTab === 'BUY' ? selectedCategoryForBuy : selectedCategoryForSell);
+  })
+.catch(error => console.warn(error));
+},[selectedTab,pageNum])
 
 const handleLoadMore=()=>{
   setPageNum(pageNum+1)
@@ -362,7 +366,7 @@ function timeDiffence(targetTime:Date):string{
       <View style={styles.options}>
         <View>
           <View style={{flexDirection: 'row', width: '100%'}}>
-            <TouchableWithoutFeedback onPress={() => setSelectedTab('BUY')}>
+            <TouchableWithoutFeedback onPress={() => handlerTab('BUY')}>
               <View style={[{alignItems: 'center', width: '50%'}]}>
                 <Text
                   style={[
@@ -377,7 +381,7 @@ function timeDiffence(targetTime:Date):string{
                 )}
               </View>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback onPress={() => setSelectedTab('SELL')}>
+            <TouchableWithoutFeedback onPress={()=>handlerTab('SELL')}>
               <View style={[{alignItems: 'center', width: '50%'}]}>
                 <Text
                   style={[
@@ -411,7 +415,7 @@ function timeDiffence(targetTime:Date):string{
         </View>
       </View>
 
-      <View style={{flexGrow:1}}>
+      {/* <View style={{flexGrow:1}}> */}
       <FlatList
         data={posts}
         keyExtractor={item => item.boardId.toString()}
@@ -459,12 +463,16 @@ function timeDiffence(targetTime:Date):string{
             </View>
           </TouchableOpacity>
         )}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.1}
+        onScroll={handleScroll}
+        onEndReached={()=>{
+          setPageNum(prev=>prev+1)
+        }}
+        onEndReachedThreshold={0.8}
+        
       />
-      </View>
+      {/* </View> */}
     </View>
-    </ScrollView>
+      </ScrollView>
   );
 }
 
