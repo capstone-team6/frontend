@@ -42,16 +42,23 @@ const Chatting = () => {
     otherUserId: number,
     roomId: number,
   ) => {
-    navigation.navigate('chatScreenNavigator', {
-      screen: 'ChatScreen',
-      params: {
-        userName: userName,
-        roomName: roomName,
-        boardId: boardId,
-        otherUserId: otherUserId,
-      },
+    navigation.navigate('ChatScreen', {
+      userName: userName,
+      roomName: roomName,
+      boardId: boardId,
+      otherUserId: otherUserId,
     });
   };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {height: 70},
+      });
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     AsyncStorage.getItem('accessToken').then(token => {
@@ -148,9 +155,11 @@ const Chatting = () => {
                 <Text style={styles.chatContent}>{item.message}</Text>
               </View>
 
-              <View style={styles.chatCountContainer}>
-                <Text style={styles.chatCount}>{item.noReadChat}</Text>
-              </View>
+              {item.noReadChat > 0 && (
+                <View style={styles.chatCountContainer}>
+                  <Text style={styles.chatCount}>{item.noReadChat}</Text>
+                </View>
+              )}
             </View>
           </TouchableOpacity>
         )}
