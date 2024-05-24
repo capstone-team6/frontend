@@ -7,6 +7,8 @@ import StackNavigator from './src/navigation/StackNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import  RNEventSource from 'react-native-event-source';
 import PushNotification from 'react-native-push-notification';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn]=useState<boolean>(false)
@@ -100,7 +102,8 @@ function App() {
     }
   },[isLoggedIn])
   return (
-      <NavigationContainer independent={true}>    
+      <Provider store={store}>
+        <NavigationContainer independent={true}>    
         <SafeAreaView style={{flex:1}}>
           {/* {isLoggedIn?(
             <BottmTabNavigation/>
@@ -112,6 +115,7 @@ function App() {
           {/* <MapSearch/> */}
         </SafeAreaView>
       </NavigationContainer>
+      </Provider>
   );
 }
 
