@@ -77,7 +77,7 @@ const Mypage: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.profile}>
-        <Image source={require('../assets/images/profile.png')} />
+        <Ionicons name="person-circle" size={80} color={'#352456'} />
         <Text
           style={{
             fontFamily: 'NanumGothic-regular',
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   profile: {
     paddingTop: 15,
-    margin: 10,
+    marginHorizontal: 30,
     flexDirection: 'row',
     justifyContent: 'flex-start',
   },
