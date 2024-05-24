@@ -32,11 +32,11 @@ const Setting: React.FC=()=> {
                     <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16, marginRight:45}}>로그아웃</Text>
                     <Antdesign name='right' size={15}/>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.options_detail} onPress={goToDeleteMem}>
+                {/* <TouchableOpacity style={styles.options_detail} onPress={goToDeleteMem}>
                     <Antdesign name='deleteuser' size={40} color='black'/>
                     <Text style={{fontFamily:'NanumGothic-Bold' , color:'#313131', fontSize:16, marginRight:45}}>회원 탈퇴</Text>
                     <Antdesign name='right' size={15}/>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         </View>
     );
