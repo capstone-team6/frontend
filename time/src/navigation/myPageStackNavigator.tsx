@@ -1,5 +1,3 @@
-// StackNavigator.tsx
-
 import React from 'react';
 import {
   StackNavigationProp,
@@ -42,6 +40,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 type writeNavigation = StackNavigationProp<RootStackParamList, 'Appeal'>;
 type SettingNavigationProp = StackNavigationProp<RootStackParamList, 'Setting'>;
 type MypageNavigation = StackNavigationProp<RootStackParamList, 'Mypage'>;
+import {RouteProp} from '@react-navigation/native';
 
 const StackNavigator = () => {
   const navigation = useNavigation<writeNavigation>();
@@ -231,12 +230,13 @@ const StackNavigator = () => {
         name="Logout"
         component={Logout}
         options={{
-          headerTitle: '로그아웃',
-          headerTitleStyle: {
-            fontFamily: 'NanumGothic-Bold',
-            fontSize: 28,
-            color: 'black',
-          },
+          // headerTitle: '로그아웃',
+          // headerTitleStyle: {
+          //   fontFamily: 'NanumGothic-Bold',
+          //   fontSize: 28,
+          //   color: 'black',
+          // },
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -300,6 +300,11 @@ const StackNavigator = () => {
         component={EvaluationScreen}
         options={{
           headerTitle: '매너평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
         }}
       />
 

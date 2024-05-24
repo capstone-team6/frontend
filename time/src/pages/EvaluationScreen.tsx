@@ -138,7 +138,7 @@ const EvaluationScreen: React.FC<prop> = ({route}) => {
   return (
     <View style={styles.container}>
       <View style={styles.topcontainer}>
-        <Ionicons name="person-circle" size={120} color={'#352456'} />
+        <Ionicons name="person-circle" size={80} color={'#352456'} />
         {/* <Svg height="200" width="200">
           <Circle cx="90" cy="70" r="57" fill="#303030" />
           <Path
@@ -153,7 +153,7 @@ const EvaluationScreen: React.FC<prop> = ({route}) => {
         <View style={styles.text_container}>
           <Text
             style={{
-              fontSize: 25,
+              fontSize: 20,
               color: 'black',
               fontFamily: 'NanumGothic-Bold',
             }}>
@@ -170,7 +170,7 @@ const EvaluationScreen: React.FC<prop> = ({route}) => {
         </View>
       </View>
       <View style={{marginHorizontal: 30}}>
-        <View style={{height: 250}}>
+        <View style={{height: 200}}>
           <View style={{marginBottom: 5}}>
             <Text
               style={{
@@ -315,7 +315,8 @@ const styles = StyleSheet.create({
   },
   text_container: {
     flexDirection: 'column',
-
+    textAlign: 'center',
+    justifyContent: 'center',
     marginLeft: 10,
   },
   categoryItem: {
