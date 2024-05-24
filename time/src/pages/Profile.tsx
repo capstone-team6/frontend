@@ -34,20 +34,56 @@ interface Props {
   route: ProfileRouteProp;
 }
 
+interface time {
+  mannerTime: number | undefined;
+}
+
 const Profile: React.FC<Props> = ({route}) => {
   const userId = route.params?.userId;
   // const userId = 1;
   const boardId = route.params?.boardId;
   // const boardId = 1;
-  const id = 1;
+  // const id = 1;
   console.log('userId', userId, 'boardId', boardId);
 
   const [nickname, setNickname] = useState<string | undefined>('');
   // console.log('NickName', nickname);
   const [mannerTime, setMannerTime] = useState<number | undefined>();
   const [timepay, setTimePay] = useState();
-  // const [id, setId] = useState();
+  const [id, setId] = useState();
   const navigation = useNavigation<ChangeNavigation>();
+
+  const TimeIcon: React.FC<time> = ({mannerTime}) => {
+    let iconName;
+
+    if (mannerTime === 5) {
+      iconName = 'clock-time-one-outline';
+    } else if (mannerTime === 10) {
+      iconName = 'clock-time-two-outline';
+    } else if (mannerTime === 15) {
+      iconName = 'clock-time-three-outline';
+    } else if (mannerTime === 20) {
+      iconName = 'clock-time-four-outline';
+    } else if (mannerTime === 25) {
+      iconName = 'clock-time-five-outline';
+    } else if (mannerTime === 30) {
+      iconName = 'clock-time-six-outline';
+    } else {
+      iconName = 'clock-alert-outline';
+    }
+
+    return (
+      <View>
+        <M
+          name={iconName}
+          size={135}
+          color="black"
+          style={{alignSelf: 'center'}}
+        />
+      </View>
+    );
+  };
+
   const goToChange = () => {
     navigation.navigate('NameChange');
   };
@@ -99,7 +135,7 @@ const Profile: React.FC<Props> = ({route}) => {
             setNickname(data.nickname);
             setMannerTime(data.mannerTime);
             // setTimePay(data?.timePay);
-            // setId(data?.id);
+            setId(data?.id);
           }
         })
         .catch(error => {
@@ -122,7 +158,6 @@ const Profile: React.FC<Props> = ({route}) => {
                     A 50,50 0 0,1 140,70 Z" // 0도에서 90도
             fill="#CC94E6"
           />
-          
         </Svg> */}
 
         <View style={styles.text_container}>
@@ -157,12 +192,13 @@ const Profile: React.FC<Props> = ({route}) => {
         </Text>
         <Svg width="330" height="180">
           <Rect width="330" height="170" fill="#C9BAE5" rx="10" ry="10" />
-          <M
+          {/* <M
             name="clock-time-three-outline"
             size={135}
             color="black"
             style={{alignSelf: 'center'}}
-          />
+          /> */}
+          <TimeIcon mannerTime={mannerTime} />
           <Text
             style={{
               fontSize: 20,
