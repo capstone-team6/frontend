@@ -12,14 +12,15 @@ import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
 import myPageStack from '../navigation/myPageStackNavigator';
 import ChatStackNavigator from './chatStackNavigator';
-import {StackNavigationProp, createStackNavigator} from '@react-navigation/stack';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../../types/Type';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import postStackNavigator from './postNavigator';
 import ScrapStackNavigator from './ScrapStackNavigator';
-import App from '../../App';
 
 const Tab = createBottomTabNavigator();
+
 const BottmTabNavigation = () => {
   return (
     <Tab.Navigator
@@ -111,7 +112,6 @@ const BottmTabNavigation = () => {
         component={ChatStackNavigator}
         options={{
           tabBarLabel: '채팅',
-          tabBarStyle: {display: 'none'},
           headerShown: false,
           tabBarIcon: ({focused}) => (
             <Ionicons
@@ -126,7 +126,7 @@ const BottmTabNavigation = () => {
         name="나의 틈새"
         component={myPageStack}
         options={{
-          unmountOnBlur:true,
+          unmountOnBlur: true,
           headerShown: false,
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',

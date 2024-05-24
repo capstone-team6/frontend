@@ -8,6 +8,13 @@ import chatScreenNavigator from './chatScreenNavigator';
 import React from 'react';
 import {useEffect} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
+import Profile from '../pages/Profile';
+import AccountEnter from '../pages/AccountEnter';
+import AppealWrite from '../pages/AppealWrite';
+import AccountCheck from '../pages/AccountCheck';
+import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
+import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
+import EvaluationScreen from '../pages/EvaluationScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 type ChatScreenNavigationProp = StackNavigationProp<
@@ -19,27 +26,6 @@ interface Props {
   navigation: ChatScreenNavigationProp;
 }
 const ChatStackNavigator: React.FC<Props> = ({navigation}) => {
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      const currentRouteName =
-        navigation.getState().routes[navigation.getState().index].name;
-
-      if (currentRouteName === 'chatScreenNavigator') {
-        navigation.getParent()?.setOptions({tabBarStyle: {display: 'none'}});
-      }
-    });
-
-    const blurUnsubscribe = navigation.addListener('blur', () => {
-      // 화면이 blur될 때 바텀 탭을 다시 보이게 함
-      navigation.getParent()?.setOptions({tabBarStyle: undefined});
-    });
-
-    return () => {
-      unsubscribe();
-      blurUnsubscribe();
-    };
-  }, [navigation]);
-
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -58,10 +44,91 @@ const ChatStackNavigator: React.FC<Props> = ({navigation}) => {
         }}
       />
       <Stack.Screen
-        name="chatScreenNavigator"
-        component={chatScreenNavigator}
+        name="ChatScreen"
+        component={ChatScreen}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          headerTitle: '상대방의 프로필',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AccountEnter"
+        component={AccountEnter}
+        options={{
+          headerTitle: '계좌 입력',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AccountCheck"
+        component={AccountCheck}
+        options={{
+          headerTitle: '계좌 정보',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AppealWrite"
+        component={AppealWrite}
+        options={{
+          headerTitle: '이의신청 작성',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ServiceEvaluationScreen"
+        component={ServiceEvaluationScreen}
+        options={{
+          headerTitle: '서비스 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="MannerEvaluationScreen"
+        component={MannerEvaluationScreen}
+        options={{
+          headerTitle: '매너 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name="EvaluationScreen"
+        component={EvaluationScreen}
+        options={{
+          headerTitle: '매너 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
         }}
       />
     </Stack.Navigator>
