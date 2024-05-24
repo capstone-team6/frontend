@@ -322,7 +322,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
         <View style={{height: 10}} />
         <View style={styles.info_detail}>
           <Text style={styles.text}>가격</Text>
-          <View style={{width: 28}} />
+          <View style={{width: 15}} />
           <Text style={styles.text}>{boardData?.itemPrice + '원'}</Text>
         </View>
 
@@ -361,16 +361,19 @@ const PostDetail: React.FC<Props> = ({route}) => {
         {/* </View> */}
         {/* </View> */}
 
-        {boardData?.who=='writer'?'':
-        <View style={styles.btnContainer}>
-        <TouchableOpacity
-          style={styles.chatBtn}
-          onPress={() => {
-            goToChatScreen(boardId, roomName);
-          }}>
-          <Text style={styles.chatBtn_text}> 채팅하기</Text>
-        </TouchableOpacity>
-      </View>}
+        {boardData?.who == 'writer' ? (
+          ''
+        ) : (
+          <View style={styles.btnContainer}>
+            <TouchableOpacity
+              style={styles.chatBtn}
+              onPress={() => {
+                goToChatScreen(boardId, roomName);
+              }}>
+              <Text style={styles.chatBtn_text}> 채팅하기</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -485,14 +488,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom:10
+    marginBottom: 10,
   },
   btnContainer: {
     bottom: 0,
     marginBottom: 20,
     alignSelf: 'center',
     paddingTop: 10,
-    
   },
   chatBtn: {
     width: 200,
