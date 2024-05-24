@@ -29,6 +29,7 @@ import AppealWrite from './AppealWrite';
 import App from '../../App';
 import ImageResizer from 'react-native-image-resizer';
 import {useFocusEffect} from '@react-navigation/native';
+import {useLayoutEffect} from 'react';
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp =
   | StackNavigationProp<RootStackParamList, 'AccountEnter'>
@@ -118,11 +119,28 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const [areButtonsEnabled, setAreButtonsEnabled] = useState(true);
   const [selectedButton, setSelectedButton] = useState(null);
   const [images, setImages] = useState<ImageType[]>([]);
+  const [isTransactionStarted, setIsTransactionStarted] = useState(false);
 
   async function fetchToken() {
     const item = await AsyncStorage.getItem('accessToken');
     return item ? JSON.parse(item) : null;
   }
+  useLayoutEffect(() => {
+    const parent = navigation.getParent();
+    if (parent) {
+      parent.setOptions({
+        tabBarStyle: {display: 'none'},
+      });
+    }
+
+    return () => {
+      if (parent) {
+        parent.setOptions({
+          tabBarStyle: undefined,
+        });
+      }
+    };
+  }, [navigation]);
 
   useEffect(() => {
     fetchMessages();
@@ -132,13 +150,12 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     console.log('fetchMessage');
     const token = await fetchToken();
     console.log(token);
-    const data={
+    const data = {
       roomName: roomName,
-          boardId: boardId,
-    }
+      boardId: boardId,
+    };
     await axios
-      .post('http://13.125.118.92:8080/chat/room',data, {
-       
+      .post('http://13.125.118.92:8080/chat/room', data, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -283,6 +300,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const onCameraPress = () => {
+    console.log('camera');
     launchCamera({mediaType: 'photo'}, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -398,6 +416,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
   const onTransactionPress = () => {
     setModalVisible(false);
+    setIsTransactionStarted(true);
     // console.log(roomId);
     if (roomId !== undefined) {
       setChatList(currentChatList => [
@@ -1321,7 +1340,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
           style={styles.plusButton}>
-          <AntDesign name="plus" size={13} color={'#352456'} />
+          <AntDesign name="plus" size={25} color={'#352456'} />
         </TouchableOpacity>
         <TextInput
           value={messageInput}
@@ -1353,6 +1372,14 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            <View style={styles.closeBtn}>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(!modalVisible);
+                }}>
+                <Text>X</Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
               style={styles.categoryBtn}
               onPress={onCameraPress}>
@@ -1365,7 +1392,8 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.categoryBtn}
-              onPress={onTransactionPress}>
+              onPress={onTransactionPress}
+              disabled={isTransactionStarted}>
               <Text style={styles.categoryBtn_text}>거래 시작</Text>
             </TouchableOpacity>
           </View>
@@ -1376,6 +1404,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  closeBtn: {
+    alignSelf: 'flex-end',
+    marginBottom: 30,
+    zIndex: 1,
+  },
   inputContainer: {
     flexDirection: 'row',
     padding: 10,
@@ -1408,12 +1447,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 15,
   },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
+  // centeredView: {
+  //   flex: 1,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   marginTop: 22,
+  // },
   modalView: {
     margin: 20,
     backgroundColor: 'white',
@@ -1425,6 +1464,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
+    position: 'relative',
   },
   plusButton: {
     marginRight: 10,
@@ -1443,7 +1483,7 @@ const styles = StyleSheet.create({
     height: 35,
     borderRadius: 10,
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   categoryBtn_text: {
     color: 'black',
