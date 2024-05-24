@@ -35,7 +35,7 @@ const ChatStackNavigator: React.FC<Props> = ({navigation}) => {
           headerTitle: '채팅',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
-            fontSize: 25,
+            fontSize: 28,
             color: 'black',
           },
           headerStyle: {
