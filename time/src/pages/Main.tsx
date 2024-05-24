@@ -27,6 +27,8 @@ import { NativeSyntheticEvent } from 'react-native';
 import { NativeScrollEvent } from 'react-native';
 import postStackNavigator from '../navigation/postNavigator';
 import { RefreshControl } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 
 async function requestPermission() {
@@ -59,25 +61,17 @@ interface SlideableCategoryButtonsProps {
   onSelectCategory: (category: string) => void;
 }
 
-type SearchProps=RouteProp<RootStackParamList,'틈새시장'>
-interface Props{
-  route:SearchProps
-}
-
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 type LoginNav=StackNavigationProp<RootStackParamList,'LoginStackNavigation'>
 type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
 
 
-const Main:React.FC<Props>=({route})=>{
+const Main:React.FC=()=>{
+  const { newAddress, newLocation } = useSelector((state:RootState) => state.location);
   useEffect(()=>{
     Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
   },[])
-  console.log("재설정 위치: "+route.params)
-  const {addressChange,markerLocation}=route.params||{}
 
-  console.log(addressChange)
-  // console.log(markerLocation)
   const navigation = useNavigation<MainNavigationProp>();
   const loginNavigation=useNavigation<LoginNav>()
   const goToPostDetail = (boardId: number) => {
@@ -221,32 +215,32 @@ const Main:React.FC<Props>=({route})=>{
       if (result === 'granted') {
         Geolocation.getCurrentPosition(
           pos => {
-            if(markerLocation){
-              setLocation(markerLocation)
+            if(newLocation){
+              setLocation(newLocation)
             }else{
               setLocation(pos.coords);
             }
-            const latitude=pos.coords.latitude
-            const longitude=pos.coords.longitude
+            // const latitude=pos.coords.latitude
+            // const longitude=pos.coords.longitude
             Geocoder.from(pos.coords.latitude, pos.coords.longitude, 'ko')
               .then(json => {
                 const addressComponent = json.results[0].formatted_address;
                 const desireAddress = addressComponent.split(', ')[0];
                 const words = desireAddress.split(' ');
                 const lastAddress = `${words[1]} ${words[2]} ${words[3]} ${words[4]}`;
-                
-                  if(addressChange){
-                    setAddress(addressChange)
+                console.log(lastAddress)
+                  if(newAddress){
+                    setAddress(newAddress)
                   }else{
                     setAddress(lastAddress)
                   }
-                if(longitude&&latitude&&address){
+                if(address){
                   AsyncStorage.getItem('kakaoId').then(id=>{
                     const kakaoId=id
                   
                     const locationData={
-                      longitude:longitude,
-                      latitude:latitude,
+                      longitude:location?.latitude,
+                      latitude:location?.longitude,
                       address:address,
                       kakaoId:kakaoId
                     }
@@ -279,7 +273,7 @@ const Main:React.FC<Props>=({route})=>{
         );
       }
     });
-  }, [refreshing]);
+  }, [newAddress,newLocation,address]);
   
 
   const axiosGetPosts = async (category: string) => {
@@ -337,22 +331,22 @@ function timeDiffence(targetTime:Date):string{
   }
 }
   return (
-    <ScrollView
-    refreshControl={
-      <RefreshControl
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-      />
-    }
-    onScroll={(event)=>{
-      const scrollPosition = event.nativeEvent.contentOffset.y;
-      const scrollOffset = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
-      if (scrollPosition === 0 && !refreshing) {
-        onRefresh();
-      }
-    }}
-    scrollEventThrottle={16} 
-    >
+    // <ScrollView
+    // refreshControl={
+    //   <RefreshControl
+    //   refreshing={refreshing}
+    //   onRefresh={onRefresh}
+    //   />
+    // }
+    // onScroll={(event)=>{
+    //   const scrollPosition = event.nativeEvent.contentOffset.y;
+    //   const scrollOffset = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+    //   if (scrollPosition === 0 && !refreshing) {
+    //     onRefresh();
+    //   }
+    // }}
+    // scrollEventThrottle={16} 
+    // >
       <View style={styles.main_container}>
       <TouchableOpacity onPress={goToLocationSearch}>
         <View style={styles.location}>
@@ -472,7 +466,7 @@ function timeDiffence(targetTime:Date):string{
       />
       {/* </View> */}
     </View>
-      </ScrollView>
+      // </ScrollView>
   );
 }
 

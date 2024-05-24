@@ -9,7 +9,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { updateLocation } from '../redux/locationSlice';
+import { RootState } from '../redux/store';
 
 
 Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{lanuage:"ko",region:"KR"})
@@ -27,7 +29,8 @@ async function requestPermission() {
 
 type MainNav=StackNavigationProp<RootStackParamList,'Main'>
 const LocationSearch= () =>{
-
+    const dispatch = useDispatch();
+    const { newAddress, newLocation } = useSelector((state:RootState) => state.location);
     const navigation=useNavigation<MainNav>()
     const mapRef=useRef<MapView>(null)
     const [address, setAddress]=useState<string>('')
@@ -105,6 +108,11 @@ const LocationSearch= () =>{
             }
         })
     },[])
+    useEffect(() => {
+        if (address && markerLocation) {
+            dispatch(updateLocation({ newAddress: address, newLocation: markerLocation }));
+        }
+    }, [address, markerLocation]);
     
     const goToMain=(addressChange:string,markerLocation:{latitude:number,longitude:number})=>{
         navigation.navigate('틈새시장',{addressChange,markerLocation})
@@ -114,6 +122,19 @@ const LocationSearch= () =>{
         <View style={styles.container}>
             <View style={{zIndex:4,flex:2, paddingTop:30}}>
                 <GooglePlacesAutocomplete minLength={2} 
+                textInputProps={{
+                    style: {
+                        borderWidth: 1, 
+                        borderColor: 'gray',
+                        borderRadius: 5, 
+                        padding: 10,
+                        height: 50, 
+                        fontSize: 16, 
+                        width:Dimensions.get('screen').width/1.2,
+                        marginLeft:10,
+                        marginBottom:10
+                        },
+                    }}
                     placeholder={'장소를 검색하세요'}
                     query={{
                     key:'AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ',
@@ -175,7 +196,7 @@ const styles=StyleSheet.create({
         textAlign:'center',
         color:'black',
         borderWidth:2, width:140, borderRadius:5,
-        borderColor:'gray',fontFamily:'NanumGothic-Regular',height:30, 
+        borderColor:'#C9BAE5',fontFamily:'NanumGothic-Regular',height:30, 
         textAlignVertical:'center',backgroundColor:'#C9BAE5'
     }
 })
