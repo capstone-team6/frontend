@@ -42,7 +42,6 @@ const Stack = createStackNavigator<RootStackParamList>();
 type writeNavigation = StackNavigationProp<RootStackParamList, 'Appeal'>;
 type SettingNavigationProp = StackNavigationProp<RootStackParamList, 'Setting'>;
 type MypageNavigation = StackNavigationProp<RootStackParamList, 'Mypage'>;
-import {RouteProp} from '@react-navigation/native';
 
 const StackNavigator = () => {
   const navigation = useNavigation<writeNavigation>();
