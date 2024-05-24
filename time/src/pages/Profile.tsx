@@ -44,6 +44,7 @@ const Profile: React.FC<Props> = ({route}) => {
   const boardId = route.params?.boardId;
   // const boardId = 1;
   // const id = 1;
+  const fromPostDetail = route.params;
   console.log('userId', userId, 'boardId', boardId);
 
   const [nickname, setNickname] = useState<string | undefined>('');
@@ -169,14 +170,18 @@ const Profile: React.FC<Props> = ({route}) => {
             }}>
             {nickname}
           </Text>
-          {userId ? (
-            <TouchableOpacity onPress={goToManner}>
-              <Text style={styles.profile_but}>매너 평가</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={goToChange}>
-              <Text style={styles.profile_but}>프로필 수정</Text>
-            </TouchableOpacity>
+          {!fromPostDetail && (
+            <>
+              {userId ? (
+                <TouchableOpacity onPress={goToManner}>
+                  <Text style={styles.profile_but}>매너 평가하기</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={goToChange}>
+                  <Text style={styles.profile_but}>프로필 수정</Text>
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </View>
       </View>

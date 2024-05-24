@@ -37,7 +37,9 @@ interface LocationSet {
 
 export type RootStackParamList = {
   Home: undefined;
-  Profile: {userId?: number; boardId?: number} | undefined;
+  Profile:
+    | {userId?: number; boardId?: number; fromPostDetail?: boolean}
+    | undefined;
   Mypage: undefined;
   MyBuyTime: undefined;
   Notify: undefined;

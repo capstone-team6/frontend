@@ -27,6 +27,8 @@ import Notify from '../pages/Notify';
 import KeywordSet from '../pages/KeywordSet';
 import ReportPost from '../pages/ReportPost';
 import PostSet from '../pages/PostSet';
+import WriteHistory from '../pages/WriteHistory';
+import Profile from '../pages/Profile';
 const Stack = createStackNavigator<RootStackParamList>();
 
 type SearchProps = StackNavigationProp<RootStackParamList, 'postNavigatoer'>;
@@ -84,6 +86,35 @@ const postStackNavigator = () => {
           headerTitle: '',
         }}
       />
+
+      <Stack.Screen
+        name="WriteHistory"
+        component={WriteHistory}
+        options={{
+          headerTitle: '작성내역',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          headerTitle: '프로필',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+          headerStyle: {
+            height: 80,
+          },
+        }}
+      />
       <Stack.Screen name="App" component={App} />
 
       <Stack.Screen
@@ -95,8 +126,8 @@ const postStackNavigator = () => {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
           },
-        }}/>
-      
+        }}
+      />
 
       <Stack.Screen
         name="PostDetailSet"
@@ -124,26 +155,32 @@ const postStackNavigator = () => {
         }}
       />
 
-      <Stack.Screen name='Search' component={Search}
-      options={{
-        headerTransparent: true,
-        headerTitle: '',
-      }}
+      <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{
+          headerTransparent: true,
+          headerTitle: '',
+        }}
       />
-      <Stack.Screen name='SearchList' component={SearchList}
-      options={{
-        headerTransparent: true,
-        headerTitle: '',
-      }}
+      <Stack.Screen
+        name="SearchList"
+        component={SearchList}
+        options={{
+          headerTransparent: true,
+          headerTitle: '',
+        }}
       />
-      <Stack.Screen name='Notify' component={Notify}
-      options={{
-        headerTitle:'알림',
-        headerTitleStyle: {
-          fontFamily: 'NanumGothic-Bold',
-          fontSize: 28,
-        },
-      }}
+      <Stack.Screen
+        name="Notify"
+        component={Notify}
+        options={{
+          headerTitle: '알림',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
       />
       <Stack.Screen
         name="KeywordSet"
@@ -154,21 +191,28 @@ const postStackNavigator = () => {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
           },
-        }}/>
+        }}
+      />
 
-        <Stack.Screen name='ReportPost' component={ReportPost}
+      <Stack.Screen
+        name="ReportPost"
+        component={ReportPost}
         options={{
           headerTitle: '게시글 신고',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
           },
-        }}/>
+        }}
+      />
 
-        <Stack.Screen name='PostSet' component={PostSet}
+      <Stack.Screen
+        name="PostSet"
+        component={PostSet}
         options={{
-          headerTitle:''
-        }}/>
+          headerTitle: '',
+        }}
+      />
     </Stack.Navigator>
   );
 };

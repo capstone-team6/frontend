@@ -10,6 +10,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Touchable,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -275,7 +276,15 @@ const PostDetail: React.FC<Props> = ({route}) => {
               source={require('../assets/images/profile.png')}
             />
             <View style={{flexDirection: 'row'}}>
-              <Text style={styles.user_name}>{boardData?.nickname} </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('Profile', {
+                    userId: otherUserId,
+                    fromPostDetail: true,
+                  });
+                }}>
+                <Text style={styles.user_name}>{boardData?.nickname} </Text>
+              </TouchableOpacity>
               <View style={styles.icon_container}>
                 <AntDesign name="message1" size={13} color="black" />
                 <Text> {boardData?.chatCount} </Text>
