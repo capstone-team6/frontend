@@ -273,6 +273,7 @@ const handleMapSearchComplete = (data: any, details: any) => {
   } else {
     setAddress(data.description);
   }
+  setLocation(selectedLocation)
   
 };
 
