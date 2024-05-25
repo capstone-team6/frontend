@@ -33,9 +33,9 @@ interface RoomData {
 }
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Scrap'>;
 const Scrap = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<RoomData[]>([]);
   const navigation=useNavigation<MainNavigationProp>()
-
+  const [pageNum,setPageNum]=useState<number>(0)
   const goToPostDetail=(boardId:number)=>{
     navigation.navigate('PostDetail',{boardId})
   }
@@ -45,31 +45,34 @@ const Scrap = () => {
       console.log(accessToken);
       axios
         .get('http://13.125.118.92:8080/api/scrap-list', {
+          params:{
+            pageNum:pageNum
+          },
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
         })
         .then(response => {
-          console.log(JSON.stringify(response.data.data));
           const posts = JSON.stringify(response.data.data);
-          console.log(posts);
-
           if (posts) {
             const b = JSON.parse(posts);
-            setPosts(b);
-            b.forEach((posts: any) => {
-              Object.entries(posts).forEach(([key, value]) => {
-                console.log(`${key}: ${value}`);
-              });
+            // setPosts(prev=>[...prev,...b]);
+            setPosts(prev => {
+              const newPosts = [...prev, ...b];
+              // Set을 사용하여 중복 제거
+              const uniquePosts = Array.from(new Set(newPosts.map(post => post.boardId)))
+                .map(id => newPosts.find(post => post.boardId === id));
+              return uniquePosts;
             });
+          
           }
         })
         .catch(error => {
           console.error(error);
         });
     });
-  }, []);
+  }, [pageNum]);
 
   function timeDiffence(targetTime:Date):string{
     const koreanTime = new Date().getTime()
@@ -85,6 +88,21 @@ const Scrap = () => {
       return `${diffInDays}일 전`
     }
   }
+  const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: any; }; contentOffset: { y: any; }; contentSize: { height: any; }; }; }) => {
+    // 스크롤 뷰의 높이
+    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+    // 스크롤된 위치
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+    // 콘텐츠의 전체 높이
+    const contentHeight = event.nativeEvent.contentSize.height;
+  
+    // 사용자가 스크롤의 끝에 도달했을 때, 다음 페이지를 요청합니다.
+    if (scrollViewHeight + scrollOffset >= contentHeight) {
+      // 현재 페이지 번호를 증가시킵니다.
+      setPageNum(prev=>prev + 1);
+    }
+  };
+  
   return (
     <View style={styles.main_container}>
       <FlatList
@@ -136,6 +154,11 @@ const Scrap = () => {
             </View>
           </TouchableOpacity>
         )}
+        onScroll={handleScroll}
+        onEndReached={()=>{
+          setPageNum(prev=>prev+1)
+        }}
+        onEndReachedThreshold={0.8}
       />
     </View>
   );
@@ -145,7 +168,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get('screen').height,
     backgroundColor: 'white',
     flex: 1,
-    
+    paddingBottom:10
   },
   location: {
     flexDirection: 'row',
@@ -184,24 +207,23 @@ const styles = StyleSheet.create({
     height: 110,
     borderRadius: 5,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
     borderWidth: 0.1,
     borderColor: 'black',
-    marginTop:20
+    marginTop:10,
   },
   post_image: {
     width: 95,
     height: 95,
     borderRadius: 25,
-    marginRight: 10,
+    // marginRight: 10,
     position: 'absolute',
     left: 10,
   },
   post_info: {
     flexDirection: 'column',
-    left:-35
+    marginLeft:115
   },
   info1: {
     fontFamily: 'NanumGothic',

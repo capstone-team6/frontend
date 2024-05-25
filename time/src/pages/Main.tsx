@@ -61,6 +61,11 @@ interface SlideableCategoryButtonsProps {
   onSelectCategory: (category: string) => void;
 }
 
+type SearchProps=RouteProp<RootStackParamList,'틈새시장'>
+interface Props{
+  route:SearchProps
+}
+
 type MainNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 type LoginNav=StackNavigationProp<RootStackParamList,'LoginStackNavigation'>
 type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
@@ -68,9 +73,11 @@ type SearchNav=StackNavigationProp<RootStackParamList,'LocationSearch'>
 
 const Main:React.FC=()=>{
   const { newAddress, newLocation } = useSelector((state:RootState) => state.location);
+
   useEffect(()=>{
     Geocoder.init('AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ', {language: 'ko',region:"KR"})
   },[])
+  
 
   const navigation = useNavigation<MainNavigationProp>();
   const loginNavigation=useNavigation<LoginNav>()
@@ -101,6 +108,7 @@ const Main:React.FC=()=>{
     setSelectedCategoryForBuy('')
     setSelectedCategoryForSell('')
   }
+
   const [selectedCategoryForBuy, setSelectedCategoryForBuy] =
     useState('');
   const [selectedCategoryForSell, setSelectedCategoryForSell] =
@@ -117,6 +125,15 @@ const Main:React.FC=()=>{
   ];
 
   const [pageNum, setPageNum]=useState<number>(0)
+  // const totalPosts=posts.length
+  // const postsPage=8 //한 페이지에 보여줄 게시물 개수
+  // const totalPage=Math.ceil(totalPosts/postsPage)
+  // const handelPageChange=(page:number)=>{
+  //   setPageNum(page)
+  // }
+  // const startIndex=pageNum*postsPage
+  // const endIndex=startIndex+postsPage
+  // const currentPosts=posts.slice(startIndex,endIndex)
 
   const convertToEnglish = (category: string) => {
     switch (category) {
@@ -139,18 +156,16 @@ const Main:React.FC=()=>{
     }
   };
 
-  const [postsForBuy, setPostsForBuy] = useState<RoomData[]>([]);
-  const [postsForSell, setPostsForSell] = useState<RoomData[]>([]);
+
   const handleSelectCategory = (category: string) => {
     if (selectedTab === 'BUY') {
       setSelectedCategoryForBuy(category);
-      axiosGetPosts(category)
+      postData(category)
       setPosts([])
       setPageNum(0)
-      
     } else if (selectedTab === 'SELL') {
       setSelectedCategoryForSell(category);
-      axiosGetPosts(category)
+      postData(category)
       setPosts([])
       setPageNum(0)
     }
@@ -196,22 +211,10 @@ const Main:React.FC=()=>{
     );
   };
 
-  const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: any; }; contentOffset: { y: any; }; contentSize: { height: any; }; }; }) => {
-    // 스크롤 뷰의 높이
-    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
-    // 스크롤된 위치
-    const scrollOffset = event.nativeEvent.contentOffset.y;
-    // 콘텐츠의 전체 높이
-    const contentHeight = event.nativeEvent.contentSize.height;
   
-    // 사용자가 스크롤의 끝에 도달했을 때, 다음 페이지를 요청합니다.
-    if (scrollViewHeight + scrollOffset >= contentHeight) {
-      // 현재 페이지 번호를 증가시킵니다.
-      setPageNum(prev=>prev + 1);
-    }
-  };
   useEffect(() => {
     requestPermission().then(result => {
+      console.log({result});
       if (result === 'granted') {
         Geolocation.getCurrentPosition(
           pos => {
@@ -224,26 +227,33 @@ const Main:React.FC=()=>{
             // const longitude=pos.coords.longitude
             Geocoder.from(pos.coords.latitude, pos.coords.longitude, 'ko')
               .then(json => {
+                console.log(json);
                 const addressComponent = json.results[0].formatted_address;
                 const desireAddress = addressComponent.split(', ')[0];
                 const words = desireAddress.split(' ');
                 const lastAddress = `${words[1]} ${words[2]} ${words[3]} ${words[4]}`;
-                console.log(lastAddress)
+                
                   if(newAddress){
                     setAddress(newAddress)
                   }else{
                     setAddress(lastAddress)
                   }
+                // console.log(longitude,latitude,address)
+
                 if(address){
                   AsyncStorage.getItem('kakaoId').then(id=>{
                     const kakaoId=id
                   
                     const locationData={
-                      longitude:location?.latitude,
-                      latitude:location?.longitude,
+                      longitude:location?.longitude,
+                      latitude:location?.latitude,
                       address:address,
                       kakaoId:kakaoId
                     }
+                    
+                    console.log(location?.longitude,location?.latitude,address)
+                    console.log(kakaoId)
+  
                     axios.post('http://13.125.118.92:8080/api/auth/point',locationData,{
                       headers:{
                         'Content-Type': 'application/json',
@@ -257,6 +267,7 @@ const Main:React.FC=()=>{
                       console.log(error)
                     });
                   })
+
                   
                 }
                 })
@@ -273,40 +284,54 @@ const Main:React.FC=()=>{
         );
       }
     });
-  }, [newAddress,newLocation,address]);
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,address]);
   
-
-  const axiosGetPosts = async (category: string) => {
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      const accessToken = token ? JSON.parse(token) : null;
-      console.log(accessToken);
-      const response = await axios.get('http://13.125.118.92:8080/api/board', {
+const postData=async(category:string)=>{
+  AsyncStorage.getItem('accessToken').then(token=>{
+    const accessToken=token?JSON.parse(token):null
+    console.log(accessToken)
+    axios
+      .get('http://13.125.118.92:8080/api/board', {
         params: {
           pageNum: pageNum,
           boardType: selectedTab,
-          category: convertToEnglish(category), // 선택한 카테고리로 요청
+          category:convertToEnglish(category)
         },
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
         },
+      })
+      .then((response) => {
+        const boards=JSON.stringify(response.data.data.boards)
+        if(boards){
+          const b=JSON.parse(boards)
+          // setPosts(prev=>[...prev,...b])
+          setPosts(prev => {
+            const newPosts = [...prev, ...b];
+            // Set을 사용하여 중복 제거
+            const uniquePosts = Array.from(new Set(newPosts.map(post => post.boardId)))
+              .map(id => newPosts.find(post => post.boardId === id));
+            return uniquePosts;
+          })
+        
+        }
+      })
+      .catch(error => {
+        console.error(error);
       });
-      const newPosts = response.data.data.boards; // 새로운 페이지의 게시글
-      setPosts(prev=>[...prev,...newPosts]);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  })
+.catch(error => console.warn(error));
+}
 useEffect(()=>{
   
   AsyncStorage.getItem('accessToken').then(token=>{
     const accessToken=token?JSON.parse(token):null
     console.log(accessToken)
-    axiosGetPosts(selectedTab === 'BUY' ? selectedCategoryForBuy : selectedCategoryForSell);
+    postData(selectedTab === 'BUY' ? selectedCategoryForBuy : selectedCategoryForSell);
   })
 .catch(error => console.warn(error));
-},[selectedTab,pageNum])
+},[selectedTab,pageNum,address])
 
 const handleLoadMore=()=>{
   setPageNum(pageNum+1)
@@ -314,6 +339,20 @@ const handleLoadMore=()=>{
 const goToLocationSearch=()=>{
   goToSearch.navigate('LocationSearch')
 }
+const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: any; }; contentOffset: { y: any; }; contentSize: { height: any; }; }; }) => {
+  // 스크롤 뷰의 높이
+  const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+  // 스크롤된 위치
+  const scrollOffset = event.nativeEvent.contentOffset.y;
+  // 콘텐츠의 전체 높이
+  const contentHeight = event.nativeEvent.contentSize.height;
+
+  // 사용자가 스크롤의 끝에 도달했을 때, 다음 페이지를 요청합니다.
+  if (scrollViewHeight + scrollOffset >= contentHeight) {
+    // 현재 페이지 번호를 증가시킵니다.
+    setPageNum(prev=>prev + 1);
+  }
+};
 
 
 function timeDiffence(targetTime:Date):string{
@@ -375,7 +414,7 @@ function timeDiffence(targetTime:Date):string{
                 )}
               </View>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback onPress={()=>handlerTab('SELL')}>
+            <TouchableWithoutFeedback onPress={() => handlerTab('SELL')}>
               <View style={[{alignItems: 'center', width: '50%'}]}>
                 <Text
                   style={[
@@ -408,8 +447,8 @@ function timeDiffence(targetTime:Date):string{
           </View>
         </View>
       </View>
-
-      {/* <View style={{flexGrow:1}}> */}
+{/* 
+      <View style={{flexGrow:1}}> */}
       <FlatList
         data={posts}
         keyExtractor={item => item.boardId.toString()}
@@ -462,11 +501,11 @@ function timeDiffence(targetTime:Date):string{
           setPageNum(prev=>prev+1)
         }}
         onEndReachedThreshold={0.8}
-        
+
       />
       {/* </View> */}
     </View>
-      // </ScrollView>
+    //  </ScrollView>
   );
 }
 
@@ -475,6 +514,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get('screen').height+70,
     backgroundColor: 'white',
     flex: 1,
+    paddingBottom:10
     
   },
   location: {
@@ -514,7 +554,6 @@ const styles = StyleSheet.create({
     height: 110,
     borderRadius: 5,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
     borderWidth: 0.1,
@@ -531,7 +570,7 @@ const styles = StyleSheet.create({
   },
   post_info: {
     flexDirection: 'column',
-    
+    marginLeft:115
     
   },
   info1: {
@@ -586,7 +625,7 @@ const styles = StyleSheet.create({
     fontFamily: 'NanumGothic',
   },
   scrollView: {
-    maxHeight: 50,
+    // maxHeight: 50,
   },
   selectedOption: {
     fontWeight: 'bold',
