@@ -18,6 +18,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import axios from 'axios';
 import {RootStackParamList} from '../../types/Type';
 import {RouteProp} from '@react-navigation/native';
+import { number } from 'prop-types';
 
 type tRouteProp = RouteProp<RootStackParamList, 'WriteHistory'>;
 
@@ -70,10 +71,11 @@ interface RoomData {
   boardType: string;
 }
 const WriteHistory: React.FC<Props> = ({route}) => {
+  const [pageNum, setPageNum]=useState<number>(0)
   const userId = route.params.userId;
   console.log('userId', userId);
   const [selectedTab, setSelectedTab] = useState('BUY');
-  const [posts, setPosts] = useState<RoomData[]>();
+  const [posts, setPosts] = useState<RoomData[]>([]);
   const filteredPosts = posts?.filter(post => post.boardType === selectedTab);
   useEffect(() => {
     axios
@@ -84,7 +86,7 @@ const WriteHistory: React.FC<Props> = ({route}) => {
         console.log('Received data', data);
         if (data) {
           const d = JSON.parse(data);
-          setPosts(d);
+          setPosts(prev=>[...prev,...d]);
         }
       })
       .catch(error => {
@@ -121,7 +123,20 @@ const WriteHistory: React.FC<Props> = ({route}) => {
         return state;
     }
   };
-
+  const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: any; }; contentOffset: { y: any; }; contentSize: { height: any; }; }; }) => {
+    // 스크롤 뷰의 높이
+    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+    // 스크롤된 위치
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+    // 콘텐츠의 전체 높이
+    const contentHeight = event.nativeEvent.contentSize.height;
+  
+    // 사용자가 스크롤의 끝에 도달했을 때, 다음 페이지를 요청합니다.
+    if (scrollViewHeight + scrollOffset >= contentHeight) {
+      // 현재 페이지 번호를 증가시킵니다.
+      setPageNum(prev=>prev + 1);
+    }
+  };
   return (
     <View style={styles.main_container}>
       <View style={styles.options}>
@@ -160,7 +175,7 @@ const WriteHistory: React.FC<Props> = ({route}) => {
           </View>
         </View>
       </View>
-      <View style={{flexGrow: 1}}>
+      
         <FlatList
           data={filteredPosts}
           keyExtractor={item => item.boardId.toString()}
@@ -222,10 +237,13 @@ const WriteHistory: React.FC<Props> = ({route}) => {
               </View>
             </TouchableOpacity>
           )}
-          //   onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.1}
+          onScroll={handleScroll}
+          onEndReached={()=>{
+            setPageNum(prev=>prev+1)
+          }}
+          onEndReachedThreshold={0.8}
         />
-      </View>
+      
     </View>
   );
 };
@@ -234,6 +252,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get('screen').height + 70,
     backgroundColor: 'white',
     flex: 1,
+    paddingBottom:10
   },
   location: {
     flexDirection: 'row',
@@ -272,7 +291,6 @@ const styles = StyleSheet.create({
     height: 110,
     borderRadius: 5,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
     borderWidth: 0.1,
@@ -289,7 +307,8 @@ const styles = StyleSheet.create({
   },
   post_info: {
     flexDirection: 'column',
-    left: -20,
+    marginLeft:115
+    
   },
   info1: {
     fontFamily: 'NanumGothic',

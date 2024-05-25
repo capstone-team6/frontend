@@ -7,6 +7,7 @@ import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../../types/Type';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type ERouteProp = RouteProp<RootStackParamList, 'EvaluationScreen'>;
 
@@ -136,7 +137,8 @@ const EvaluationScreen: React.FC<prop> = ({route}) => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView>
+       <View style={styles.container}>
       <View style={styles.topcontainer}>
         <Ionicons name="person-circle" size={80} color={'#352456'} />
         {/* <Svg height="200" width="200">
@@ -177,6 +179,7 @@ const EvaluationScreen: React.FC<prop> = ({route}) => {
                 fontSize: 20,
                 color: 'black',
                 fontFamily: 'NanumGothic-Bold',
+                marginTop:15
               }}>
               {nickname}님의 매너
             </Text>
@@ -233,6 +236,7 @@ const EvaluationScreen: React.FC<prop> = ({route}) => {
               color: 'black',
               fontFamily: 'NanumGothic-Bold',
               marginBottom: 10,
+              marginTop:30
             }}>
             {nickname}님의 서비스
           </Text>
@@ -278,6 +282,7 @@ const EvaluationScreen: React.FC<prop> = ({route}) => {
         </View>
       </View>
     </View>
+    </ScrollView>
   );
 };
 
@@ -306,7 +311,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   categoryContainer: {
-    marginBottom: 15,
+    // marginBottom: 15,
     alignSelf: 'center',
   },
   categoryText: {
