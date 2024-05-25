@@ -322,6 +322,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     navigation.navigate('Profile', {
       boardId: boardId,
       userId: otherUserId || o,
+      fromPostDetail: false,
     });
   };
 
@@ -658,6 +659,8 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
     if (role === 'BUYER') {
       onPay();
+      Appeal();
+      completeMessage();
       // sellerComplete();
     } else if (role === 'SELLER') {
       sellerComplete();

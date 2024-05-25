@@ -29,6 +29,7 @@ import ReportPost from '../pages/ReportPost';
 import PostSet from '../pages/PostSet';
 import WriteHistory from '../pages/WriteHistory';
 import Profile from '../pages/Profile';
+import EvaluationScreen from '../pages/EvaluationScreen';
 const Stack = createStackNavigator<RootStackParamList>();
 
 type SearchProps = StackNavigationProp<RootStackParamList, 'postNavigatoer'>;
@@ -53,7 +54,7 @@ const postStackNavigator = () => {
         // }}
         options={{
           headerLeft: () => null,
-          freezeOnBlur:false,
+          freezeOnBlur: false,
           headerTitleStyle: {
             color: '#352456',
             fontFamily: 'Gugi-Regular',
@@ -213,6 +214,19 @@ const postStackNavigator = () => {
         component={PostSet}
         options={{
           headerTitle: '',
+        }}
+      />
+
+      <Stack.Screen
+        name="EvaluationScreen"
+        component={EvaluationScreen}
+        options={{
+          headerTitle: '매너평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
         }}
       />
     </Stack.Navigator>

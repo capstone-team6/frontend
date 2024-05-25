@@ -44,7 +44,8 @@ const Profile: React.FC<Props> = ({route}) => {
   const boardId = route.params?.boardId;
   // const boardId = 1;
   // const id = 1;
-  const fromPostDetail = route.params;
+  const fromPostDetail = route.params?.fromPostDetail;
+  console.log('포스트디테일', fromPostDetail);
   console.log('userId', userId, 'boardId', boardId);
 
   const [nickname, setNickname] = useState<string | undefined>('');
@@ -146,7 +147,7 @@ const Profile: React.FC<Props> = ({route}) => {
   }, []);
 
   console.log('nicknname', nickname, 'mannerTime', mannerTime);
-
+  console.log('POSTDETAIL', fromPostDetail);
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topContainer}>
@@ -170,6 +171,7 @@ const Profile: React.FC<Props> = ({route}) => {
             }}>
             {nickname}
           </Text>
+
           {!fromPostDetail && (
             <>
               {userId ? (
