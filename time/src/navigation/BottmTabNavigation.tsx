@@ -41,6 +41,7 @@ const BottmTabNavigation = () => {
         name="틈새시장"
         component={postStackNavigator}
         options={{
+          headerLeft: () => null,
           headerShown: false,
           unmountOnBlur: true,
 
@@ -110,6 +111,7 @@ const BottmTabNavigation = () => {
         name="채팅"
         component={ChatStackNavigator}
         options={{
+          unmountOnBlur:true,
           tabBarLabel: '채팅',
           headerShown: false,
           tabBarIcon: ({focused}) => (

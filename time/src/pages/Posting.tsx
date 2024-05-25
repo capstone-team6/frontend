@@ -51,7 +51,10 @@ async function requestPermission() {
 
 type Nav=StackNavigationProp<RootStackParamList,'틈새시장'>
 const Posting = () => {
-
+  useEffect(()=>{
+    Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{language:"ko",region:"KR"})
+  },[])
+  
   const navigation=useNavigation<Nav>();
   const [location,setLocation]=useState<{
     latitude:number
@@ -92,10 +95,6 @@ const [isType, setIsType]=useState<{[key:string]:boolean}>({
   'SELL':false,
 })
 const [showMapSearch,setShowMapSearch]=useState(false)
-
-useEffect(()=>{
-  Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{language:"ko",region:"KR"})
-},[])
 
 useEffect(()=>{
     requestPermission().then(result=>{
@@ -171,8 +170,8 @@ const onResponse = useCallback(async (response:any) => {
   console.log('orientation', orientation);
   return ImageResizer.createResizedImage(
     response.path,
-    response.width/2,
-    response.height/2,
+    response.width/4,
+    response.height/4,
     response.mime.includes('jpeg') ? 'JPEG' : 'PNG',
     100,
     0,

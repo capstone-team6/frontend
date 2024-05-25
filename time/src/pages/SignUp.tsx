@@ -16,7 +16,7 @@ import {
 import {RootStackParamList} from '../../types/Type';
 import {useNavigation} from '@react-navigation/native';
 
-type SignInNavigation = StackNavigationProp<RootStackParamList, 'SignIn'>;
+type SignInNavigation = StackNavigationProp<RootStackParamList, 'SignUp'>;
 type MainNavigation = StackNavigationProp<
   RootStackParamList,
   'BottmTabNavigation'

@@ -18,7 +18,11 @@ interface StackNavProps{
 const StackNavigators:React.FC<StackNavProps>=({onLoginSuccess}) => {
     
     return (
-    <Stack.Navigator>
+    <Stack.Navigator
+    screenOptions={{
+        headerLeft: () => null, // 모든 화면에서 뒤로가기 화살표 숨기기
+      }}
+    >
         <Stack.Screen name='SignIn' options={{headerShown:false}}>
             {props => <SignIn {...props} onLoginSuccess={onLoginSuccess} />}
         </Stack.Screen>
@@ -31,7 +35,8 @@ const StackNavigators:React.FC<StackNavProps>=({onLoginSuccess}) => {
         }}/>
         <Stack.Screen name='BottmTabNavigation' component={BottmTabNavigation}
         options={{
-            headerShown:false
+            headerShown:false,
+            headerLeft: () => null
         }}
         />
         {/* <Stack.Screen name='Main' component={Main} options={{
