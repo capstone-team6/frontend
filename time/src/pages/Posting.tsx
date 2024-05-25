@@ -171,8 +171,8 @@ const onResponse = useCallback(async (response:any) => {
   console.log('orientation', orientation);
   return ImageResizer.createResizedImage(
     response.path,
-    response.width,
-    response.height,
+    response.width/2,
+    response.height/2,
     response.mime.includes('jpeg') ? 'JPEG' : 'PNG',
     100,
     0,
@@ -189,18 +189,32 @@ const onResponse = useCallback(async (response:any) => {
 
 
 const onChangeFile = useCallback(() => {
-  
-  return ImagePicker.openPicker({
-    includeExif: true,
-    includeBase64: true,
-    mediaType: 'photo',
-    multiple:true
-  })
-    .then((responses:any[])=>{
-      return Promise.all(responses.map((response) => onResponse(response)));
-    })
-    .catch(console.log);
+  Alert.alert(
+    '사진 선택',
+    '사진을 촬영하시겠습니까 아니면 가져오시겠습니까?',
+    [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '사진 촬영',
+        onPress: () => ImagePicker.openCamera({
+          includeExif: true,
+          includeBase64: true,
+          mediaType: 'photo',
+        }).then(onResponse).catch(console.log),
+      },
+      {
+        text: '앨범에서 선택',
+        onPress: () => ImagePicker.openPicker({
+          includeExif: true,
+          includeBase64: true,
+          mediaType: 'photo',
+          multiple: true,
+        }).then(responses => Promise.all(responses.map(onResponse))).catch(console.log),
+      },
+    ]
+  );
 }, [onResponse]);
+
 
 const toggleMapVisibility=()=>{
   setShowMap(!showMap)
