@@ -14,7 +14,7 @@ import { updateLocation } from '../redux/locationSlice';
 import { RootState } from '../redux/store';
 
 
-Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{lanuage:"ko",region:"KR"})
+
 async function requestPermission() {
     try{
         if(Platform.OS==="android"){
@@ -29,6 +29,9 @@ async function requestPermission() {
 
 type MainNav=StackNavigationProp<RootStackParamList,'Main'>
 const LocationSearch= () =>{
+    useEffect(()=>{
+        Geocoder.init("AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ",{language:"ko",region:"KR"})
+    },[])
     const dispatch = useDispatch();
     const { newAddress, newLocation } = useSelector((state:RootState) => state.location);
     const navigation=useNavigation<MainNav>()
@@ -120,7 +123,7 @@ const LocationSearch= () =>{
     
     return (
         <View style={styles.container}>
-            <View style={{zIndex:4,flex:2, paddingTop:30}}>
+            <View style={{zIndex:4,flex:2, paddingTop:30,paddingBottom:70}}>
                 <GooglePlacesAutocomplete minLength={2} 
                 textInputProps={{
                     style: {
@@ -159,7 +162,7 @@ const LocationSearch= () =>{
             
             {location&&(
                 <MapView
-                style={{ flex: 2, width:Dimensions.get('screen').width,height:250, marginBottom:20}}
+                style={{ flex: 4, width:Dimensions.get('screen').width,height:250, marginBottom:20}}
                 ref={mapRef}
                 provider={PROVIDER_GOOGLE}
                 initialRegion={{

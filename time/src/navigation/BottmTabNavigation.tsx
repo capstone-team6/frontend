@@ -42,7 +42,6 @@ const BottmTabNavigation = () => {
         component={postStackNavigator}
         options={{
           headerShown: false,
-
           unmountOnBlur: true,
 
           // headerTitleStyle: {

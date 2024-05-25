@@ -52,6 +52,7 @@ const postStackNavigator = () => {
         //   dataFromParent: dataToMain
         // }}
         options={{
+          freezeOnBlur:false,
           headerTitleStyle: {
             color: '#352456',
             fontFamily: 'Gugi-Regular',

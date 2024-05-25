@@ -89,6 +89,7 @@ const Main:React.FC=()=>{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [isLocationSet, setIsLocationSet] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh=()=>{
     setRefreshing(true)
@@ -251,7 +252,7 @@ const Main:React.FC=()=>{
                       kakaoId:kakaoId
                     }
                     
-                    console.log(location?.longitude,location?.latitude,address)
+                    console.log(location?.longitude,location?.latitude,address,newLocation)
                     console.log(kakaoId)
   
                     axios.post('http://13.125.118.92:8080/api/auth/point',locationData,{
@@ -262,6 +263,7 @@ const Main:React.FC=()=>{
                     
                     .then(res => {
                       console.log(res.data);
+                      setIsLocationSet(true)
                     })
                     .catch(error => {
                       console.log(error)
@@ -284,7 +286,7 @@ const Main:React.FC=()=>{
         );
       }
     });
-  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,address]);
+  }, [selectedTab, selectedCategoryForBuy, selectedCategoryForSell,address,newLocation,]);
   
 const postData=async(category:string)=>{
   AsyncStorage.getItem('accessToken').then(token=>{
@@ -328,10 +330,12 @@ useEffect(()=>{
   AsyncStorage.getItem('accessToken').then(token=>{
     const accessToken=token?JSON.parse(token):null
     console.log(accessToken)
-    postData(selectedTab === 'BUY' ? selectedCategoryForBuy : selectedCategoryForSell);
+    if(isLocationSet){
+      postData(selectedTab === 'BUY' ? selectedCategoryForBuy : selectedCategoryForSell);
+    }
   })
 .catch(error => console.warn(error));
-},[selectedTab,pageNum,address])
+},[selectedTab,isLocationSet,pageNum,address,newAddress,newLocation,location])
 
 const handleLoadMore=()=>{
   setPageNum(pageNum+1)
