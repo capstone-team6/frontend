@@ -24,7 +24,7 @@ import {
   ImageLibraryOptions,
 } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BooleanOptional} from 'qs';
+import {BooleanOptional, parse} from 'qs';
 import AppealWrite from './AppealWrite';
 import App from '../../App';
 import ImageResizer from 'react-native-image-resizer';
@@ -50,6 +50,13 @@ type ImageType = {
   name: string;
 };
 
+interface ChatParams {
+  userName: string | undefined;
+  roomName: string | undefined;
+  boardId: number | undefined;
+  otherUserId: number | undefined;
+}
+
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const {
     userName,
@@ -67,6 +74,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   console.log(userName, roomName, boardId, otherUserId);
   const [role, setRole] = useState('BUYER');
   const [roomId, setRoomId] = useState();
+  // const roomId = 1;
   const [messageInput, setMessageInput] = useState('');
   const [selectedPayment, setSelectedPayment] = useState<PaymentType>(null);
   const [selectedAction, setSelectedAction] = useState<
@@ -120,11 +128,44 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const [selectedButton, setSelectedButton] = useState(null);
   const [images, setImages] = useState<ImageType[]>([]);
   const [isTransactionStarted, setIsTransactionStarted] = useState(false);
-
+  const [u, setu] = useState();
+  const [r, setr] = useState();
+  const [b, setb] = useState();
+  const [o, seto] = useState();
   async function fetchToken() {
     const item = await AsyncStorage.getItem('accessToken');
     return item ? JSON.parse(item) : null;
   }
+  const [chatParams, setChatParams] = useState<ChatParams | null>(null);
+
+  useEffect(() => {
+    const saveParams = async () => {
+      const paramsToSave = {userName, roomName, boardId, otherUserId};
+      await AsyncStorage.setItem('chatParams', JSON.stringify(paramsToSave));
+      setChatParams(paramsToSave);
+      console.log('chatParams', chatParams);
+    };
+
+    saveParams();
+  }, [route.params]);
+
+  useEffect(() => {
+    const loadParams = async () => {
+      const storedParams = await AsyncStorage.getItem('chatParams');
+      if (storedParams) {
+        const parsedParams = JSON.parse(storedParams);
+        console.log('parsedParams', parsedParams);
+        setu(parsedParams.userName);
+        setr(parsedParams.roomName);
+        setb(parsedParams.boardId);
+        seto(parsedParams.otherUserId);
+        console.log('재로드', u, r, b, o);
+      }
+    };
+
+    loadParams();
+  }, []);
+
   useLayoutEffect(() => {
     const parent = navigation.getParent();
     if (parent) {
@@ -278,13 +319,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const goToProfile = () => {
-    navigation.navigate('Profile', {boardId: boardId, userId: otherUserId});
+    navigation.navigate('Profile', {
+      boardId: boardId,
+      userId: otherUserId || o,
+    });
   };
 
   const goToAccountEnter = () => {
     navigation.navigate('AccountEnter', {
       boardId: boardId,
       roomId: roomId,
+      otherUserId: otherUserId,
     });
   };
 
@@ -292,6 +337,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     navigation.navigate('AccountCheck', {
       boardId: boardId,
       roomId: roomId,
+      otherUserId: otherUserId,
     });
   };
 
@@ -768,7 +814,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
               fontWeight: 'bold',
               color: 'black',
             }}>
-            {userName}
+            {userName || u}
           </Text>
           {/* <Text
             style={{

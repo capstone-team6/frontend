@@ -4,7 +4,6 @@ import Chatting from '../pages/Chatting';
 import ChatScreen from '../pages/ChatScreen';
 import {RootStackParamList} from '../../types/Type';
 import {RotationGestureHandlerStateChangeEvent} from 'react-native-gesture-handler';
-import chatScreenNavigator from './chatScreenNavigator';
 import React from 'react';
 import {useEffect} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -15,7 +14,8 @@ import AccountCheck from '../pages/AccountCheck';
 import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
 import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
 import EvaluationScreen from '../pages/EvaluationScreen';
-
+import WriteHistory from '../pages/WriteHistory';
+import TransactionHistory from '../pages/TransactionHistory';
 const Stack = createStackNavigator<RootStackParamList>();
 type ChatScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -124,6 +124,31 @@ const ChatStackNavigator: React.FC<Props> = ({navigation}) => {
         component={EvaluationScreen}
         options={{
           headerTitle: '매너 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="WriteHistory"
+        component={WriteHistory}
+        options={{
+          headerTitle: '작성한 내역',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name="TransactionHistory"
+        component={TransactionHistory}
+        options={{
+          headerTitle: '거래한 내역',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
