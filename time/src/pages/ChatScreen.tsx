@@ -833,7 +833,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             style={{
               alignSelf:
                 (msg.type === 'GOTRANSACTION' && role === 'BUYER') ||
-                msg.type === 'MESSAGE' ||
+                (msg.writer !== userName && msg.type === 'MESSAGE') ||
                 (msg.type === 'COMPLETETRANSACTION' && role === 'BUYER') ||
                 msg.type === 'transferInfo' ||
                 (msg.type === 'ACCOUNT' && role === 'BUYER') ||
