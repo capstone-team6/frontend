@@ -384,7 +384,7 @@ const styles=StyleSheet.create({
         height: 110,
         borderRadius: 5,
         flexDirection: 'row',
-        justifyContent: 'center',
+        // justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
         borderWidth: 0.1,
@@ -401,7 +401,8 @@ const styles=StyleSheet.create({
       },
       post_info: {
         flexDirection: 'column',
-        left:-20
+        marginLeft:115
+        
         
       },
       info1: {

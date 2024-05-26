@@ -37,7 +37,7 @@ function changeTime(str:string):{timeNew:string, unit:string}{
 
 const PostingChange: React.FC<Props> = ({route}) => {
     const {boardData}=route.params
-    // console.log(boardData.images)
+    console.log(boardData.images)
     const navigation=useNavigation<Nav>()
     const {timeNew, unit}=changeTime(boardData.itemTime)
     const [location,setLocation]=useState<{
@@ -83,11 +83,16 @@ const PostingChange: React.FC<Props> = ({route}) => {
     
     useEffect(() => {
         if (boardData && Array.isArray(boardData.images)) {
+          
             setImages(boardData.images)
+            // console.log('초기화 완료',images)
             const imageLinks = boardData.images.map(imageName => `http://13.125.118.92:8080/images/jpg/${imageName}`);
             setPreviews(imageLinks);
         }
         }, [boardData]);
+        useEffect(() => {
+          console.log('초기화 완료', images);
+      }, [images]);
     
     async function moveToLocation(latitude:any,longitude:any) {
         mapRef.current?.animateToRegion(
@@ -166,8 +171,8 @@ const PostingChange: React.FC<Props> = ({route}) => {
         console.log('orientation', orientation);
         return ImageResizer.createResizedImage(
         response.path,
-        response.width,
-        response.height,
+        response.width/4,
+        response.height/4,
         response.mime.includes('jpeg') ? 'JPEG' : 'PNG',
         100,
         0,
@@ -184,17 +189,30 @@ const PostingChange: React.FC<Props> = ({route}) => {
     
     
     const onChangeFile = useCallback(() => {
-      
-      return ImagePicker.openPicker({
-        includeExif: true,
-        includeBase64: true,
-        mediaType: 'photo',
-        multiple:true
-      })
-        .then((responses:any[])=>{
-          return Promise.all(responses.map((response) => onResponse(response)));
-        })
-        .catch(console.log);
+      Alert.alert(
+        '사진 선택',
+        '사진을 촬영하시겠습니까 아니면 가져오시겠습니까?',
+        [
+          { text: '취소', style: 'cancel' },
+          {
+            text: '사진 촬영',
+            onPress: () => ImagePicker.openCamera({
+              includeExif: true,
+              includeBase64: true,
+              mediaType: 'photo',
+            }).then(onResponse).catch(console.log),
+          },
+          {
+            text: '앨범에서 선택',
+            onPress: () => ImagePicker.openPicker({
+              includeExif: true,
+              includeBase64: true,
+              mediaType: 'photo',
+              multiple: true,
+            }).then(responses => Promise.all(responses.map(onResponse))).catch(console.log),
+          },
+        ]
+      );
     }, [onResponse]);
     
     const toggleMapVisibility=()=>{
@@ -282,7 +300,7 @@ const PostingChange: React.FC<Props> = ({route}) => {
           body.append('latitude', location?.latitude);
           body.append('longitude', location?.longitude);
         }
-      
+        
         images.forEach((image, index) => {
           const file = {
             uri: image.uri,
@@ -290,6 +308,7 @@ const PostingChange: React.FC<Props> = ({route}) => {
             name: `image_${index}.jpg`,
           };
           body.append('images', file);
+          console.log(file)
         });
       
         body.append('boardType', boardType);
@@ -445,11 +464,24 @@ const PostingChange: React.FC<Props> = ({route}) => {
           </View>
           {showMap&&(
             <>
-              <Text style={{ fontSize: 15, borderWidth: 1, borderColor: 'gray', margin: 10, height: 40, borderRadius: 5, textAlignVertical: 'center' }}>{address}
+              <Text style={{ fontSize: 15, borderWidth: 1, borderColor: 'gray', margin: 10, height: 45, borderRadius: 5, textAlignVertical: 'center' }}>{address}
                 <Right name='right' size={20} onPress={handleShowMapSearch} />
               </Text>
               <View style={{zIndex:4,flex:2}}>
                 <GooglePlacesAutocomplete minLength={2} 
+                    textInputProps={{
+                      style: {
+                        borderWidth: 1, 
+                        borderColor: 'gray',
+                        borderRadius: 5, 
+                        padding: 10,
+                        height: 50, 
+                        fontSize: 16, 
+                        width:Dimensions.get('screen').width/1.2,
+                        marginLeft:10,
+                        marginBottom:10
+                      },
+                    }}
                     placeholder={'장소를 검색하세요'}
                     query={{
                     key:'AIzaSyCe4RbHkxkqRnuuvXUTEHXZ12zFT4tG5gQ',

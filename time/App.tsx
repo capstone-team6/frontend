@@ -72,13 +72,17 @@ function App() {
               message: `${eventData.traderName}님과의 거래가 완료되었습니다.`,
             });
           });
-          eventSource.addEventListener('notReadChatNumberNotification', (event: any) => {
+          eventSource.addEventListener('notReedChatNumberNotification', (event: any) => {
             console.log('채팅 알림:', event.data);
             const eventData = JSON.parse(event.data)
+            if (eventData.writer && eventData.message) {
+              console.log('이벤트 데이터 작성자:', eventData.writer);
+              console.log('이벤트 데이터 메시지:', eventData.message);
+            } 
             PushNotification.localNotification({
               channelId: 'default-channel-id', 
-              title: `${eventData.writer}`,
-              message: `${eventData.message}`,
+              title: eventData.writer,
+              message: eventData.message,
             });
           });
           eventSource.addEventListener('scarpNotification', (event: any) => {

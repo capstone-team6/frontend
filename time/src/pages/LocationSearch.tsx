@@ -123,19 +123,19 @@ const LocationSearch= () =>{
     
     return (
         <View style={styles.container}>
-            <View style={{zIndex:4,flex:2, paddingTop:30,paddingBottom:70}}>
+            <View style={{zIndex:4,flex:4.5, paddingTop:30,paddingBottom:40}}>
                 <GooglePlacesAutocomplete minLength={2} 
                 textInputProps={{
                     style: {
                         borderWidth: 1, 
                         borderColor: 'gray',
                         borderRadius: 5, 
-                        padding: 10,
+                        padding: 5,
                         height: 50, 
-                        fontSize: 16, 
+                        fontSize: 13, 
                         width:Dimensions.get('screen').width/1.2,
                         marginLeft:10,
-                        marginBottom:10
+                        marginBottom:10,
                         },
                     }}
                     placeholder={'장소를 검색하세요'}
@@ -162,7 +162,7 @@ const LocationSearch= () =>{
             
             {location&&(
                 <MapView
-                style={{ flex: 4, width:Dimensions.get('screen').width,height:250, marginBottom:20}}
+                style={{ flex: 4, width:Dimensions.get('screen').width,height:300, marginBottom:20,}}
                 ref={mapRef}
                 provider={PROVIDER_GOOGLE}
                 initialRegion={{
@@ -178,7 +178,7 @@ const LocationSearch= () =>{
             </MapView>
             
             )}
-            <View style={{paddingTop:50, alignItems:'center',marginBottom:50}}>
+            <View style={{paddingTop:20, alignItems:'center',marginBottom:50}}>
                 <TouchableOpacity onPress={()=>{
                     goToMain(address,markerLocation)
                 }}>
@@ -192,7 +192,8 @@ const LocationSearch= () =>{
 const styles=StyleSheet.create({
     container:{
         backgroundColor:'white',
-        flex:1
+        flex:1,
+        height:Dimensions.get('screen').height
     },
     btn:{
         fontSize:18,

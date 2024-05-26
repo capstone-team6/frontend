@@ -310,6 +310,7 @@ const onSubmit = async () => {
       name: `image_${index}.jpg`,
     };
     body.append('images', file);
+    console.log("확인",file)
   });
 
   body.append('boardType', boardType);
