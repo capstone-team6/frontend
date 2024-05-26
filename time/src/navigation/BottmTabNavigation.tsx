@@ -103,7 +103,7 @@ const BottmTabNavigation = () => {
           },
           unmountOnBlur: true,
           tabBarIcon: () => (
-            <AntDesign name="pluscircle" size={45} color="#C9BAE5" />
+            <AntDesign name="pluscircle" size={43} color="#C9BAE5" />
           ),
         }}
       />
