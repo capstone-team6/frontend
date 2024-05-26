@@ -16,6 +16,7 @@ import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
 import EvaluationScreen from '../pages/EvaluationScreen';
 import WriteHistory from '../pages/WriteHistory';
 import TransactionHistory from '../pages/TransactionHistory';
+import NameChange from '../pages/NameChange';
 const Stack = createStackNavigator<RootStackParamList>();
 type ChatScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -154,6 +155,14 @@ const ChatStackNavigator: React.FC<Props> = ({navigation}) => {
             fontSize: 28,
             color: 'black',
           },
+        }}
+      />
+
+      <Stack.Screen
+        name="NameChange"
+        component={NameChange}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

@@ -30,6 +30,12 @@ import PostSet from '../pages/PostSet';
 import WriteHistory from '../pages/WriteHistory';
 import Profile from '../pages/Profile';
 import EvaluationScreen from '../pages/EvaluationScreen';
+import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
+import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
+import AccountEnter from '../pages/AccountEnter';
+import AppealWrite from '../pages/AppealWrite';
+import Appeal from '../pages/Appeal';
+import AccountCheck from '../pages/AccountCheck';
 const Stack = createStackNavigator<RootStackParamList>();
 
 type SearchProps = StackNavigationProp<RootStackParamList, 'postNavigatoer'>;
@@ -226,6 +232,63 @@ const postStackNavigator = () => {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
             color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ServiceEvaluationScreen"
+        component={ServiceEvaluationScreen}
+        options={{
+          headerTitle: '서비스 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="MannerEvaluationScreen"
+        component={MannerEvaluationScreen}
+        options={{
+          headerTitle: '매너 평가',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AccountEnter"
+        component={AccountEnter}
+        options={{
+          headerTitle: '계좌 입력',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AccountCheck"
+        component={AccountCheck}
+        options={{
+          headerTitle: '계좌 정보',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AppealWrite"
+        component={AppealWrite}
+        options={{
+          headerTitle: '이의신청 작성',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
           },
         }}
       />
