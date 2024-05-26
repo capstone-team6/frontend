@@ -54,19 +54,19 @@ const ReportPost:React.FC<Props> = ({route}) => {
         <View style={styles.container}>
 
             <View style={styles.options}>
-            <TouchableOpacity style={styles.options_detail} onPress={()=>onPress('ADVERTISEMENT')}>
+            <TouchableOpacity style={[styles.options_detail, selectValue === 'ADVERTISEMENT' && styles.selectedOption]} onPress={()=>onPress('ADVERTISEMENT')}>
                 <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16,}}>스팸 및 홍보글</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.options_detail} onPress={()=>onPress('OTHER')}>
+            <TouchableOpacity style={[styles.options_detail, selectValue === 'OTHER' && styles.selectedOption]} onPress={()=>onPress('OTHER')}>
                 <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16,}}>음란성이 포함된 글</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.options_detail} onPress={()=>onPress('ABUSE')}>
+            <TouchableOpacity style={[styles.options_detail, selectValue === 'ABUSE' && styles.selectedOption]} onPress={()=>onPress('ABUSE')}>
                 <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16,}}>게시글 도배</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.options_detail} onPress={()=>onPress('HATE_SPEECH')}>
+            <TouchableOpacity style={[styles.options_detail, selectValue === 'HATE_SPEECH' && styles.selectedOption]} onPress={()=>onPress('HATE_SPEECH')}>
                 <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16,}}>욕설/생명경시/혐오/차별적인 글</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.options_detail} onPress={()=>onPress('ILLEGAL_CONTENT')}>
+            <TouchableOpacity style={[styles.options_detail, selectValue === 'ILLEGAL_CONTENT' && styles.selectedOption]} onPress={()=>onPress('ILLEGAL_CONTENT')}>
                 <Text style={{fontFamily:'NanumGothic-Bold', color:'#313131', fontSize:16,}}>불법적인 글</Text>
             </TouchableOpacity>
             
@@ -90,7 +90,7 @@ const styles=StyleSheet.create({
         paddingTop:Dimensions.get('screen').height/11
     },
     text:{
-        fontSize:20,
+        fontSize:15,
         color:'black',
         borderWidth:1,
         padding:10,

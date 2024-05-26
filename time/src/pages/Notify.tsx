@@ -56,6 +56,7 @@ const Notify = () => {
                 },
             })
             .then((res)=>{
+                console.log(res.data)
                 const Data=res.data
                 console.log(Data)
                 // const lastId=Data.keywordResponses.length > 0 ? Data.keywordResponses[Data.keywordResponses.length - 1].id : null;
@@ -82,10 +83,11 @@ const Notify = () => {
                 }
             })
             .then(res=>{
-                console.log(res.data.keywordNotificationListDtos)
+                console.log(res)
                 const data=JSON.stringify(res.data.keywordNotificationListDtos)
+                console.log(data)
                 if(data){
-                    const d=JSON.parse(data)
+                    const d=JSON.parse(data).reverse()  
                     setKeywordPosts(d)
                 }
             })
@@ -299,7 +301,6 @@ const styles = StyleSheet.create({
         height: 110,
         borderRadius: 5,
         flexDirection: 'row',
-        justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
         borderWidth: 0.1,
@@ -316,8 +317,8 @@ const styles = StyleSheet.create({
     },
     post_info: {
         flexDirection: 'column',
-        // left:-20
-        left:10
+        marginLeft:115
+        
         
     },
     info1: {

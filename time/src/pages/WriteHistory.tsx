@@ -203,7 +203,7 @@ const WriteHistory: React.FC<Props> = ({route}) => {
               )}
               <View style={styles.post_info}>
                 <Text style={styles.info1}>
-                  {item.distance + 'km'} ·{' '}
+                  
                   {timeDiffence(new Date(item.createdDate))}
                 </Text>
                 <Text style={styles.info2}>{item.title}</Text>
