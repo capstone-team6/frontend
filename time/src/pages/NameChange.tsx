@@ -62,23 +62,33 @@ const NameChange = () => {
 
   const onSubmit = async () => {
     try {
-      const data = {
-        nickname: nickName,
-      };
-      axios
-        .put('http://13.125.118.92:8080/nickname/change', data)
-        .then(res => {
-          const result = res.data.data;
-          console.log(result);
-          if (result.isChange == true) {
-            console.log('닉네임 변경이 완료되었습니다');
-            goToReturn();
+      AsyncStorage.getItem('accessToken').then(token=>{
+        const accessToken=token?JSON.parse(token):null
+        const data = {
+          nickname: nickName,
+        };
+        axios
+          .put('http://13.125.118.92:8080/nickname/change', data,{
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
           }
-        })
-        .catch(err => {
-          const result = err.response.data.data;
-          console.log(result);
-        });
+          )
+          .then(res => {
+            const result = res.data.data;
+            console.log(result);
+            if (result.isChange == true) {
+              console.log('닉네임 변경이 완료되었습니다');
+              goToReturn();
+            }
+          })
+          .catch(err => {
+            const result = err.response.data.data;
+            console.log(result);
+          });
+      })
+      
     } catch (error) {
       console.log(error);
     }
