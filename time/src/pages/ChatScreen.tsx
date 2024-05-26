@@ -465,7 +465,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   const onTransactionPress = () => {
     setModalVisible(false);
     setIsTransactionStarted(true);
-    // console.log(roomId);
+    console.log(roomId);
     if (roomId !== undefined) {
       setChatList(currentChatList => [
         ...currentChatList,
@@ -847,7 +847,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 msg.type === 'transferInfo' ||
                 (msg.type === 'ACCOUNT' && role === 'BUYER') ||
                 msg.type === 'PAY' ||
-                (msg.type === 'APPEAL' && role === 'BUYER') ||
+                msg.type === 'APPEAL' ||
                 (msg.type === 'SELLERCOMPLETE' && role === 'SELLER')
                   ? 'flex-end'
                   : msg.type === 'ONTRANSACTION' ||
@@ -1309,7 +1309,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   {msg.time}
                 </Text>
               </View>
-            ) : msg.type === 'APPEAL' && role === 'BUYER' ? (
+            ) : msg.type === 'APPEAL' ? (
               <View
                 style={{
                   backgroundColor: '#F1F1F1',
