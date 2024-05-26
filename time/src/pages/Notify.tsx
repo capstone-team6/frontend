@@ -134,6 +134,22 @@ const Notify = () => {
             })
         })
     }
+    const deleteKeyword=(id:number)=>{
+        AsyncStorage.getItem('accessToken').then(token=>{
+            const accessToken=token?JSON.parse(token):null
+            axios.delete(`http://13.125.118.92:8080/notification/keyword/${id}`,{
+                headers:{
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+            .then(res=>{
+                setKeywordPosts(prevList => prevList.filter(keword =>keword.keywordId  !== id));
+            })
+            .catch(err=>{
+                console.log(err)
+            })
+        })
+    }
     return (
         <View style={styles.container}>
             <View style={styles.options}>
@@ -222,7 +238,7 @@ const Notify = () => {
                                 style={styles.post_image}/>}
 
                             <View style={styles.post_info}>
-                                <Delete name='close' size={15} style={styles.deleteIcon}/>
+                                <Delete name='close' size={15} style={styles.deleteIcon} onPress={()=>deleteKeyword(item.keywordId)}/>
                                 <Text style={styles.info2}>{item.keyword}- {item.title}</Text>
                                 <Text style={styles.info1}>{item.time}</Text>
                             </View>
