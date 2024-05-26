@@ -30,6 +30,7 @@ import App from '../../App';
 import ImageResizer from 'react-native-image-resizer';
 import {useFocusEffect} from '@react-navigation/native';
 import {useLayoutEffect} from 'react';
+import {Alert} from 'react-native';
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp =
   | StackNavigationProp<RootStackParamList, 'AccountEnter'>
@@ -508,10 +509,10 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
     try {
       const token = await fetchToken();
-
+      console.log('결제 방법 선택');
       const paymentData = {
         payMeth:
-          pay === '틈새페이' ? 'PAY' : pay === '만나서 결제' ? 'MEET' : null,
+          pay === '틈새 페이' ? 'PAY' : pay === '만나서 결제' ? 'MEET' : null,
       };
 
       const res = await axios.post(
@@ -528,6 +529,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       if (res.status === 200) {
         console.log('goTransaction', res.data);
       }
+      // else if (
+      //   res.status === 500 &&
+      //   res.data.data === '틈새페이를 충전해주세요'
+      // ) {
+      //   Alert.alert(
+      //     '충전 필요',
+      //     '틈새페이를 충전해주세요',
+      //     [{text: '확인', onPress: () => console.log('확인 버튼 눌림')}],
+      //     {cancelable: false},
+      //   );
+      // }
     } catch (error) {
       console.log(error);
     }
@@ -604,7 +616,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
   };
 
-  const sellerPress = () => {
+  const sellerPress = async () => {
     if (roomId !== undefined) {
       setChatList(currentChatList => [
         ...currentChatList,
@@ -612,22 +624,17 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           roomId: roomId,
           message:
             '시간 판매자가 ‘거래 완료’를 눌렀어요. 최종 거래를 완료하려면 시간 구매자도 거래 완료를 눌러주세요.\n거래 완료가 되지 않았다면 이의신청을 해주세요.아무 응답이 없을 경우 3일 후에 자동으로 ‘거래 완료’ 상태로 변경됩니다.',
-          type: 'ONTRANSACTION',
+          type: 'APPEAL',
         },
       ]);
+
       sendMessage(
         roomId,
         '시간 판매자가 ‘거래 완료’를 눌렀어요.최종 거래를 완료하려면 시간 구매자도 거래 완료를 눌러주세요.\n거래 완료가 되지 않았다면 이의신청을 해주세요.아무 응답이 없을 경우 3일 후에 자동으로 ‘거래 완료’ 상태로 변경됩니다.',
-        'ONTRANSACTION',
+        'APPEAL',
       );
     } else {
       console.error('sellerComplete ERROR');
-    }
-    if (role === 'BUYER') {
-      Appeal();
-      completeMessage();
-    } else {
-      completeMessage();
     }
   };
 
@@ -638,7 +645,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
   };
 
-  const payInfo = () => {
+  const payInfo = async () => {
     if (roomId !== undefined) {
       setChatList(currentChatList => [
         ...currentChatList,
@@ -649,7 +656,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
           type: 'PAYINFO',
         },
       ]);
-      sendMessage(
+      await sendMessage(
         roomId,
         '‘틈새페이’ 는 안전한 결제를 위하여 포인트 차감 후 결제완료시 시간판매자의 틈새페이로 포인트가 전달됩니다. 또한, 시간판매자가 거래완료를 누른 뒤 시간 구매자가 거래완료를 눌러야 거래가 최종 완료됩니다.',
         'PAYINFO',
@@ -659,16 +666,14 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
     if (role === 'BUYER') {
       onPay();
-      Appeal();
-      completeMessage();
       // sellerComplete();
-    } else if (role === 'SELLER') {
-      sellerComplete();
       // completeMessage();
+      // sellerComplete();
     }
+    // Appeal();
   };
 
-  const onPay = () => {
+  const onPay = async () => {
     if (roomId !== undefined) {
       setChatList(currentChatList => [
         ...currentChatList,
@@ -683,31 +688,32 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         `틈새페이가 차감되었어요.\n현재 잔고 : ${timepay}원`,
         'PAY',
       );
+      sellerComplete();
     } else {
       console.error('onPay ERROR');
     }
   };
 
-  const Appeal = () => {
-    if (roomId !== undefined) {
-      setChatList(currentChatList => [
-        ...currentChatList,
-        {
-          roomId: roomId,
-          message:
-            '거래를 완료했다면 ‘거래 완료’를 눌러주세요.상대방이 거짓으로 눌렀을 경우 이의신청을 해주세요.이의신청시 자동으로 거래 완료가 되지 않습니다.',
-          type: 'APPEAL',
-        },
-      ]);
-      sendMessage(
-        roomId,
-        '거래를 완료했다면 ‘거래 완료’를 눌러주세요.상대방이 거짓으로 눌렀을 경우 이의신청을 해주세요.이의신청시 자동으로 거래 완료가 되지 않습니다.',
-        'APPEAL',
-      );
-    } else {
-      console.error('transferComplete ERROR');
-    }
-  };
+  // const Appeal = () => {
+  //   if (roomId !== undefined) {
+  //     setChatList(currentChatList => [
+  //       ...currentChatList,
+  //       {
+  //         roomId: roomId,
+  //         message:
+  //           '거래를 완료했다면 ‘거래 완료’를 눌러주세요.상대방이 거짓으로 눌렀을 경우 이의신청을 해주세요.이의신청시 자동으로 거래 완료가 되지 않습니다.',
+  //         type: 'APPEAL',
+  //       },
+  //     ]);
+  //     sendMessage(
+  //       roomId,
+  //       '거래를 완료했다면 ‘거래 완료’를 눌러주세요.상대방이 거짓으로 눌렀을 경우 이의신청을 해주세요.이의신청시 자동으로 거래 완료가 되지 않습니다.',
+  //       'APPEAL',
+  //     );
+  //   } else {
+  //     console.error('transferComplete ERROR');
+  //   }
+  // };
 
   const transferComplete = () => {
     if (roomId !== undefined) {
@@ -992,10 +998,10 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 </Text>
                 <View>
                   <TouchableOpacity
-                    disabled={
-                      isCompleted ||
-                      (selectedAction !== null && selectedAction !== 'complete')
-                    }
+                    // disabled={
+                    //   isCompleted ||
+                    //   (selectedAction !== null && selectedAction !== 'complete')
+                    // }
                     style={{
                       backgroundColor: '#C9BAE5',
                       width: '100%',
@@ -1276,9 +1282,9 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                     ]}
                     onPress={sellerPress}>
                     <Text
-                      disabled={
-                        selectedAction !== null && selectedAction !== 'cancel'
-                      }
+                      // disabled={
+                      //   selectedAction !== null && selectedAction !== 'cancel'
+                      // }
                       style={[
                         {
                           fontFamily: 'NanumGothic',
@@ -1321,10 +1327,10 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 </Text>
                 <View>
                   <TouchableOpacity
-                    disabled={
-                      isCompleted ||
-                      (selectedAction !== null && selectedAction !== 'complete')
-                    }
+                    // disabled={
+                    //   // isCompleted ||
+                    //   // (selectedAction !== null && selectedAction !== 'complete')
+                    // }
                     style={{
                       backgroundColor: '#C9BAE5',
                       width: '100%',
