@@ -155,6 +155,14 @@ const Chatting = () => {
   //   },
   // ];
 
+  const truncateAtDot = (text: string): string => {
+    const dotIndex = text.indexOf('.');
+    if (dotIndex !== -1) {
+      return text.slice(0, dotIndex + 1);
+    }
+    return text;
+  };
+
   return (
     <View style={styles.chatListContainer}>
       <FlatList
@@ -179,7 +187,9 @@ const Chatting = () => {
                   <View style={{width: 7}} />
                   <Text style={styles.info_text}>{item.time}</Text>
                 </View>
-                <Text style={styles.chatContent}>{item.message}</Text>
+                <Text style={styles.chatContent}>
+                  {truncateAtDot(item.message)}
+                </Text>
               </View>
 
               {item.noReadChat > 0 && (
