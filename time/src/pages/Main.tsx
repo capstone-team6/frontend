@@ -208,6 +208,7 @@ const Main: React.FC = () => {
         setScrollEnabled(true);
       }
     };
+    
     return (
       <ScrollView
         horizontal={true}

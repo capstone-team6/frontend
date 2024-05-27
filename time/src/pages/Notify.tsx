@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableNativeFeedback, TouchableOpacity, View } from 'react-native';
 import { FlatList, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import Delete from 'react-native-vector-icons/MaterialIcons'
 import Setting from 'react-native-vector-icons/AntDesign'
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/Type';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { ListRenderItemInfo } from 'react-native';
@@ -73,6 +73,36 @@ const Notify = () => {
             })
         })
     },[selectedTab])
+
+    useFocusEffect(
+        useCallback(()=>{
+            AsyncStorage.getItem('accessToken').then(token=>{
+                const accessToken=token?JSON.parse(token):null
+                axios.get('http://13.125.118.92:8080/keyword',{
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                })
+                .then((res)=>{
+                    console.log(res.data)
+                    const Data=res.data
+                    console.log(Data)
+                    // const lastId=Data.keywordResponses.length > 0 ? Data.keywordResponses[Data.keywordResponses.length - 1].id : null;
+                    let count=0
+                    Data.keywordResponses.forEach((response: { id: any; keyword: any; memberId: any; }) => {
+                        if (response.id && response.keyword && response.memberId) {
+                            count++;
+                        }
+                    })
+                    setKeywordCount(count)
+                }) 
+                .catch((error: any)=>{
+                    console.log(error)
+                })
+            })
+        },[])
+    )
 
     useEffect(()=>{
         AsyncStorage.getItem('accessToken').then(token=>{
