@@ -31,11 +31,16 @@ const BottmTabNavigation = () => {
         },
         tabBarLabelStyle: {
           marginBottom: 10,
+          
         },
         headerStyle: {
           height: 80,
         },
         tabBarActiveTintColor: '#C9BAE5',
+        tabBarIconStyle:{
+          paddingRight:5,
+          paddingLeft:5
+        }
       }}>
       <Tab.Screen
         name="틈새시장"

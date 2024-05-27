@@ -83,8 +83,12 @@ const PostingChange: React.FC<Props> = ({route}) => {
     
     useEffect(() => {
         if (boardData && Array.isArray(boardData.images)) {
-          
-            setImages(boardData.images)
+          const imageData = boardData.images.map(imageName => ({
+            name: "",
+            type: "image/jpeg",
+            uri: `http://13.125.118.92:8080/images/jpg/${imageName}`
+        }));
+            setImages(imageData)
             // console.log('초기화 완료',images)
             const imageLinks = boardData.images.map(imageName => `http://13.125.118.92:8080/images/jpg/${imageName}`);
             setPreviews(imageLinks);
