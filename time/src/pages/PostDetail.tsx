@@ -94,6 +94,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
   const [roomName, setRoomName] = useState('');
   const [userName, setName] = useState();
   const [otherUserId, setUserId] = useState();
+  const [boardState, setBoardState] = useState();
 
   const goToSet = () => {
     navigation.navigate('PostDetailSet', {boardId});
@@ -136,6 +137,19 @@ const PostDetail: React.FC<Props> = ({route}) => {
     });
   };
 
+  const translateBoardState = (state: string | undefined) => {
+    switch (state) {
+      case 'SALE':
+        return '판매 중';
+      case 'RESERVED':
+        return '예약 중';
+      case 'SOLD':
+        return '판매 완료';
+      default:
+        return state;
+    }
+  };
+
   useEffect(() => {
     AsyncStorage.getItem('accessToken').then(item => {
       const token = item ? JSON.parse(item) : null;
@@ -151,6 +165,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
           console.log(response.data.data.images);
           setBoardData(response.data.data);
           setRoomName(response.data.data.roomName);
+          setBoardState(response.data.data.boardState);
           if (response.data.data.scrapStus === 'YES') {
             setIsScrap(true);
           }
@@ -271,10 +286,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
 
         <View style={styles.user}>
           <View style={styles.user_info}>
-            <Image
-              style={styles.user_profile}
-              source={require('../assets/images/profile.png')}
-            />
+            <Ionicons name="person-circle" size={40} color={'#352456'} />
             <View style={{flexDirection: 'row'}}>
               <TouchableOpacity
                 onPress={() => {
@@ -285,6 +297,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
                 }}>
                 <Text style={styles.user_name}>{boardData?.nickname} </Text>
               </TouchableOpacity>
+              <View></View>
               <View style={styles.icon_container}>
                 <AntDesign name="message1" size={13} color="black" />
                 <Text> {boardData?.chatCount} </Text>
@@ -292,6 +305,27 @@ const PostDetail: React.FC<Props> = ({route}) => {
               <View style={styles.icon_container}>
                 <AntDesign name="hearto" size={13} color="black" />
                 <Text> {boardData?.scrapCount}</Text>
+              </View>
+
+              <View
+                style={{
+                  marginLeft: 10,
+                  backgroundColor: '#C9BAE5',
+                  borderRadius: 5,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 60,
+                }}>
+                <View
+                  style={{
+                    borderRadius: 5,
+                    borderWidth: 1,
+                    borderColor: 'black',
+                  }}>
+                  <Text style={styles.boardStateText}>
+                    {translateBoardState(boardState)}
+                  </Text>
+                </View>
               </View>
             </View>
             <View style={styles.appeal_icon}>
@@ -519,5 +553,14 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   appeal_icon: {position: 'absolute', right: 15, top: 10},
+  boardStateText: {
+    fontSize: 12,
+
+    padding: 3,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    color: 'black',
+    fontFamily: 'NanumGothic',
+  },
 });
 export default PostDetail;
