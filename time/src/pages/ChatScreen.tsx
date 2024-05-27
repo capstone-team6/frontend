@@ -1309,7 +1309,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   {msg.time}
                 </Text>
               </View>
-            ) : msg.type === 'APPEAL' ? (
+            ) : msg.type === 'APPEAL' && role === 'BUYER' ? (
               <View
                 style={{
                   backgroundColor: '#F1F1F1',
