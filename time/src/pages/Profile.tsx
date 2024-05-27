@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Image,
@@ -14,7 +14,7 @@ import M from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ScrollView} from 'react-native-gesture-handler';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../types/Type';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {RouteProp} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -145,6 +145,72 @@ const Profile: React.FC<Props> = ({route}) => {
         });
     });
   }, []);
+
+  function postData(){
+    const url = userId
+    ? `http://13.125.118.92:8080/member/${userId}/profile`
+    : 'http://13.125.118.92:8080/member/profile';
+
+  AsyncStorage.getItem('accessToken').then(item => {
+    const token = item ? JSON.parse(item) : null;
+    console.log('token', token);
+    axios
+      .get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(response => {
+        const d = JSON.stringify(response.data.data);
+        console.log('받은 데이터', d);
+        if (d) {
+          const data = JSON.parse(d);
+          setNickname(data.nickname);
+          setMannerTime(data.mannerTime);
+          // setTimePay(data?.timePay);
+          setId(data?.id);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  });
+  }
+
+  useFocusEffect(
+    useCallback(()=>{
+      const url = userId
+      ? `http://13.125.118.92:8080/member/${userId}/profile`
+      : 'http://13.125.118.92:8080/member/profile';
+
+    AsyncStorage.getItem('accessToken').then(item => {
+      const token = item ? JSON.parse(item) : null;
+      console.log('token', token);
+      axios
+        .get(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(response => {
+          const d = JSON.stringify(response.data.data);
+          console.log('받은 데이터', d);
+          if (d) {
+            const data = JSON.parse(d);
+            setNickname(data.nickname);
+            setMannerTime(data.mannerTime);
+            // setTimePay(data?.timePay);
+            setId(data?.id);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    });
+    },[])
+  )
 
   console.log('nicknname', nickname, 'mannerTime', mannerTime);
   console.log('POSTDETAIL', fromPostDetail);

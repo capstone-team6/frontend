@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,7 @@ import Antdesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {
   StackNavigationProp,
   createStackNavigator,
@@ -22,35 +22,36 @@ import Profile from './Profile';
 import {RootStackParamList} from '../../types/Type';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import PostDetail from './PostDetail';
 type MypageNavigationProp = StackNavigationProp<RootStackParamList, 'Mypage'>;
 
 const Mypage: React.FC = () => {
   const [nickname, setNickname] = useState();
+  
   useEffect(() => {
     const url = 'http://13.125.118.92:8080/member/profile';
-
-    AsyncStorage.getItem('accessToken').then(item => {
-      const token = item ? JSON.parse(item) : null;
-      console.log(token);
-      axios
-        .get(url, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(response => {
-          console.log(JSON.stringify(response.data.data));
-          const d = JSON.stringify(response.data.data);
-          if (d) {
-            const data = JSON.parse(d);
-            setNickname(data.nickname);
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        });
-    });
+      AsyncStorage.getItem('accessToken').then(item => {
+        const token = item ? JSON.parse(item) : null;
+        console.log(token);
+        axios
+          .get(url, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(response => {
+            console.log(JSON.stringify(response.data.data));
+            const d = JSON.stringify(response.data.data);
+            if (d) {
+              const data = JSON.parse(d);
+              setNickname(data.nickname);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+          });
+      });
   }, []);
   const navigation = useNavigation<MypageNavigationProp>();
   const goToProfile = () => {
@@ -74,6 +75,37 @@ const Mypage: React.FC = () => {
     navigation.navigate('Appeal');
   };
 
+  function postData(){
+    const url = 'http://13.125.118.92:8080/member/profile';
+      AsyncStorage.getItem('accessToken').then(item => {
+        const token = item ? JSON.parse(item) : null;
+        console.log(token);
+        axios
+          .get(url, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(response => {
+            console.log(JSON.stringify(response.data.data));
+            const d = JSON.stringify(response.data.data);
+            if (d) {
+              const data = JSON.parse(d);
+              setNickname(data.nickname);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+          });
+      });
+  }
+
+  useFocusEffect(
+    useCallback(()=>{
+      postData()
+    },[])
+  )
   return (
     <View style={styles.container}>
       <View style={styles.profile}>

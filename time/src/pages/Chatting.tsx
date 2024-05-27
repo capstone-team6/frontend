@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   FlatList,
   ListRenderItemInfo,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../types/Type';
 import {StackNavigationProp} from '@react-navigation/stack';
 import axios from 'axios';
@@ -84,6 +84,33 @@ const Chatting = () => {
         });
     });
   }, []);
+  
+  useFocusEffect(
+    useCallback(()=>{
+      AsyncStorage.getItem('accessToken').then(token => {
+        const accessToken = token ? JSON.parse(token) : null;
+        console.log(accessToken);
+        axios
+          .get('http://13.125.118.92:8080/my-page/chat', {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+          })
+          .then(response => {
+            console.log(JSON.stringify(response.data.data));
+            const d = JSON.stringify(response.data.data);
+            if (d) {
+              const chat = JSON.parse(d);
+              setChatRoomDetails(chat.chatRoomDetails);
+            }
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      });
+    },[])
+  )
 
   // const chatData = [
   //   {

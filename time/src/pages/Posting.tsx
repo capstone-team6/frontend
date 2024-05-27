@@ -368,6 +368,8 @@ const onSubmit = async () => {
         <View style={styles.container}>
           <Text style={styles.container_text}>제목</Text>
           <TextInput placeholder="제목" style={styles.titleInput} value={title} onChangeText={onTitleChange}></TextInput>
+          <Text>유해성 게시물의 경우 게시가 제한됩니다.</Text>
+          <Text>ex) 과제, 성매매, 마약, 주류, 비속어</Text>
         </View>
         <View style={styles.container}>
           <Text style={styles.container_text}>카테고리</Text>
@@ -451,7 +453,7 @@ const onSubmit = async () => {
           <Text style={styles.container_text}>내용</Text>
           <TextInput
             placeholder="자세한 내용을 적어주세요.
-          (유해성 게시물의 경우 게시가 제한됩니다.)"
+          (유해성 게시물의 경우 게시가 제한됩니다. ex)과제, 성매매, 마약, 주류, 비속어 )"
             multiline={true}
             style={styles.textInput}
             value={content}
