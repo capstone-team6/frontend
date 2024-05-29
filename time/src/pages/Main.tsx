@@ -1,5 +1,5 @@
 import Geolocation from '@react-native-community/geolocation';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
@@ -25,6 +25,7 @@ import {
   NavigationProp,
   NavigationState,
   RouteProp,
+  useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -230,8 +231,7 @@ const Main: React.FC = () => {
       </ScrollView>
     );
   };
-
-  useEffect(() => {
+  function locationPost(){
     requestPermission().then(result => {
       console.log({result});
       if (result === 'granted') {
@@ -312,6 +312,9 @@ const Main: React.FC = () => {
         );
       }
     });
+  }
+  useEffect(() => {
+    locationPost()
   }, [
     selectedTab,
     selectedCategoryForBuy,
@@ -386,7 +389,13 @@ const Main: React.FC = () => {
     newLocation,
     location,
   ]);
-
+  useFocusEffect(
+    useCallback(() => {
+      locationPost(); // 화면 focus 시 위치 정보 업데이트
+      // 현재 선택된 탭에 따라 데이터를 다시 불러옴
+      postData(selectedTab === 'BUY' ? selectedCategoryForBuy : selectedCategoryForSell);
+    }, [])
+  );
   const handleLoadMore = () => {
     setPageNum(pageNum + 1);
   };
