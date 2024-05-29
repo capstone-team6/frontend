@@ -208,7 +208,7 @@ const Main: React.FC = () => {
         setScrollEnabled(true);
       }
     };
-    
+
     return (
       <ScrollView
         horizontal={true}
@@ -539,9 +539,16 @@ const Main: React.FC = () => {
                 {item.distance + 'km'} ·{' '}
                 {timeDiffence(new Date(item.createdDate))}
                 <View style={{width: 5}}></View>
-                <Text style={styles.boardStateText}>
-                  {translateBoardState(boardState)}
-                </Text>
+                <View
+                  style={{
+                    borderRadius: 5,
+                    borderWidth: 1,
+                    borderColor: 'black',
+                  }}>
+                  <Text style={styles.boardStateText}>
+                    {translateBoardState(boardState)}
+                  </Text>
+                </View>
               </Text>
 
               <Text style={styles.info2}>{item.title}</Text>

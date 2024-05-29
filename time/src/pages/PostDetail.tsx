@@ -316,12 +316,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
                   justifyContent: 'center',
                   width: 60,
                 }}>
-                <View
-                  style={{
-                    borderRadius: 5,
-                    borderWidth: 1,
-                    borderColor: 'black',
-                  }}>
+                <View>
                   <Text style={styles.boardStateText}>
                     {translateBoardState(boardState)}
                   </Text>
