@@ -68,10 +68,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     bank,
     accountNumber,
   } = route.params;
-
-  // const userName = 'BH';
-  // const [roomId, setRoomId] = useState();
-  // const roomId = 1;
   console.log(userName, roomName, boardId, otherUserId);
   const [role, setRole] = useState('BUYER');
   const [roomId, setRoomId] = useState();
@@ -94,35 +90,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }[]
   >([]);
   const [timepay, setTimepay] = useState();
-  // useEffect(() => {
-  //   setChatList([
-  //     {
-  //       roomId: 39,
-  //       messageId: null,
-  //       writer: 'BH',
-  //       message: 'BH님이 입장하셨습니다.',
-  //       type: 'MESSAGE',
-  //       time: '14:12',
-  //       buyerRead: null,
-  //       sellerRead: null,
-  //     },
-  //   ]);
-  //   setChatList(currentChatList => [
-  //     ...currentChatList,
-  //     {
-  //       roomId: 39,
-  //       messageId: null,
-  //       writer: 'BH',
-  //       message: 'BH님이 입장하셨습니다.',
-  //       type: 'MESSAGE',
-  //       time: '14:12',
-  //       buyerRead: null,
-  //       sellerRead: null,
-  //     },
-  //   ]);
-
-  //   console.log(chatList);
-  // }, []);
   const [modalVisible, setModalVisible] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [areButtonsEnabled, setAreButtonsEnabled] = useState(true);
@@ -529,17 +496,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       if (res.status === 200) {
         console.log('goTransaction', res.data);
       }
-      // else if (
-      //   res.status === 500 &&
-      //   res.data.data === '틈새페이를 충전해주세요'
-      // ) {
-      //   Alert.alert(
-      //     '충전 필요',
-      //     '틈새페이를 충전해주세요',
-      //     [{text: '확인', onPress: () => console.log('확인 버튼 눌림')}],
-      //     {cancelable: false},
-      //   );
-      // }
     } catch (error) {
       console.log(error);
     }
@@ -694,27 +650,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     }
   };
 
-  // const Appeal = () => {
-  //   if (roomId !== undefined) {
-  //     setChatList(currentChatList => [
-  //       ...currentChatList,
-  //       {
-  //         roomId: roomId,
-  //         message:
-  //           '거래를 완료했다면 ‘거래 완료’를 눌러주세요.상대방이 거짓으로 눌렀을 경우 이의신청을 해주세요.이의신청시 자동으로 거래 완료가 되지 않습니다.',
-  //         type: 'APPEAL',
-  //       },
-  //     ]);
-  //     sendMessage(
-  //       roomId,
-  //       '거래를 완료했다면 ‘거래 완료’를 눌러주세요.상대방이 거짓으로 눌렀을 경우 이의신청을 해주세요.이의신청시 자동으로 거래 완료가 되지 않습니다.',
-  //       'APPEAL',
-  //     );
-  //   } else {
-  //     console.error('transferComplete ERROR');
-  //   }
-  // };
-
   const transferComplete = () => {
     if (roomId !== undefined) {
       setChatList(currentChatList => [
@@ -825,15 +760,6 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             }}>
             {userName || u}
           </Text>
-          {/* <Text
-            style={{
-              fontFamily: 'NanumGothic',
-              fontSize: 10,
-              color: 'black',
-              marginVertical: 10,
-            }}>
-            지금까지 5번의 시간을 거래했어요.
-          </Text> */}
         </View>
 
         {chatList?.map((msg, index) => (

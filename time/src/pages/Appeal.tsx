@@ -36,9 +36,10 @@ function Appeal() {
         })
         .then(response => {
           console.log(JSON.stringify(response.data.data));
-          const fetchedData = response.data.data;
+          const fetchedData = JSON.stringify(response.data.data);
           if (fetchedData) {
-            setData(fetchedData);
+            const d = JSON.parse(fetchedData);
+            setData(d);
           }
         })
         .catch(error => {

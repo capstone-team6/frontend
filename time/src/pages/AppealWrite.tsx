@@ -45,14 +45,6 @@ const AppealWrite: React.FC<Props> = ({route, navigation}) => {
     body.append('title', title);
     body.append('content', content);
     body.append('objectId', objectId);
-    images.forEach((image, index) => {
-      const file = {
-        uri: image.uri,
-        type: image.type,
-        name: `image_${index}.jpg`,
-      };
-      body.append('images', file);
-    });
 
     try {
       const store = await AsyncStorage.getItem('accessToken');
