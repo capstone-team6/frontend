@@ -12,6 +12,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Antdesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Help from 'react-native-vector-icons/Entypo'
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {
@@ -74,7 +75,9 @@ const Mypage: React.FC = () => {
   const goToAppeal = () => {
     navigation.navigate('Appeal');
   };
-
+  const goToHelp=()=>{
+    navigation.navigate('Help')
+  }
   function postData(){
     const url = 'http://13.125.118.92:8080/member/profile';
       AsyncStorage.getItem('accessToken').then(item => {
@@ -171,6 +174,19 @@ const Mypage: React.FC = () => {
               marginRight: 45,
             }}>
             이의신청 내역
+          </Text>
+          <Antdesign name="right" size={15} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.options_detail} onPress={goToHelp}>
+          <Help name="help-with-circle" size={40} color="black" />
+          <Text
+            style={{
+              fontFamily: 'NanumGothic-Bold',
+              color: '#313131',
+              fontSize: 16,
+              marginRight: 45,
+            }}>
+            도움말
           </Text>
           <Antdesign name="right" size={15} />
         </TouchableOpacity>

@@ -126,4 +126,5 @@ export type RootStackParamList = {
   PayBalance: undefined;
   ReportPost: {boardId: number};
   PostSet: {boardId: number};
+  Help:undefined
 };

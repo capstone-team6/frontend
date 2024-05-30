@@ -41,6 +41,7 @@ type writeNavigation = StackNavigationProp<RootStackParamList, 'Appeal'>;
 type SettingNavigationProp = StackNavigationProp<RootStackParamList, 'Setting'>;
 type MypageNavigation = StackNavigationProp<RootStackParamList, 'Mypage'>;
 import {RouteProp} from '@react-navigation/native';
+import Help from '../pages/Help';
 
 const StackNavigator = () => {
   const navigation = useNavigation<writeNavigation>();
@@ -378,6 +379,15 @@ const StackNavigator = () => {
           },
         }}
       />
+      <Stack.Screen name='Help' component={Help}
+      options={{
+        headerTitle: '도움말',
+        headerTitleStyle: {
+          fontFamily: 'NanumGothic-Bold',
+          fontSize: 28,
+          color: 'black',
+        },
+      }}/>
     </Stack.Navigator>
   );
 };
