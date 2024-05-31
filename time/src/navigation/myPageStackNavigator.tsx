@@ -35,7 +35,7 @@ import KakaoPay from '../pages/KakaoPay';
 import PayBalance from '../pages/PayBalance';
 import WriteHistory from '../pages/WriteHistory';
 import TransactionHistory from '../pages/TransactionHistory';
-
+import CategoryEvaluationScreen from '../pages/CategoryEvaluatioScreen';
 const Stack = createStackNavigator<RootStackParamList>();
 type writeNavigation = StackNavigationProp<RootStackParamList, 'Appeal'>;
 type SettingNavigationProp = StackNavigationProp<RootStackParamList, 'Setting'>;
@@ -310,6 +310,19 @@ const StackNavigator = () => {
       />
 
       <Stack.Screen
+        name="CategoryEvaluationScreen"
+        component={CategoryEvaluationScreen}
+        options={{
+          headerTitle: '심부름 서비스',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+
+      <Stack.Screen
         name="KakaoPay"
         component={KakaoPay}
         options={{
@@ -379,15 +392,18 @@ const StackNavigator = () => {
           },
         }}
       />
-      <Stack.Screen name='Help' component={Help}
-      options={{
-        headerTitle: '도움말',
-        headerTitleStyle: {
-          fontFamily: 'NanumGothic-Bold',
-          fontSize: 28,
-          color: 'black',
-        },
-      }}/>
+      <Stack.Screen
+        name="Help"
+        component={Help}
+        options={{
+          headerTitle: '도움말',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 };

@@ -17,6 +17,8 @@ import EvaluationScreen from '../pages/EvaluationScreen';
 import WriteHistory from '../pages/WriteHistory';
 import TransactionHistory from '../pages/TransactionHistory';
 import NameChange from '../pages/NameChange';
+import CategoryEvaluationScreen from '../pages/CategoryEvaluatioScreen';
+
 const Stack = createStackNavigator<RootStackParamList>();
 type ChatScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -163,6 +165,19 @@ const ChatStackNavigator: React.FC<Props> = ({navigation}) => {
         component={NameChange}
         options={{
           headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="CategoryEvaluationScreen"
+        component={CategoryEvaluationScreen}
+        options={{
+          headerTitle: '심부름 서비스',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
         }}
       />
     </Stack.Navigator>
