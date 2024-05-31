@@ -19,6 +19,7 @@ import TransactionHistory from '../pages/TransactionHistory';
 import NameChange from '../pages/NameChange';
 import CategoryEvaluationScreen from '../pages/CategoryEvaluatioScreen';
 
+import PostDetail from '../pages/PostDetail';
 const Stack = createStackNavigator<RootStackParamList>();
 type ChatScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -173,6 +174,18 @@ const ChatStackNavigator: React.FC<Props> = ({navigation}) => {
         component={CategoryEvaluationScreen}
         options={{
           headerTitle: '심부름 서비스',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="PostDetail"
+        component={PostDetail}
+        options={{
+          headerTitle: '게시글',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,

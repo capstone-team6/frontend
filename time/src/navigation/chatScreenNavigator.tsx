@@ -10,6 +10,7 @@ import ServiceEvaluationScreen from '../pages/ServiceEvaluationScreen';
 import MannerEvaluationScreen from '../pages/MannerEvaluationScreen';
 import EvaluationScreen from '../pages/EvaluationScreen';
 import CategoryEvaluationScreen from '../pages/CategoryEvaluatioScreen';
+import PostDetail from '../pages/PostDetail';
 const Stack = createStackNavigator<RootStackParamList>();
 const chatScreenNavigator = () => {
   return (
@@ -108,6 +109,18 @@ const chatScreenNavigator = () => {
         component={CategoryEvaluationScreen}
         options={{
           headerTitle: '심부름 서비스',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="PostDetail"
+        component={PostDetail}
+        options={{
+          headerTitle: '게시글',
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,

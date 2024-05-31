@@ -31,6 +31,8 @@ import ImageResizer from 'react-native-image-resizer';
 import {useFocusEffect} from '@react-navigation/native';
 import {useLayoutEffect} from 'react';
 import {Alert} from 'react-native';
+import Antdesign from 'react-native-vector-icons/AntDesign';
+
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 type ChatScreenNavigationProp =
   | StackNavigationProp<RootStackParamList, 'AccountEnter'>
@@ -729,7 +731,9 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       }
     }, [delay]);
   }
-
+  const goToPostDetail = () => {
+    navigation.navigate('PostDetail', {boardId});
+  };
   return (
     <View
       style={{
@@ -743,6 +747,29 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         </TouchableOpacity>
       </View>
       <ScrollView>
+        <View
+          style={{
+            elevation: 5,
+            backgroundColor: '#fff',
+            marginHorizontal: 10,
+            borderRadius: 5,
+            height: 30,
+            marginBottom: 10,
+          }}>
+          <TouchableOpacity onPress={goToPostDetail}>
+            <View
+              style={{
+                flexDirection: 'row',
+                // alignSelf: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: 10,
+              }}>
+              <Text>해당 게시글로 이동</Text>
+              <AntDesign name="arrowright" size={24} color="#A58EFF" />
+            </View>
+          </TouchableOpacity>
+        </View>
+
         <View
           style={{
             width: Dimensions.get('screen').width,

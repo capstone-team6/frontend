@@ -74,7 +74,7 @@ export type RootStackParamList = {
   StackNavigators: undefined;
   App: undefined;
   Main: undefined;
-  PostDetail: {boardId: number};
+  PostDetail: {boardId?: number};
   // 틈새시장: MainParams;
 
   chatStackNavigator: undefined;
