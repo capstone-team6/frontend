@@ -36,6 +36,7 @@ import AccountEnter from '../pages/AccountEnter';
 import AppealWrite from '../pages/AppealWrite';
 import Appeal from '../pages/Appeal';
 import AccountCheck from '../pages/AccountCheck';
+import CategoryEvaluationScreen from '../pages/CategoryEvaluatioScreen';
 const Stack = createStackNavigator<RootStackParamList>();
 
 type SearchProps = StackNavigationProp<RootStackParamList, 'postNavigatoer'>;
@@ -289,6 +290,18 @@ const postStackNavigator = () => {
           headerTitleStyle: {
             fontFamily: 'NanumGothic-Bold',
             fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="CategoryEvaluationScreen"
+        component={CategoryEvaluationScreen}
+        options={{
+          headerTitle: '심부름 서비스',
+          headerTitleStyle: {
+            fontFamily: 'NanumGothic-Bold',
+            fontSize: 28,
+            color: 'black',
           },
         }}
       />
