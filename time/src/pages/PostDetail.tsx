@@ -103,7 +103,7 @@ const PostDetail: React.FC<Props> = ({route}) => {
     navigation.navigate('PostSet', {boardId});
   };
 
-  const goToChatScreen = (boardId: number, roomName: string) => {
+  const goToChatScreen = (boardId?: number, roomName?: string) => {
     console.log(`PostDetailToChatScreen${boardId}${roomName}`);
     navigation.navigate('ChatScreen', {
       boardId,

@@ -107,6 +107,30 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
     return item ? JSON.parse(item) : null;
   }
   const [chatParams, setChatParams] = useState<ChatParams | null>(null);
+  const [title, setTitle] = useState();
+  const [price, setPrice] = useState();
+
+  useEffect(() => {
+    AsyncStorage.getItem('accessToken').then(item => {
+      const token = item ? JSON.parse(item) : null;
+      console.log(token);
+      axios
+        .get(`http://13.125.118.92:8080/api/board/${boardId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(response => {
+          console.log('Data received:', response.data);
+          setTitle(response.data.data.title);
+          setPrice(response.data.data.itemPrice);
+          console.log(title);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    });
+  }, []);
 
   useEffect(() => {
     const saveParams = async () => {
@@ -764,7 +788,14 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                 justifyContent: 'space-between',
                 paddingHorizontal: 10,
               }}>
-              <Text>해당 게시글로 이동</Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <Text>{title}</Text>
+                <View style={{width: 20}}></View>
+                <Text>{price}원</Text>
+              </View>
               <AntDesign name="arrowright" size={24} color="#A58EFF" />
             </View>
           </TouchableOpacity>

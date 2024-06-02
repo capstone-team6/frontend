@@ -100,7 +100,7 @@ export type RootStackParamList = {
   };
 
   postNavigatoer: undefined;
-  PostDetailSet: {boardId: number};
+  PostDetailSet: {boardId?: number};
   PostingChange: {boardData: BoardData};
   Scrap: undefined;
   Search: undefined;
@@ -125,7 +125,7 @@ export type RootStackParamList = {
   KakaoPay: {amountValue: number};
   PayBalance: undefined;
   ReportPost: {boardId: number};
-  PostSet: {boardId: number};
+  PostSet: {boardId?: number};
   Help: undefined;
   CategoryEvaluationScreen: {evaluationNum: number; userId?: number};
 };
