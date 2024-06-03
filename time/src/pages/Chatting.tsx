@@ -156,12 +156,17 @@ const Chatting = () => {
   // ];
 
   const truncateAtDot = (text: string): string => {
+    if (text == null) {
+      // text가 null 또는 undefined인 경우 빈 문자열을 반환
+      return '';
+    }
     const dotIndex = text.indexOf('.');
     if (dotIndex !== -1) {
       return text.slice(0, dotIndex + 1);
     }
     return text;
   };
+  
 
   return (
     <View style={styles.chatListContainer}>

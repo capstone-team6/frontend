@@ -8,6 +8,7 @@ import {
   ScrollView,
   Dimensions,
   Modal,
+  Image,
 } from 'react-native';
 import {RouteProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -73,6 +74,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   console.log(userName, roomName, boardId, otherUserId);
   const [role, setRole] = useState('BUYER');
   const [roomId, setRoomId] = useState();
+  const [image, setImage]=useState();
   // const roomId = 1;
   const [messageInput, setMessageInput] = useState('');
   const [selectedPayment, setSelectedPayment] = useState<PaymentType>(null);
@@ -282,6 +284,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       );
 
       console.log('SENDMESSAGE SUCCESSFULLY:', response.data);
+      setImage(response.data.images)
     } catch (error) {
       console.error('FAILED TO SENDMESSAGE:', error);
     }
@@ -450,6 +453,8 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         },
       );
       console.log('Image uploaded successfully:', response.data);
+      setImage(response.data.images)
+      
     } catch (error) {
       console.error('Error uploading image:', error);
     }
@@ -826,7 +831,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
             style={{
               alignSelf:
                 (msg.type === 'GOTRANSACTION' && role === 'BUYER') ||
-                (msg.writer !== userName && msg.type === 'MESSAGE') ||
+                (msg.writer !== userName && msg.type === 'MESSAGE') ||msg.type==='IMAGE'||
                 (msg.type === 'COMPLETETRANSACTION' && role === 'BUYER') ||
                 msg.type === 'transferInfo' ||
                 (msg.type === 'ACCOUNT' && role === 'BUYER') ||
@@ -1154,7 +1159,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </View>
                 </View>
               </View>
-            ) : msg.type === 'MESSAGE' ? (
+            ) : msg.type === 'MESSAGE' || msg.type==='IMAGE'? (
               <View
                 style={{
                   alignSelf:
@@ -1167,6 +1172,14 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   marginHorizontal: 10,
                 }}>
                 <Text style={{color: 'black'}}>{msg.message}</Text>
+                <Image
+                source={{
+                  uri: `http://13.125.118.92:8080/images/jpg/${image}`,
+                }}
+                style={styles.post_image}
+                // resizeMethod='resize'
+                // onError={(error) => console.error("이미지 로딩 오류:", error)}
+              />
                 <Text style={{fontSize: 10, color: 'gray', textAlign: 'right'}}>
                   {msg.time}
                 </Text>
@@ -1527,6 +1540,14 @@ const styles = StyleSheet.create({
   categoryBtn_text: {
     color: 'black',
     textAlign: 'center',
+  },
+  post_image: {
+    // width: 150,
+    // height: 150,
+    // borderRadius: 25,
+    // marginRight: 10,
+    // position: 'absolute',
+    // left: 10,
   },
 });
 
