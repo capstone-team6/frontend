@@ -345,6 +345,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
 
   const onCameraPress = () => {
     console.log('camera');
+    setModalVisible(false);
     launchCamera({mediaType: 'photo'}, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -384,6 +385,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
   };
 
   const onGalleryPress = () => {
+    setModalVisible(false);
     launchImageLibrary({mediaType: 'photo'}, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -845,7 +847,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
               alignSelf:
                 (msg.type === 'GOTRANSACTION' && role === 'BUYER') ||
                 (msg.writer !== userName && msg.type === 'MESSAGE') ||
-                msg.type === 'IMAGE' ||
+                (msg.writer !== userName && msg.type === 'IMAGE') ||
                 (msg.type === 'COMPLETETRANSACTION' && role === 'BUYER') ||
                 msg.type === 'transferInfo' ||
                 (msg.type === 'ACCOUNT' && role === 'BUYER') ||
@@ -1173,7 +1175,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </View>
                 </View>
               </View>
-            ) : msg.type === 'MESSAGE' || msg.type === 'IMAGE' ? (
+            ) : msg.type === 'MESSAGE' ? (
               <View
                 style={{
                   alignSelf:
@@ -1186,14 +1188,14 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   marginHorizontal: 10,
                 }}>
                 <Text style={{color: 'black'}}>{msg.message}</Text>
-                <Image
+                {/* <Image
                   source={{
                     uri: `http://13.125.118.92:8080/images/jpg/${image}`,
                   }}
                   style={styles.post_image}
                   // resizeMethod='resize'
                   // onError={(error) => console.error("이미지 로딩 오류:", error)}
-                />
+                /> */}
                 <Text style={{fontSize: 10, color: 'gray', textAlign: 'right'}}>
                   {msg.time}
                 </Text>
@@ -1392,6 +1394,31 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
+            ) : msg.type === 'IMAGE' ? (
+              <View
+                style={{
+                  alignSelf:
+                    msg.writer === userName ? 'flex-end' : 'flex-start',
+                  backgroundColor:
+                    msg.writer === userName ? '#F1F1F1' : '#C9BAE5',
+                  padding: 10,
+                  borderRadius: 8,
+                  marginVertical: 5,
+                  marginHorizontal: 10,
+                }}>
+                <Text style={{color: 'black'}}>{msg.message}</Text>
+                <Image
+                  source={{
+                    uri: `http://13.125.118.92:8080/images/jpg/${image}`,
+                  }}
+                  style={styles.post_image}
+                  // resizeMethod='resize'
+                  // onError={(error) => console.error("이미지 로딩 오류:", error)}
+                />
+                <Text style={{fontSize: 10, color: 'gray', textAlign: 'right'}}>
+                  {msg.time}
+                </Text>
+              </View>
             ) : null}
           </View>
         ))}
@@ -1556,8 +1583,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   post_image: {
-    // width: 150,
-    // height: 150,
+    width: 150,
+    height: 150,
     // borderRadius: 25,
     // marginRight: 10,
     // position: 'absolute',
